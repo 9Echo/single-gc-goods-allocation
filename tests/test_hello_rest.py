@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Description: rest服务调用测试
-# Created: shaoluyu 2019/06/19
-# Modified: shaoluyu 2019/06/19; shaoluyu 2019/07/18
+# Created: shaoluyu 2019/10/29
+# Modified: shaoluyu 2019/10/29; shaoluyu 2019/07/18
 
 import requests
 
