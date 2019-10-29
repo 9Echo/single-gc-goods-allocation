@@ -1,0 +1,9 @@
+Flask
+Flask-RESTful
+flask_SQLAlchemy
+Flask_APScheduler
+DBUtils
+numpy
+pandas
+redis
+celery
