@@ -6,7 +6,8 @@
   - models 模型包
   - rules 规则包
 - app/main 业务包
-  - models 数据库模型包
+  - entity 数据库实体包
+  - dao 数据访问对象包
   - routes 路由包
   - services 业务逻辑包
 - app/task 计划任务包
