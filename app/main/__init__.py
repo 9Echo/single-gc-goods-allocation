@@ -17,7 +17,7 @@ api.add_resource(Hello, '/hello')
 
 @blueprint.route('/demo', methods=['GET'])
 def demo():
-    return jsonify({"name": "flask demo"})
+    return jsonify({"name": "gc goods allocation"})
 
 
 
