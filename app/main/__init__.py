@@ -6,7 +6,7 @@
 from flask import Blueprint
 from flask import jsonify
 from flask_restful import Api
-from app.main.resources.hello import Hello
+from app.main.routes.hello import Hello
 
 blueprint = Blueprint('main', __name__)
 api = Api(blueprint)
