@@ -23,7 +23,6 @@ if hasattr(active_config, 'MYSQL_HOST'):
         user=active_config.MYSQL_USER,
         passwd=active_config.MYSQL_PASSWD,
         db=active_config.MYSQL_DB,
-        setsession=['SET AUTOCOMMIT = 1'],
         charset=active_config.MYSQL_CHARSET)
 
     db_pool_ods = PooledDB(

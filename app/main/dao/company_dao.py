@@ -108,10 +108,13 @@ def write_database(result):
             # print(re[1])
             cursor.execute(sql.format(re[0][0], re[0][1], re[1]))
         print("finish!")
+        conn.commit()
     except Exception as e:
+        conn.rollback()
         print("write_database error!")
         traceback.print_exc()
     finally:
+        cursor.close()
         conn.close()
 
 
