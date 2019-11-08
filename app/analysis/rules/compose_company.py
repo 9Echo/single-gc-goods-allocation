@@ -62,8 +62,8 @@ class Company:
                                     company_list.append([i[4], j[4]])
                                     print(k, i, 'i')
                                     print(k, j, 'j')
-            # print(company_list)
-
+            if len(company_list) == 0:
+                print("没有可更新数据！")
 
             # 添加拼车次数列
             # {('公司1', '公司2'), 拼车次数,...}
