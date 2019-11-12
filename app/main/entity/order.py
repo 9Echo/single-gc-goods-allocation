@@ -8,13 +8,13 @@ class Order(BaseEntity):
     """管厂订单"""
 
     def __int__(self):
-        rid = ""                        # 主键id
-        order_id = ""                   # 订单id
-        product_type = ""               # 产品类型
-        spec = ""                       # 产品规格
-        quantity = ""                   # 数量
-        dest = ""                       # 目的地
-        customer_id = ""                # 客户id
-        salesman_id = ""                # 业务员id
-        create_time = ""                # 创建时间
-        update_time = ""                # 更新时间
+        self.rid = ""                        # 主键id
+        self.order_id = ""                   # 订单id
+        self.product_type = ""               # 产品类型
+        self.spec = ""                       # 产品规格
+        self.quantity = ""                   # 数量
+        self.dest = ""                       # 目的地
+        self.customer_id = ""                # 客户id
+        self.salesman_id = ""                # 业务员id
+        self.create_time = ""                # 创建时间
+        self.update_time = ""                # 更新时间

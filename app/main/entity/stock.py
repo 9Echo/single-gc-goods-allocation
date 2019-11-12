@@ -8,11 +8,11 @@ class Stock(BaseEntity):
     """库存"""
 
     def __int__(self):
-        rid = ""                        # 表主键id
-        item_id = ""                    # 产品id
-        item_name = ""                  # 产品名
-        spec = ""                       # 规格
-        quantity = ""                   # 数量
-        warehouse = ""                  # 仓库
-        create_time = ""                # 创建时间
-        update_time = ""                # 更新时间
+        self.rid = ""                        # 表主键id
+        self.item_id = ""                    # 产品id
+        self.item_name = ""                  # 产品名
+        self.spec = ""                       # 规格
+        self.quantity = ""                   # 数量
+        self.warehouse = ""                  # 仓库
+        self.create_time = ""                # 创建时间
+        self.update_time = ""                # 更新时间

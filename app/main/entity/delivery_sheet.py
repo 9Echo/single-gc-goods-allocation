@@ -8,13 +8,13 @@ class DeliverySheet(BaseEntity):
     """发货通知单"""
 
     def __int__(self):
-        rid = ""                        # 主键id
-        delivery_no = ""                # 发货通知单号
-        batch_no = ""                   # 批次号
-        data_address = ""               # 数据来源
-        items = []                      # 发货通知单子单
-        total_quantity = ""             # 总件数
-        free_pcs = ""                   # 散根数
-        total_pcs = ""                  # 总根数
-        create_time = ""                # 创建时间
-        update_time = ""                # 更新时间
+        self.rid = ""                        # 主键id
+        self.delivery_no = ""                # 发货通知单号
+        self.batch_no = ""                   # 批次号
+        self.data_address = ""               # 数据来源
+        self.items = []                      # 发货通知单子单
+        self.total_quantity = ""             # 总件数
+        self.free_pcs = ""                   # 散根数
+        self.total_pcs = ""                  # 总根数
+        self.create_time = ""                # 创建时间
+        self.update_time = ""                # 更新时间
