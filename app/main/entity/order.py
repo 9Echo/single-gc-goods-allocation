@@ -11,9 +11,7 @@ class Order(BaseEntity):
     def __int__(self, order):
         self.rid = ""                      # 主键id
         self.order_id = ""                   # 订单id
-        self.product_type = ""               # 产品类型
-        self.spec = ""                       # 产品规格
-        self.quantity = ""                   # 数量
+        self.order_item = []                 # 子项
         self.dest = ""                       # 目的地
         self.customer_id = ""                # 客户id
         self.salesman_id = ""                # 业务员id
