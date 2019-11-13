@@ -67,40 +67,26 @@ class DevelopmentConfig(Config):
     REDIS_MAX_CONNECTIONS = 2
 
     # APScheduler定时任务配置，可选（不使用时可删除）
-    SCHEDULER_OPEN = False
+    SCHEDULER_OPEN = True
     SCHEDULER_API_ENABLED = True
     JOBS = [
-        # {
-        #     # 单次立即任务。有不执行的可能！
-        #     'id': 'job_1_0',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2)
-        # },
-        # {
-        #   # 单次定时任务
-        #     'id': 'job_1_01',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2),
-        #     'trigger': 'date',
-        #     'run_date': datetime.datetime.now() + datetime.timedelta(seconds=20)
-        # },
-        # {
-        #       # 周期定时任务
-        #     'id': 'redis_task',
-        #     'func': 'app.task.task:Task1.redis_task',
-        #     'args': None,
-        #     'trigger': 'interval',
-        #     'seconds': 30
-        # },
-        # {
-        #     # cron定时任务
-        #     'id': 'job_1',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2),
-        #     'trigger': 'cron',
-        #     # 'hour': '17',
-        #     'minute': '2-59/5'
-        # }
+        {
+            # 程序启动执行一次
+            'id': 'redis_task_start',
+            'func': 'app.task.task:update_stock_job',
+            'args': None,
+            'trigger': 'date',
+            'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
+        },
+        {
+            # 周期定时任务
+            'id': 'redis_task2',
+            'func': 'app.task.task:update_stock_job',
+            'args': None,
+            'trigger': 'interval',
+            'minute': 30
+        },
+
     ]
 
     # Celery配置，可选（不使用时可删除）
