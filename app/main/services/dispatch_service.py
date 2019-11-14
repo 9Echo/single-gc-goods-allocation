@@ -40,7 +40,7 @@ def dispatch(order: Order):
         # 执行分货逻辑，将结合订单信息、过滤信息、库存信息得出结果
         print('以下是开单动作、尾货处理、尾货拼货推荐-----------')
 
-        return delivery_sheet
+        return {}
     except Exception as e:
         current_app.logger.info("dispatch error")
         current_app.logger.exception(e)
@@ -48,7 +48,7 @@ def dispatch(order: Order):
 
 def get_stock():
     """
-    获取库存，如果Redis没有，调用成都管厂库存API，set到Redis
+    获取库存
     :return:
     """
     try:

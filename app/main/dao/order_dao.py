@@ -14,40 +14,63 @@ def get():
 
 def insert(order: Order):
     try:
-        sql = """
+        # 获取连接
+        conn = db_pool_trans_plan.connection()
+        cursor = conn.cursor()
+        sql_main = """
             insert into 
             t_ga_order(
-            order_id
-            product_type
-            spec
-            quantity
-            dest
-            customer_id
-            saleman_id
+            order_id,
+            dest,
+            customer_id,
+            saleman_id,
             create_time
             ) value (
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
-            {},
+            '{}',
+            '{}',
+            '{}',
+            '{}',
             now()
             )
             """.format(
             order.order_id,
-            order.product_type,
-            order.spec,
-            order.quantity,
             order.dest,
             order.customer_id,
             order.salesman_id
         )
-        # 获取连接
-        conn = db_pool_trans_plan.connection()
-        cursor = conn.cursor()
-        cursor.execute(sql)
+        sql_item = """
+        insert into
+                t_ga_order_item(
+                order_id,
+                product_type,
+                spec,
+                quantity,
+                number,
+                create_time
+                ) value 
+        """
+        value_list = []
+        for i in order.order_item:
+
+            value_list.append("""
+               (
+                '{}',
+                '{}',
+                '{}',
+                 {},
+                 {},
+                now()
+                )
+        """.format(
+                i.order_id,
+                i.product_type,
+                i.spec,
+                i.quantity,
+                i.number
+            ))
+        sql_item += ','.join(value_list)
+        cursor.execute(sql_main)
+        cursor.execute(sql_item)
         conn.commit()
     except Exception as e:
         conn.rollback()

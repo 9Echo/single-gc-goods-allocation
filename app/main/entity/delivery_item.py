@@ -7,7 +7,7 @@ from app.main.entity.base_entity import BaseEntity
 class DeliveryItem(BaseEntity):
     """发货通知单子项"""
 
-    def __int__(self):
+    def __init__(self):
         self.rid = ""                    # 主键id
         self.delivery_no = ""            # 发货通知单主单号
         self.delivery_item_no = ""       # 子单号

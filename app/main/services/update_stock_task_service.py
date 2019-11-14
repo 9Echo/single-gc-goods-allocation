@@ -48,7 +48,7 @@ def get_stock_api():
             "requestCompanyType": "GSLX20",
             "requestUserSegmentId": "002"
         }
-        res = requests.post(url, data=json.dumps(input_dict), headers=headers, timeout=5)
+        res = requests.post(url, data=json.dumps(input_dict), headers=headers, timeout=20)
         if 'data' not in res.json():
             raise RuntimeError('redis data error')
         result = res.json()['data']['list']
