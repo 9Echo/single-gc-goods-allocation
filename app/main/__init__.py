@@ -8,7 +8,6 @@ from flask import jsonify
 from flask_restful import Api
 
 from app.main.routes.confirm_route import ConfirmRoute
-from app.main.routes.hello import Hello
 from app.main.routes.order_route import OrderRoute
 from app.main.services.dispatch_service import get_stock
 
@@ -16,9 +15,11 @@ blueprint = Blueprint('main', __name__)
 api = Api(blueprint)
 
 # Routes
-api.add_resource(Hello, '/hello')
+# 订单请求
 api.add_resource(OrderRoute, '/order')
+# 推荐发货通知单确认反馈
 api.add_resource(ConfirmRoute, '/confirm')
+
 
 @blueprint.route('/demo', methods=['GET'])
 def demo():

@@ -84,7 +84,7 @@ class DevelopmentConfig(Config):
             'func': 'app.task.task:update_stock_job',
             'args': None,
             'trigger': 'interval',
-            'minute': 30
+            'seconds': 60*30
         },
 
     ]

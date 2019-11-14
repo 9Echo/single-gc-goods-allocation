@@ -10,7 +10,7 @@ from app.utils.uuid_util import UuidUtil
 class Order(BaseEntity):
     """管厂订单"""
 
-    def __int__(self, order):
+    def __init__(self, order):
         # 主键id
         self.rid = ""
         # 订单id

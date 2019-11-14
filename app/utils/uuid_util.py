@@ -4,12 +4,12 @@
 
 import uuid
 
+
 class UuidUtil:
     """
 基于uuid1生成唯一业务号
 """
+
     @staticmethod
     def create_id(prefix):
-
-        uid = prefix + str(uuid.uuid1()).replace('-', '')[0:-12]
-        return uid
+        return prefix + '_' + str(uuid.uuid1()).replace('-', '')[0:-12]
