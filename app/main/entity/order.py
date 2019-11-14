@@ -3,18 +3,28 @@
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
 from app.main.entity.base_entity import BaseEntity
+from app.main.entity.order_item import OrderItem
+from app.utils.uuid_util import UuidUtil
 
 
 class Order(BaseEntity):
     """管厂订单"""
 
     def __int__(self, order):
-        self.rid = ""                      # 主键id
-        self.order_id = ""                   # 订单id
-        self.order_item = []                 # 子项
-        self.dest = ""                       # 目的地
-        self.customer_id = ""                # 客户id
-        self.salesman_id = ""                # 业务员id
+        # 主键id
+        self.rid = ""
+        # 订单id
+        self.order_id = UuidUtil.create_id('od')
+        # 子项
+        self.order_item = []
+        for i in order['item']:
+            self.order_item.append(OrderItem(i, self.order_id))
+        # 目的地
+        self.dest = order['dest']
+        # 客户id
+        self.customer_id = order['customer_id']
+        # 业务员id
+        self.salesman_id = order['salesman_id']
         self.create_time = ""                # 创建时间
         self.update_time = ""                # 更新时间
 
