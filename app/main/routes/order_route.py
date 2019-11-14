@@ -10,6 +10,7 @@ from flask_restful import Resource
 
 from app.main.entity.order import Order
 from app.main.services.dispatch_service import dispatch
+from app.utils.result import Result
 
 
 class OrderRoute(Resource):
@@ -30,8 +31,8 @@ class OrderRoute(Resource):
             order = Order(order_data)
             # 执行开单，输出结果
             result = dispatch(order)
-            return jsonify({"code": 100, "msg": "post成功", "data": result})
+            return Result.response(result)
         except Exception as e:
             current_app.logger.info("json error")
             current_app.logger.exception(e)
-            return jsonify({"code": -1, "msg": "应用错误"})
+            return Result.error_response()

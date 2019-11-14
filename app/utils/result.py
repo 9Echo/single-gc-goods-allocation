@@ -1,3 +1,5 @@
+from flask import jsonify
+
 from app.utils.code import ResponseCode
 
 
@@ -30,3 +32,12 @@ class Result:
         result.code = ResponseCode.Warn
         result.msg = msg
         return result
+
+    @staticmethod
+    def response(result):
+        return jsonify({"code": result.code, "msg": result.msg, "data": result.data})
+
+    @staticmethod
+    def error_response():
+        return jsonify({"code": -1, "msg": "应用错误"})
+

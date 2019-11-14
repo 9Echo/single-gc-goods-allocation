@@ -51,23 +51,20 @@ def get_stock():
     获取库存
     :return:
     """
-    try:
-        redis_conn = redis.Redis(connection_pool=redis_pool)
-        # 获取Redis库存数据
-        json_stock_list = redis_conn.get('gc:stocks')
-        # 如果数据存在
-        if json_stock_list:
-            current_app.logger.info('get stock_list from redis')
-            result_list = json.loads(json_stock_list)
-            return result_list
+    redis_conn = redis.Redis(connection_pool=redis_pool)
+    # 获取Redis库存数据
+    json_stock_list = redis_conn.get('gc:stocks')
+    # 如果数据存在
+    if json_stock_list:
+        current_app.logger.info('get stock_list from redis')
+        result_list = json.loads(json_stock_list)
+        return result_list
         # 如果数据过期或被删除
-        else:
-            raise RuntimeError('redis data error')
+    else:
+        raise RuntimeError('redis data error')
 
-        redis_conn.close()
-    except Exception as e:
-        current_app.logger.info("get_stock error")
-        current_app.logger.exception(e)
+    redis_conn.close()
+
 
 
 

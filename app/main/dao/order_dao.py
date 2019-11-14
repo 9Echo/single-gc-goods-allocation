@@ -45,7 +45,7 @@ def insert(order: Order):
                 product_type,
                 spec,
                 quantity,
-                number,
+                free_pcs,
                 create_time
                 ) value 
         """
@@ -66,7 +66,7 @@ def insert(order: Order):
                 i.product_type,
                 i.spec,
                 i.quantity,
-                i.number
+                i.free_pcs
             ))
         sql_item += ','.join(value_list)
         cursor.execute(sql_main)
