@@ -7,5 +7,5 @@ def get():
     return
 
 
-def insert():
+def insert(delivery):
     return

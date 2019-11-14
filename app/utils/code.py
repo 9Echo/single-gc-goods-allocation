@@ -8,6 +8,7 @@ class ResponseCode(object):
     Fail = -1  # 失败，未知错误
     Success = 100  # 成功
     Error = 101  # 错误
+    Warn = 102   # 警告
     NoResourceFound = 40001  # 未找到资源
     InvalidParameter = 40002  # 参数无效
     AccountOrPassWordErr = 40003  # 账户或密码错误
@@ -23,8 +24,10 @@ class ResponseMessage(object):
     Fail = "失败"
     Success = "成功"
     Error = "没有找到数据"
+    Warn = "库存剩余不足"
     NoResourceFound = "未找到资源"
     InvalidParameter = "参数无效"
     AccountOrPassWordErr = "账户或密码错误"
     VerificationCodeError = "验证码错误"
     PleaseSignIn = "请登陆"
+

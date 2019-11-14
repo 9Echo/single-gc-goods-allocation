@@ -10,7 +10,9 @@ from flask_restful import Resource
 
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
+from app.main.services.confirm_delivery_service import confirm
 from app.main.services.dispatch_service import dispatch
+from app.utils.code import ResponseCode, ResponseMessage
 
 
 class ConfirmRoute(Resource):
@@ -20,8 +22,8 @@ class ConfirmRoute(Resource):
 
     def post(self):
         """
-        获取人工确认后的发货通知单，扣减库存
-        判断库存是否充足
+        获取人工确认后的发货通知单
+        判断库存是否充足，扣减库存
         将发货通知单写库,有可能也要写入成都数据库
         :return:
         """
@@ -29,11 +31,10 @@ class ConfirmRoute(Resource):
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
             delivery_data = request.get_json(force=True).get('data')  # 入参是json
-            # 创建订单实例，初始化订单属性
+            # 创建发货通知单实例，初始化属性
             delivery = DeliverySheet(delivery_data)
-            # 执行开单，输出结果
-            result = dispatch()
-            return jsonify({"code": 100, "msg": "保存成功"})
+            result = confirm(delivery)
+            return jsonify({"code": result.code, "msg": result.msg})
         except Exception as e:
             current_app.logger.info("json error")
             current_app.logger.exception(e)

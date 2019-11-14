@@ -23,3 +23,5 @@ class DeliveryItem(BaseEntity):
         self.total_pcs = ""              # 总根数
         self.create_time = ""            # 创建时间
         self.update_time = ""            # 更新时间
+
+
