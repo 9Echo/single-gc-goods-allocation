@@ -156,5 +156,32 @@ def pd_read_table(tablename):
         traceback.print_exc()
 
 
+def write_db(data):
+    """写库
+
+    Args:
+        data:要写入的数据  形如：[主品名，搭配品名，搭配次数，更新时间]
+
+    Returns:
+
+    Raise:
+
+    """
+    try:
+        sql = """
+            insert into db_trans_plan.a_test(cname,itemid,div_result,result) 
+            values('{}', '{}', '{}', '{}')
+        """
+        conn = db_pool_trans_plan.connection()
+        cursor = conn.cursor()
+        cursor.execute(sql.format(data[0], data[1], data[2], data[3]))
+        conn.commit()
+    except Exception as e:
+        print("commodity_dao.write_database is error")
+        traceback.print_exc()
+        conn.rollback()
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     results = get_commodity()
