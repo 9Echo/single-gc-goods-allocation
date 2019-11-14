@@ -26,7 +26,8 @@ def insert(delivery):
                                   delivery.batch_no,
                                   delivery.data_address,
                                   delivery.total_quantity,
-                                  delivery.free_pcs))
+                                  delivery.free_pcs,
+                                  delivery.total_pcs))
         conn.commit()
     except Exception as e:
         print("commodity_dao.write_database is error")
