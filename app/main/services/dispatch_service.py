@@ -17,6 +17,7 @@ from app.main.redis_pool import redis_pool
 from app.main.dao.order_dao import insert
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
+from app.utils.result import Result
 
 
 def dispatch(order: Order):
@@ -40,7 +41,7 @@ def dispatch(order: Order):
         # 执行分货逻辑，将结合订单信息、过滤信息、库存信息得出结果
         print('以下是开单动作、尾货处理、尾货拼货推荐-----------')
 
-        return {}
+        return Result.success(1)
     except Exception as e:
         current_app.logger.info("dispatch error")
         current_app.logger.exception(e)

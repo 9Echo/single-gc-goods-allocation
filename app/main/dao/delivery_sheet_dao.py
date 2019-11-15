@@ -34,4 +34,5 @@ def insert(delivery):
         traceback.print_exc()
         conn.rollback()
     finally:
+        cursor.close()
         conn.close()

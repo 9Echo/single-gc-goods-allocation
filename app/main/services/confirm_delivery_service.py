@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 # Description: Redis连接池
 # Created: shaoluyu 2019/11/13
+import copy
 import json
-
+import pandas
 import redis
 from flask import current_app
 
@@ -31,7 +32,7 @@ def confirm(delivery):
                 result = subtract_stock(delivery, stock_list)
                 # 如果扣减库存成功，重置Redis
                 if result.code == ResponseCode.Success:
-                    json_data = json.dumps(result)
+                    json_data = json.dumps(result.data)
                     redis_conn.set('gc:stocks', json_data)
                 return result
 
@@ -55,28 +56,50 @@ def subtract_stock(delivery, stock_list):
         msg = ""
         tag = True
         for i in delivery.items:
-            # 过滤出符合品种、规格的库存数据，会出现同品种同规格有多条数据的情况
-            list = list(filter(lambda s: s['cname'] == i.product_type and s['spec'] == i.spec, stock_list))
+
+            # 过滤出发货通知单指定的品种、规格、仓库、库位的库存数据，会出现有多条数据的情况
+            data_list = list(filter(lambda s: s['cname'] == i.product_type
+                                              and s['spec'] == i.spec
+                                              and s['whsDesc'] == i.warehouse
+                                              and s['locid'] == i.loc_id, stock_list))
+            # 如果扣减库存成功最终返回的list
+            new_list = list(filter(lambda s: s['cname'] != i.product_type
+                                              and s['spec'] != i.spec
+                                              and s['whsDesc'] != i.warehouse
+                                              and s['locid'] != i.loc_id, stock_list))
             # 如果没有数据或库存不足
-            if len(list) == 0 or int(list[0]['enterJ']) <int(i.quantity) or int(list[0]['enterG']) <int(i.free_pcs):
+            if len(data_list) == 0 or int(list[0]['enterJ']) < int(i.quantity) or int(list[0]['enterG']) < int(i.free_pcs):
                 msg += "" + i.product_type + "" + i.spec + "库存不足  "
                 tag = False
                 continue
             #  库存足够的情况下减库存
             else:
-                list[0]['enterJ'] = str(int(list[0]['enterJ']) - int(i.quantity))
-                list[0]['enterG'] = str(int(list[0]['enterG']) - int(i.free_pcs))
+                # 转换库存量
+                def transform(row):
+                    row['enterJ'] = int(row['enterJ'])
+                    row['enterG'] = int(row['enterG'])
+                    return row
+                df_data = pandas.DataFrame(data_list)
+                df_data.apply(transform, axis=1)
+                # 得出库存总件数和总散根数的Series
+                series = df_data.sum()
+                # 得出剩余件数和散根数
+                enter_j = int(series['enterJ']) - int(i.quantity)
+                enter_g = int(series['enterG']) - int(i.free_pcs)
+                # 创建一个新字典，更新库存
+                new_dict = copy.deepcopy(data_list[0])
+                new_dict['enterJ'] = str(enter_j)
+                new_dict['enterG'] = str(enter_g)
+                new_list.append(new_dict)
+
         if tag:
 
             insert_main(delivery)
             insert_items(delivery.items)
-            return Result.success(stock_list)
+            return Result.success(new_list)
         else:
             return Result.warn(msg)
 
     except Exception as e:
         current_app.logger.info("subtract stock error")
         current_app.logger.exception(e)
-
-
-

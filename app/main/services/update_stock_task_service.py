@@ -22,7 +22,7 @@ def update_stock():
         if lock_id:
             result = get_stock_api()
             json_data = json.dumps(result)
-        # 将数据放入Redis，默认保存在0分片，gc下
+            # 将数据放入Redis，默认保存在0分片，数据保存在gc下
             redis_conn.set('gc:stocks', json_data)
         else:
             raise RuntimeError()
@@ -32,6 +32,7 @@ def update_stock():
     finally:
         RedisLock.unlock(redis_conn, 'stock_lock', lock_id)
         redis_conn.close()
+
 
 def get_stock_api():
     """

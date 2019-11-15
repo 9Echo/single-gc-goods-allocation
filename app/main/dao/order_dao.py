@@ -21,7 +21,6 @@ def insert(order: Order):
             insert into 
             t_ga_order(
             order_id,
-            dest,
             customer_id,
             saleman_id,
             create_time
@@ -29,16 +28,14 @@ def insert(order: Order):
             '{}',
             '{}',
             '{}',
-            '{}',
             now()
             )
             """.format(
             order.order_id,
-            order.dest,
             order.customer_id,
             order.salesman_id
         )
-        sql_item = """
+        sql_item = """ 
         insert into
                 t_ga_order_item(
                 order_id,
