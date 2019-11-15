@@ -26,7 +26,10 @@ class OrderRoute(Resource):
         try:
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
+            data = request.get_data()
+            data.decode('unicode_escape')
             order_data = request.get_json(force=True).get('data')  # 入参是json
+
             # 创建订单实例，初始化订单属性
             order = Order(order_data)
             # 执行开单，输出结果
