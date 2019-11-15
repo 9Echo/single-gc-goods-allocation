@@ -57,8 +57,6 @@ class BaseDao:
 
     def executemany(self, sql, values=None):
         try:
-            print(sql)
-            print(values)
             conn = db_pool_trans_plan.connection()
             cursor = conn.cursor()
             if values is None:

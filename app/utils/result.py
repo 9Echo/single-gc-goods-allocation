@@ -15,7 +15,6 @@ class Result:
 
     @staticmethod
     def success(object):
-        print(object)
         result = Result()
         result.code = ResponseCode.Success
         result.msg = "成功!"

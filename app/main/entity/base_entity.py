@@ -14,5 +14,8 @@ class BaseEntity:
         value = getattr(self, attr)
         if isinstance(value, datetime.datetime):
             return value.strftime('%Y-%m-%d %H:%M:%S')
+        elif isinstance(value, list) and value and isinstance(value[0], BaseEntity):
+            # 如果list内部对象为BaseEntity也将其转为dict
+            return [i.as_dict() for i in value]
         else:
             return value
