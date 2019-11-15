@@ -7,17 +7,15 @@ import json
 import threading
 
 import redis
-import requests
 from flask import current_app
 
-
+from app.analysis.rules.product_type_rule import product_type_filter
 from app.analysis.rules.spec_rule import spec_filter
 from app.analysis.rules.weight_rule import weight_filter
-from app.analysis.rules.product_type_rule import product_type_filter
-from app.main.redis_pool import redis_pool
 from app.main.dao.order_dao import insert
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
+from app.main.redis_pool import redis_pool
 from app.utils.result import Result
 
 
@@ -114,10 +112,6 @@ def get_stock():
         raise RuntimeError('redis data error')
 
     redis_conn.close()
-
-
-
-
 
 
 

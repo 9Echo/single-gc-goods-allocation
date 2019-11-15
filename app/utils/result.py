@@ -1,4 +1,6 @@
-from flask import jsonify
+import json
+
+from flask import jsonify, Response
 
 from app.utils.code import ResponseCode
 
@@ -35,7 +37,12 @@ class Result:
 
     @staticmethod
     def response(result):
-        return jsonify({"code": result.code, "msg": result.msg, "data": result.data})
+        return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
+                        mimetype='application/json')
+
+    def response(self):
+        return Response(json.dumps({"code": self.code, "msg": self.msg, "data": self.data}),
+                        mimetype='application/json')
 
     @staticmethod
     def error_response():
