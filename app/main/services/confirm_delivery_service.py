@@ -3,6 +3,8 @@
 # Created: shaoluyu 2019/11/13
 import copy
 import json
+import threading
+
 import pandas
 import redis
 from flask import current_app
@@ -93,9 +95,8 @@ def subtract_stock(delivery, stock_list):
                 new_list.append(new_dict)
 
         if tag:
-
-            insert_main(delivery)
-            insert_items(delivery.items)
+            threading.Thread(target=insert_main, args=(delivery,)).start()
+            threading.Thread(target=insert_items, args=(delivery.items,)).start()
             return Result.success(new_list)
         else:
             return Result.warn(msg)
