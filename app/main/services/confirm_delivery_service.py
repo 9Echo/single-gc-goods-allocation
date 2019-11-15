@@ -69,22 +69,27 @@ def subtract_stock(delivery, stock_list):
                                               and s['spec'] != i.spec
                                               and s['whsDesc'] != i.warehouse
                                               and s['locid'] != i.loc_id, stock_list))
-            # 如果没有数据或库存不足
-            if len(data_list) == 0 or int(list[0]['enterJ']) < int(i.quantity) or int(list[0]['enterG']) < int(i.free_pcs):
-                msg += "" + i.product_type + "" + i.spec + "库存不足  "
+            # 如果没有数据
+            if len(data_list) == 0:
+# or int(list[0]['enterJ']) < int(i.quantity) or int(list[0]['enterG']) < int(i.free_pcs):
+                msg += "品名：" + i.product_type + "规格：" + i.spec + "库存不足  "
                 tag = False
                 continue
-            #  库存足够的情况下减库存
             else:
                 # 转换库存量
                 def transform(row):
-                    row['enterJ'] = int(row['enterJ'])
-                    row['enterG'] = int(row['enterG'])
+                    row['enterJ'] = int(row['enterJ']) if row['enterJ'] is not None else 0
+                    row['enterG'] = int(row['enterG']) if row['enterG'] is not None else 0
                     return row
                 df_data = pandas.DataFrame(data_list)
                 df_data.apply(transform, axis=1)
                 # 得出库存总件数和总散根数的Series
                 series = df_data.sum()
+                # 如果库存不足
+                if int(series['enterJ']) < int(i.quantity) or int(series['enterG']) < int(i.free_pcs):
+                    msg += "品名：" + i.product_type + "规格：" + i.spec + "库存不足  "
+                    tag = False
+                    continue
                 # 得出剩余件数和散根数
                 enter_j = int(series['enterJ']) - int(i.quantity)
                 enter_g = int(series['enterG']) - int(i.free_pcs)
