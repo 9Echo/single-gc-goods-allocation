@@ -35,10 +35,10 @@ class Result:
         result.msg = msg
         return result
 
-    @staticmethod
-    def response(result):
-        return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
-                        mimetype='application/json')
+    # @staticmethod
+    # def response(result):
+    #     return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
+    #                     mimetype='application/json')
 
     def response(self):
         return Response(json.dumps({"code": self.code, "msg": self.msg, "data": self.data}),

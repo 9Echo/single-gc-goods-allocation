@@ -13,6 +13,7 @@ from app.main.entity.order import Order
 from app.main.services.confirm_delivery_service import confirm
 from app.main.services.dispatch_service import dispatch
 from app.utils.code import ResponseCode, ResponseMessage
+from app.utils.result import Result
 
 
 class ConfirmRoute(Resource):
@@ -34,8 +35,8 @@ class ConfirmRoute(Resource):
             # 创建发货通知单实例，初始化属性
             delivery = DeliverySheet(delivery_data)
             result = confirm(delivery)
-            return jsonify({"code": result.code, "msg": result.msg})
+            return result.response()
         except Exception as e:
             current_app.logger.info("json error")
             current_app.logger.exception(e)
-            return jsonify({"code": -1, "msg": "应用错误"})
+            return Result.error_response()

@@ -34,7 +34,7 @@ class OrderRoute(Resource):
             order = Order(order_data)
             # 执行开单，输出结果
             result = dispatch(order)
-            return Result.response(result)
+            return result.response()
         except Exception as e:
             current_app.logger.info("json error")
             current_app.logger.exception(e)
