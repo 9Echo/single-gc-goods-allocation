@@ -11,7 +11,7 @@ class DeliverySheet(BaseEntity):
 
     def __init__(self, delivery_sheet=0):
         if isinstance(delivery_sheet, dict):
-            self.rid = ""                      # 主键id
+            self.rid = ""                       # 主键id
             self.delivery_no = UuidUtil.create_id('de')             # 发货通知单号
             self.batch_no = delivery_sheet['batch_no']                 # 批次号
             self.data_address = delivery_sheet["data_address"]               # 数据来源
@@ -21,7 +21,7 @@ class DeliverySheet(BaseEntity):
             self.total_pcs = delivery_sheet["total_pcs"]                # 总根数
             self.weight = delivery_sheet["weight"]                      # 理重
             self.create_time = delivery_sheet["create_time"]                # 创建时间
-            self.update_time = delivery_sheet["update_time"]                # 更新时间
+            self.update_time = delivery_sheet["update"]                # 更新时间
         elif delivery_sheet == 0:
             self.rid = ""  # 主键id
             self.delivery_no = ""  # 发货通知单号

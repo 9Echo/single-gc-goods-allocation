@@ -72,6 +72,7 @@ def insert(delivery_item):
                 i.create_time
             ))
         sql_item += ','.join(value_list)
+        print(sql_item)
         cursor.execute(sql_item)
         conn.commit()
     except Exception as e:
