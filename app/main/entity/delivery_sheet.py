@@ -20,8 +20,8 @@ class DeliverySheet(BaseEntity):
             self.free_pcs = delivery_sheet["free_pcs"]                   # 散根数
             self.total_pcs = delivery_sheet["total_pcs"]                # 总根数
             self.weight = delivery_sheet["weight"]                      # 理重
-            self.create_time = delivery_sheet["create_time"]                # 创建时间
-            self.update_time = delivery_sheet["update"]                # 更新时间
+            self.create_time = ""              # 创建时间
+            self.update_time = ""              # 更新时间
         elif delivery_sheet == 0:
             self.rid = ""  # 主键id
             self.delivery_no = ""  # 发货通知单号
