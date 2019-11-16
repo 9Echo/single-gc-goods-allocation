@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Description: Redis连接池
+# Description: 定时更新库存
 # Created: shaoluyu 2019/11/13
 import json
 

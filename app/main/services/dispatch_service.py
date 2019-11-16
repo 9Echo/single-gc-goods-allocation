@@ -16,6 +16,7 @@ from app.main.dao.order_dao import insert
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
 from app.main.redis_pool import redis_pool
+from app.main.services.get_stock_service import get_stock
 from app.utils.result import Result
 
 
@@ -34,7 +35,7 @@ def dispatch(order: Order):
         # 备份订单
         copy_order = copy.deepcopy(order)
         # 经过过滤，得到符合条件的库存
-        stocks, new_order = product_type_filter(order, stocks)
+        stocks = product_type_filter(order, stocks)
         stocks = spec_filter(order, stocks)
         stocks = weight_filter(order, stocks)
         # 创建发货通知单实例，并初始化
@@ -94,24 +95,7 @@ def dispatch(order: Order):
         current_app.logger.exception(e)
 
 
-def get_stock():
-    """
-    获取库存
-    :return:
-    """
-    redis_conn = redis.Redis(connection_pool=redis_pool)
-    # 获取Redis库存数据
-    json_stock_list = redis_conn.get('gc:stocks')
-    # 如果数据存在
-    if json_stock_list:
-        current_app.logger.info('get stock_list from redis')
-        result_list = json.loads(json_stock_list)
-        return result_list
-        # 如果数据过期或被删除
-    else:
-        raise RuntimeError('redis data error')
 
-    redis_conn.close()
 
 
 

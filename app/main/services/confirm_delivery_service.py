@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Description: Redis连接池
+# Description: 确认发货通知单
 # Created: shaoluyu 2019/11/13
 import copy
 import json
@@ -71,7 +71,6 @@ def subtract_stock(delivery, stock_list):
                                               and s['locid'] != i.loc_id, stock_list))
             # 如果没有数据
             if len(data_list) == 0:
-# or int(list[0]['enterJ']) < int(i.quantity) or int(list[0]['enterG']) < int(i.free_pcs):
                 msg += "品名：" + i.product_type + "规格：" + i.spec + "库存不足  "
                 tag = False
                 continue
@@ -100,6 +99,7 @@ def subtract_stock(delivery, stock_list):
                 new_list.append(new_dict)
 
         if tag:
+            # 这里要改成更新发货通知单
             threading.Thread(target=insert_main, args=(delivery,)).start()
             threading.Thread(target=insert_items, args=(delivery.items,)).start()
             return Result.success(new_list)

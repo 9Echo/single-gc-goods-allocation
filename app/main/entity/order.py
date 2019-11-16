@@ -19,7 +19,8 @@ class Order(BaseEntity):
             # 子项
             self.order_item = []
             for i in order['item']:
-                self.order_item.append(OrderItem(i, self.order_id))
+                i['order_id'] = self.order_id
+                self.order_item.append(OrderItem(i))
             # 目的地
             # self.dest = order['dest']
             # 客户id

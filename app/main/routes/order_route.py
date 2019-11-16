@@ -2,7 +2,7 @@
 # Description: 订单请求
 # Created: shaoluyu 2019/11/13
 # Modified: shaoluyu 2019/11/13
-
+import json
 
 from flask import current_app, jsonify
 from flask import request
@@ -26,12 +26,14 @@ class OrderRoute(Resource):
         try:
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
-            data = request.get_data()
-            data.decode('unicode_escape')
-            order_data = request.get_json(force=True).get('data')  # 入参是json
+            data = request.get_data().decode('utf-8')
+            # data.decode('unicode_escape')
+
+            order_data = json.loads(data)
+            # order_data = request.get_json(force=True).get('data')  # 入参是json
 
             # 创建订单实例，初始化订单属性
-            order = Order(order_data)
+            order = Order(order_data['data'])
             # 执行开单，输出结果
             result = dispatch(order)
             return result.response()
@@ -39,3 +41,5 @@ class OrderRoute(Resource):
             current_app.logger.info("json error")
             current_app.logger.exception(e)
             return Result.error_response()
+
+
