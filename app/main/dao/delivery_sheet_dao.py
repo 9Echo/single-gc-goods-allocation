@@ -2,6 +2,7 @@
 # @Time    : 2019/11/11 17:12
 # @Author  : Zihao.Liu
 from app.main.db_pool import db_pool_trans_plan
+from app.main.dao.delivery_item_dao import insert
 import traceback
 import json
 
@@ -34,6 +35,7 @@ def insert(delivery):
                                   delivery.free_pcs,
                                   delivery.total_pcs,
                                   delivery.weight))
+        insert(delivery.items)
         conn.commit()
     except Exception as e:
         print("delivery_sheet_dao_insert is error")
