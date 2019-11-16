@@ -54,7 +54,6 @@ def insert(delivery_item):
             '{}',
             '{}',
             '{}',
-            '{}',
             now()  )
         """.format(
                 i.delivery_no,
