@@ -36,6 +36,7 @@ def confirm(delivery):
                 if result.code == ResponseCode.Success:
                     json_data = json.dumps(result.data)
                     redis_conn.set('gc:stocks', json_data)
+                    result.data = None
                 return result
 
         else:
@@ -61,12 +62,12 @@ def subtract_stock(delivery, stock_list):
 
             # 过滤出发货通知单指定的品种、规格、仓库、库位的库存数据，会出现有多条数据的情况
             data_list = list(filter(lambda s: s['cname'] == i.product_type
-                                              and s['spec'] == i.spec
+                                              and s['itemid'] == i.spec
                                               and s['whsDesc'] == i.warehouse
                                               and s['locid'] == i.loc_id, stock_list))
             # 如果扣减库存成功最终返回的list
             new_list = list(filter(lambda s: s['cname'] != i.product_type
-                                              and s['spec'] != i.spec
+                                              and s['itemid'] != i.spec
                                               and s['whsDesc'] != i.warehouse
                                               and s['locid'] != i.loc_id, stock_list))
             # 如果没有数据
@@ -81,7 +82,7 @@ def subtract_stock(delivery, stock_list):
                     row['enterG'] = int(row['enterG']) if row['enterG'] is not None else 0
                     return row
                 df_data = pandas.DataFrame(data_list)
-                df_data.apply(transform, axis=1)
+                df_data = df_data.apply(transform, axis=1)
                 # 得出库存总件数和总散根数的Series
                 series = df_data.sum()
                 # 如果库存不足

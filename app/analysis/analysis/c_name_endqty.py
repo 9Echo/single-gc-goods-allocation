@@ -84,7 +84,7 @@ def test():
             else:
                 division = 0
             formula = formula_number(i['itemid'])
-            list_in = [i["cname"], i["whsDesc"],i["locid"],i["itemid"], division, formula]
+            list_in = [i["cname"], i["whsDesc"], i["locid"], i["itemid"], division, formula]
             li.append(list_in)
             print(list_in)
     print(li)
