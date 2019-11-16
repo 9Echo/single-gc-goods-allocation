@@ -3,6 +3,10 @@
 # @Author  : Zihao.Liu
 from app.main.db_pool import db_pool_trans_plan
 import traceback
+import json
+
+from app.main.entity.delivery_sheet import DeliverySheet
+
 
 def get():
     return
@@ -17,8 +21,9 @@ def insert(delivery):
                                                           total_quantity,
                                                           free_pcs,
                                                           total_pcs,
+                                                          weight,
                                                           create_time) 
-            values('{}', '{}', '{}', '{}', '{}', '{}', now())
+            values('{}', '{}', '{}', '{}', '{}', '{}', '{}', now())
         """
         conn = db_pool_trans_plan.connection()
         cursor = conn.cursor()
@@ -27,12 +32,26 @@ def insert(delivery):
                                   delivery.data_address,
                                   delivery.total_quantity,
                                   delivery.free_pcs,
-                                  delivery.total_pcs))
+                                  delivery.total_pcs,
+                                  delivery.weight))
         conn.commit()
     except Exception as e:
-        print("commodity_dao.write_database is error")
+        print("delivery_sheet_dao_insert is error")
         traceback.print_exc()
         conn.rollback()
     finally:
         cursor.close()
         conn.close()
+
+
+if __name__ == "__main__":
+    insert(DeliverySheet({"delivery_no": "12345",
+                          "batch_no": "54321",
+                          "data_address": "山东省",
+                          "total_quantity": 1,
+                          "items": [],
+                          "free_pcs": 0,
+                          "total_pcs": 12,
+                          "weight": "26000",
+                          "create_time": "",
+                          "update_time": ""}))
