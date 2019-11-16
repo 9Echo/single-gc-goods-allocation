@@ -26,7 +26,7 @@ class OrderRoute(Resource):
         try:
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
-            data = request.get_data().decode('utf-8')
+            data = request.get_data().decode("utf-8")
             # data.decode('unicode_escape')
 
             order_data = json.loads(data)
