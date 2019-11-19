@@ -10,8 +10,8 @@ from app.utils.uuid_util import UuidUtil
 class Order(BaseEntity):
     """管厂订单"""
 
-    def __init__(self, order=0):
-        if isinstance(order, dict):
+    def __init__(self, order={}):
+        if order:
             # 主键id
             self.rid = ""
             # 订单id
@@ -29,7 +29,7 @@ class Order(BaseEntity):
             self.salesman_id = order['salesman_id']
             self.create_time = ""                # 创建时间
             self.update_time = ""                # 更新时间
-        elif order == 0:
+        else:
             # 主键id
             self.rid = ""
             # 订单id
