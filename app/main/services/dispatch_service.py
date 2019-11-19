@@ -12,7 +12,7 @@ from flask import current_app
 from app.analysis.rules.product_type_rule import product_type_filter
 from app.analysis.rules.spec_rule import spec_filter
 from app.analysis.rules.weight_rule import weight_filter
-from app.main.dao.order_dao import insert
+from app.main.dao.order_dao import orderdao
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
 from app.main.redis_pool import redis_pool
@@ -29,7 +29,7 @@ def dispatch(order: Order):
 
     try:
         # 记录订单信息，保存到数据库
-        threading.Thread(target=insert, args=(order,)).start()
+        threading.Thread(target=orderdao.insert, args=(order,)).start()
         # 获取当前库存
         stocks = get_stock()
         # 备份订单
