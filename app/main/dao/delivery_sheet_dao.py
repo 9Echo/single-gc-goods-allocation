@@ -34,4 +34,13 @@ class DeliverySheetDao(BaseDao):
             traceback.print_exc()
             current_app.logger.error("delivery_sheet_dao_insert error")
 
+    def update(self):
+        try:
+            pass
+
+        except Exception as e:
+            traceback.print_exc()
+            current_app.logger.error("delivery_sheet_dao_update error")
+
+
 delivery_sheet_dao = DeliverySheetDao()

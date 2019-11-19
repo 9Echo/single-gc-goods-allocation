@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/11 17:13
 # @Author  : Zihao.Liu
+import traceback
+
 from flask import current_app
 
 from app.main.dao.base_dao import BaseDao
@@ -54,5 +56,13 @@ class DeliveryItemDao(BaseDao):
 
     def batch_insert(self):
         return
+
+    def update(self):
+        try:
+            pass
+
+        except Exception as e:
+            traceback.print_exc()
+            current_app.logger.error("delivery_item_dao_update error")
 
 delivery_item_dao = DeliveryItemDao()
