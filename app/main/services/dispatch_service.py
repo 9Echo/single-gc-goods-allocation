@@ -41,7 +41,7 @@ def dispatch(order: Order):
         # 创建发货通知单实例，并初始化
         delivery_sheet = DeliverySheet()
         # 执行分货逻辑，将结合订单信息、过滤信息、库存信息得出结果
-        print('以下是开单动作、尾货处理、尾货拼货推荐-----------')
+        print('以下是开单动作、尾货处理、尾货拼货推荐、并将开单结果写库-----------')
         t_dict = {
                  "rid":"c3a61136d3504dca8305b83b531441d2",
                  "delivery_no":"t3-79887",
