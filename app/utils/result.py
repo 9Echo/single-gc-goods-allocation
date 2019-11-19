@@ -3,6 +3,7 @@ import json
 from flask import jsonify, Response
 
 from app.utils.code import ResponseCode
+from app.utils.json_util import json_encode
 
 
 class Result:
@@ -18,7 +19,7 @@ class Result:
         result = Result()
         result.code = ResponseCode.Success
         result.msg = "成功!"
-        result.data = object
+        result.data = json_encode(object)
         return result
 
     @staticmethod

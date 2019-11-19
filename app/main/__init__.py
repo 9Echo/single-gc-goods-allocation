@@ -9,6 +9,7 @@ from flask_restful import Api
 from pymysql import MySQLError
 
 from app.main.routes import compose_route
+from app.main.routes.stock_route import StockRoute
 from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.order_left_item_route import OrderLeftItemRoute
 from app.main.routes.order_route import OrderRoute
@@ -26,6 +27,8 @@ api.add_resource(OrderRoute, '/order')
 api.add_resource(ConfirmRoute, '/confirm')
 # 拼货请求
 api.add_resource(OrderLeftItemRoute, '/orderleft')
+# 库存请求
+api.add_resource(StockRoute, '/stock')
 
 
 @blueprint.route('/demo', methods=['GET'])
