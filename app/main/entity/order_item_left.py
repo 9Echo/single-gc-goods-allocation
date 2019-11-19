@@ -4,6 +4,6 @@
 from app.main.entity.order_item import OrderItem
 
 
-class OrderLeftItem(OrderItem):
+class OrderItemLeft(OrderItem):
     """尾订单项"""
 

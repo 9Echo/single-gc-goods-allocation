@@ -3,14 +3,11 @@
 # Created: shaoluyu 2019/11/13
 import copy
 import json
-import threading
 
 import pandas
 import redis
 from flask import current_app
 
-from app.main.dao.delivery_item_dao import insert as insert_items
-from app.main.dao.delivery_sheet_dao import insert as insert_main
 from app.main.redis_pool import redis_pool
 from app.utils.code import ResponseCode
 from app.utils.reids_lock import RedisLock

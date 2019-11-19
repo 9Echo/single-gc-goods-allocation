@@ -9,8 +9,6 @@ class DeliveryItem(BaseEntity):
     """发货通知单子项"""
 
     def __init__(self, delivery_item):
-
-
         self.rid = None  # 主键id
         self.delivery_no = None  # 发货通知单主单号
         self.delivery_item_no = UuidUtil.create_id('delivery_item')  # 子单号
@@ -30,5 +28,3 @@ class DeliveryItem(BaseEntity):
 
         for attr in self.__dict__.keys():
             setattr(self, attr, delivery_item.setdefault(attr, None))
-
-

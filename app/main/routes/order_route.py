@@ -4,19 +4,44 @@
 # Modified: shaoluyu 2019/11/13
 import json
 
-from flask import current_app, jsonify
+from flask import current_app
 from flask import request
 from flask_restful import Resource
 
-from app.main.entity.order import Order
-from app.main.services.dispatch_service import dispatch
+from app.main.dao.order_dao import order_dao
+from app.main.services import order_service
 from app.utils.result import Result
 
 
 class OrderRoute(Resource):
     """
     订单请求,返回推荐发货通知单内容
+    示例数据格式：
+        {
+        "data":{
+            "customer_id":"customer a",
+            "salesman_id":"salesman a",
+            "order_items":[
+                {
+                    "product_type":"黑管",
+                    "spec":"100x200x0.5",
+                    "quantity":20,
+                    "free_pcs":0
+                },
+                {
+                    "product_type":"长管",
+                    "spec":"300x200x0.5",
+                    "quantity":50,
+                    "free_pcs":5
+                }
+            ]
+        }
+    }
     """
+
+    def get(self):
+        result = Result.success(order_dao.get_all())
+        return result.response()
 
     def post(self):
         """
@@ -24,18 +49,9 @@ class OrderRoute(Resource):
         :return:
         """
         try:
-            # print(type(allot_app_input.get('data')))
-            # 获取输入参数
-            data = request.get_data().decode("utf-8")
-            # data.decode('unicode_escape')
-
-            order_data = json.loads(data)
-            # order_data = request.get_json(force=True).get('data')  # 入参是json
-
-            # 创建订单实例，初始化订单属性
-            order = Order(order_data['data'])
-            # 执行开单，输出结果
-            result = dispatch(order)
+            json_data = json.loads(request.get_data().decode("utf-8"))
+            order = order_service.generate_order(json_data['data'])
+            result = Result.success(order)
             return result.response()
         except Exception as e:
             current_app.logger.info("json error")

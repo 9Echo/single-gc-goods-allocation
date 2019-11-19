@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/15 16:17
 # @Author  : Zihao.Liu
-from app.main.dao.order_left_item_dao import order_left_item_dao
+from app.main.dao.order_item_left_dao import order_item_left_dao
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
@@ -28,6 +28,6 @@ def generate_delivery_sheet(order):
 def compose(order_id):
     """进行订单分货"""
     order = Order()
-    order.order_item = order_left_item_dao.get_all()
+    order.order_item = order_item_left_dao.get_all()
     # stocks = get_stock()
     return generate_delivery_sheet(order)
