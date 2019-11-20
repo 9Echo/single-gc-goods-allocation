@@ -3,11 +3,14 @@
 # Created: shaoluyu 2019/11/13
 import copy
 import json
+import threading
 
 import pandas
 import redis
 from flask import current_app
 
+from app.main.dao.delivery_item_dao import delivery_item_dao
+from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.redis_pool import redis_pool
 from app.utils.code import ResponseCode
 from app.utils.reids_lock import RedisLock
@@ -56,7 +59,6 @@ def subtract_stock(delivery, stock_list):
         msg = ""
         tag = True
         for i in delivery.items:
-
             # 过滤出发货通知单指定的品种、规格、仓库、库位的库存数据，会出现有多条数据的情况
             data_list = list(filter(lambda s: s['cname'] == i.product_type
                                               and s['itemid'] == i.spec
@@ -101,10 +103,30 @@ def subtract_stock(delivery, stock_list):
                 new_list.append(new_dict)
 
         if tag:
-            # 这里要改成更新发货通知单,对比更新的数据，将差异保存到log表，发货通知单状态修改为确认状态
-            # threading.Thread(target=insert_main, args=(delivery,)).start()
-            # threading.Thread(target=insert_items, args=(delivery.items,)).start()
-            return Result.entity_success(new_list)
+            # 这里要改成更新发货通知单主子表,对比数据，将对比有差异的两条数据保存到log表，状态分别为初始状态、确认状态
+            # threading.Thread(target=delivery_sheet_dao.insert, args=(delivery,)).start()
+            # threading.Thread(target=delivery_item_dao.insert, args=(delivery.items,)).start()
+            deli_dic = delivery_sheet_dao.get_by_sheet(delivery.delivery_no)
+            deli_item_list_dic = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+            print('deli_item_list_dic:  ', deli_item_list_dic)
+            for i in delivery.items:
+                flag = True
+                for j in deli_item_list_dic:
+                    pass
+                    # print(i, i.delivery_item_no)
+                    # print(j, j["delivery_item_no"])
+                    # if i["delivery_item_no"] == j["delivery_item_no"] and (i["status"] != j["status"] or
+                    # i["customer_id"] != j["customer_id"] or i["salesman_id"] != j["salesman_id"] or i["dest"] != j["dest"] or
+                    # i["product_type"] != j["product_type"] or i["spec"] != j["spec"] or i["weight"] != j["weight"] or
+                    # i["warehouse"] != j["warehouse"] or i["loc_id"] != j["loc_id"] or i["quantity"] != j["quantity"] or
+                    # i["free_pcs"] != j["free_pcs"] or i["total_pcs"] != j["total_pcs"]):
+                    #     flag = False
+
+            if flag == False:
+                pass
+            delivery_sheet_dao.update(delivery)
+            # delivery_item_dao.update(delivery.items)
+            return Result.success(new_list)
         else:
             return Result.warn(msg)
 

@@ -87,7 +87,7 @@ def test():
             list_in = [i["cname"], i["whsDesc"], i["locid"], i["itemid"], division, formula]
             li.append(list_in)
             print(list_in)
-    print(li)
+    # print(li)
     # 写入excel
     write_excel_xls(li)
 

@@ -11,8 +11,10 @@ from app.utils.date_util import get_now_str
 
 
 class DeliverySheetDao(BaseDao):
-    def get(self):
-        return
+
+    def get_by_sheet(self, sheet_id):
+        sql = """select * from t_ga_delivery_sheet where delivery_no = '{0}'""".format(sheet_id)
+        return self.select_one(sql)
 
     def insert(self, delivery):
         try:
@@ -34,13 +36,27 @@ class DeliverySheetDao(BaseDao):
             traceback.print_exc()
             current_app.logger.error("delivery_sheet_dao_insert error")
 
-    def update(self):
+    def update(self, delivery):
         try:
-            pass
-
+            sql = """update db_trans_plan.t_ga_delivery_sheet 
+                        set batch_no = '{0}' 
+                        and data_address = '{1}'
+                        and total_quantity = '{2}'
+                        and free_pcs = '{3}'
+                        and total_pcs = '{4}'
+                        and weight = '{5}'
+                        and create_time = '{6}'
+                        where delivery_no = '{7}'""".format(delivery.batch_no,
+                        delivery.data_address, delivery.total_quantity, delivery.free_pcs,
+                        delivery.total_pcs, delivery.weight, get_now_str(), delivery.delivery_no)
+            self.execute(sql)
         except Exception as e:
             traceback.print_exc()
             current_app.logger.error("delivery_sheet_dao_update error")
 
 
 delivery_sheet_dao = DeliverySheetDao()
+
+if __name__ == "__main__":
+    deli = delivery_sheet_dao.get_by_sheet('aaabbbcccdddeee')
+    print(deli)

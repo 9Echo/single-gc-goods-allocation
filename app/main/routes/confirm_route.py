@@ -32,10 +32,9 @@ class ConfirmRoute(Resource):
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
             delivery_data = request.get_json(force=True).get('data')  # 入参是json
-            print(delivery_data)
+            print('delivery_data:  ', delivery_data)
             # 创建发货通知单实例，初始化属性
             delivery = DeliverySheet(delivery_data)
-            print(delivery)
             result = confirm(delivery)
             return result.response()
         except Exception as e:
