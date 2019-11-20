@@ -15,11 +15,12 @@ class Result:
         self.tag = True
 
     @staticmethod
-    def success(object):
+    def entity_success(entity):
+        """封装成功返回的实体类"""
         result = Result()
         result.code = ResponseCode.Success
         result.msg = "成功!"
-        result.data = json_encode(object)
+        result.data = json_encode(entity)
         return result
 
     @staticmethod

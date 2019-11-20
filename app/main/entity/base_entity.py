@@ -8,9 +8,11 @@ class BaseEntity:
     """实体类的基类"""
 
     def as_dict(self):
-        return {attr: self.get_attr(attr) for attr in self.__dict__.keys()}
+        """将对象转为dict返回"""
+        return {attr: self.get_attr_str(attr) for attr in self.__dict__.keys()}
 
-    def get_attr(self, attr):
+    def get_attr_str(self, attr):
+        """读取类成员变量，将其统一转为string"""
         value = getattr(self, attr)
         if isinstance(value, datetime.datetime):
             return value.strftime('%Y-%m-%d %H:%M:%S')
@@ -19,3 +21,9 @@ class BaseEntity:
             return [i.as_dict() for i in value]
         else:
             return value
+
+    def set_attr(self, value: dict):
+        """根据传入的对象设置成员变量"""
+        for attr in self.__dict__.keys():
+            if value.__contains__(attr):
+                setattr(self, attr, value.get(attr))

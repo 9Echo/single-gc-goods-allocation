@@ -104,7 +104,7 @@ def subtract_stock(delivery, stock_list):
             # 这里要改成更新发货通知单,对比更新的数据，将差异保存到log表，发货通知单状态修改为确认状态
             # threading.Thread(target=insert_main, args=(delivery,)).start()
             # threading.Thread(target=insert_items, args=(delivery.items,)).start()
-            return Result.success(new_list)
+            return Result.entity_success(new_list)
         else:
             return Result.warn(msg)
 

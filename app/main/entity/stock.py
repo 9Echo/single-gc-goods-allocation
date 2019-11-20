@@ -17,7 +17,5 @@ class Stock(BaseEntity):
         self.warehouse = None  # 仓库
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
-
         if stock:
-            for attr in self.__dict__.keys():
-                setattr(self, attr, stock.setdefault(attr, None))
+            self.set_attr(stock)

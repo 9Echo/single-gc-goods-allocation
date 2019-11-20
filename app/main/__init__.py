@@ -39,7 +39,7 @@ def demo():
 @blueprint.route('/compose', methods=['GET'])
 def compose():
     ds = compose_route.compose(1)
-    result = Result.success(json_encode(ds))
+    result = Result.entity_success(json_encode(ds))
     return result.response(), 200
 
 

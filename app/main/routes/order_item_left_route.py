@@ -14,7 +14,7 @@ class OrderLeftItemRoute(Resource):
 
     def get(self):
         items = order_item_left_dao.get_all()
-        result = Result.success(items)
+        result = Result.entity_success(items)
         return result.response()
 
     def post(self):
@@ -22,5 +22,5 @@ class OrderLeftItemRoute(Resource):
         print(item_data)
         items = [OrderItemLeft(v) for v in item_data]
         order_item_left_dao.batch_insert(items)
-        result = Result.success(items)
+        result = Result.entity_success(items)
         return result.response()

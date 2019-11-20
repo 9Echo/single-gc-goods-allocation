@@ -18,10 +18,8 @@ class Order(BaseEntity):
         self.salesman_id = None  # 业务员id
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
-
         if order:
-            for attr in self.__dict__.keys():
-                setattr(self, attr, order.setdefault(attr, None))
+            self.set_attr(order)
 
 
 

@@ -40,7 +40,7 @@ class OrderRoute(Resource):
     """
 
     def get(self):
-        result = Result.success(order_dao.get_all())
+        result = Result.entity_success(order_dao.get_all())
         return result.response()
 
     def post(self):
@@ -51,7 +51,7 @@ class OrderRoute(Resource):
         try:
             json_data = json.loads(request.get_data().decode("utf-8"))
             order = order_service.generate_order(json_data['data'])
-            result = Result.success(order)
+            result = Result.entity_success(order)
             return result.response()
         except Exception as e:
             current_app.logger.info("json error")

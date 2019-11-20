@@ -8,7 +8,7 @@ from app.utils.uuid_util import UuidUtil
 class DeliveryItem(BaseEntity):
     """发货通知单子项"""
 
-    def __init__(self, delivery_item):
+    def __init__(self, delivery_item=None):
         self.rid = None  # 主键id
         self.delivery_no = None  # 发货通知单主单号
         self.delivery_item_no = UuidUtil.create_id('delivery_item')  # 子单号
@@ -25,6 +25,6 @@ class DeliveryItem(BaseEntity):
         self.total_pcs = None  # 总根数
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
+        if delivery_item:
+            self.set_attr(delivery_item)
 
-        for attr in self.__dict__.keys():
-            setattr(self, attr, delivery_item.setdefault(attr, None))

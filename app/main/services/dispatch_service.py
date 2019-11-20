@@ -82,7 +82,7 @@ def dispatch(order: Order):
                  "create_time":"",
                  "update_time":""
                 }
-        return Result.success(t_dict)
+        return Result.entity_success(t_dict)
     except Exception as e:
         current_app.logger.info("dispatch error")
         current_app.logger.exception(e)

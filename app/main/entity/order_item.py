@@ -17,7 +17,5 @@ class OrderItem(BaseEntity):
         self.dest = None  # 目的地
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
-
         if item:
-            for attr in self.__dict__.keys():
-                setattr(self, attr, item.setdefault(attr, None))
+            self.set_attr(item)

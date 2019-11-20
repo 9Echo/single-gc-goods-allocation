@@ -15,7 +15,7 @@ from app.utils.date_util import get_now_str
 class OrderDao(BaseDao):
 
     def get_all(self):
-        sql = "select od.*, odi.* from t_ga_order od " \
+        sql = "select od.*, odi.*, odi.rid as irid, odi.create_time as ict, odi.update_time as iut from t_ga_order od " \
               "left join t_ga_order_item odi on od.order_id=odi.order_id " \
               "order by od.rid"
         results = self.select_all(sql)
@@ -24,11 +24,12 @@ class OrderDao(BaseDao):
         for row in results:
             if not order_dict.__contains__(row['order_id']):
                 order_dict[row['order_id']] = Order(row)
-            # row['rid'] = row['rid(1)']
-            # row['create_time'] = row['create_time(1)']
-            # row['update_time'] = row['update_time(1)']
-            order_dict[row['order_id']].order_items.append(OrderItem(row))
-        return order_dict.values()
+            if row['irid'] is not None:
+                row['rid'] = row['irid']
+                row['create_time'] = row['ict']
+                row['update_time'] = row['iut']
+                order_dict[row['order_id']].order_items.append(OrderItem(row))
+        return [order for order in order_dict.values()]
 
     def insert(self, order):
         try:
