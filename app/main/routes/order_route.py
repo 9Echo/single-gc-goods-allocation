@@ -4,58 +4,46 @@
 # Modified: shaoluyu 2019/11/13
 import json
 
-from flask import current_app
 from flask import request
 from flask_restful import Resource
 
+from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.dao.order_dao import order_dao
-from app.main.services import order_service
+from app.main.services import order_service, dispatch_service
 from app.utils.result import Result
 
 
 class OrderRoute(Resource):
-    """
-    订单请求,返回推荐发货通知单内容
-    示例数据格式：
+
+    def get(self):
+        return Result.success_response(order_dao.get_all())
+
+    def post(self):
+        """获取订单（或列表），返回开单结果
+        示例数据格式：
         {
-        "data":{
-            "customer_id":"customer a",
-            "salesman_id":"salesman a",
-            "order_items":[
+            "data":{
+                "customer_id":"customer a",
+                "salesman_id":"salesman a",
+                "items":[
                 {
-                    "product_type":"黑管",
-                    "spec":"100x200x0.5",
+                    "product_type":"方矩管",
+                    "spec":"058040*040*2.0*6000",
                     "quantity":20,
                     "free_pcs":0
                 },
                 {
-                    "product_type":"长管",
-                    "spec":"300x200x0.5",
+                    "product_type":"热镀",
+                    "spec":"02A165*4.25*6000",
                     "quantity":50,
                     "free_pcs":5
-                }
-            ]
+                }]
+            }
         }
-    }
-    """
-
-    def get(self):
-        result = Result.entity_success(order_dao.get_all())
-        return result.response()
-
-    def post(self):
         """
-        获取订单（或列表），返回开单结果
-        :return:
-        """
-        try:
-            json_data = json.loads(request.get_data().decode("utf-8"))
-            order = order_service.generate_order(json_data['data'])
-            result = Result.entity_success(order)
-            return result.response()
-        except Exception as e:
-            current_app.logger.info("json error")
-            current_app.logger.exception(e)
-            return Result.error_response()
+        json_data = json.loads(request.get_data().decode("utf-8"))
+        order = order_service.generate_order(json_data['data'])
+        delivery = dispatch_service.dispatch(order)
+        return Result.success_response(delivery_sheet_dao.get_one(delivery.delivery_no))
 
 

@@ -11,8 +11,8 @@ class Order(BaseEntity):
 
     def __init__(self, order=None):
         self.rid = None  # 主键id
-        self.order_id = None  # 订单id
-        self.order_items = []  # 订单子项
+        self.order_no = None  # 订单id
+        self.items = []  # 订单子项
         # self.dest = None # 目的地
         self.customer_id = None  # 客户id
         self.salesman_id = None  # 业务员id

@@ -10,6 +10,4 @@ from app.utils.result import Result
 class StockRoute(Resource):
 
     def get(self):
-        stocks = stock_dao.get_all()
-        result = Result.entity_success(stocks)
-        return result.response()
+        return Result.success_response(stock_dao.get_all())

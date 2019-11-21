@@ -6,21 +6,17 @@ from flask_restful import Resource
 
 from app.main.dao.order_item_left_dao import order_item_left_dao
 from app.main.entity.order_item_left import OrderItemLeft
-from app.utils.json_util import json_encode
 from app.utils.result import Result
 
 
 class OrderLeftItemRoute(Resource):
 
     def get(self):
-        items = order_item_left_dao.get_all()
-        result = Result.entity_success(items)
-        return result.response()
+        return Result.success_response(order_item_left_dao.get_all())
 
     def post(self):
         item_data = request.get_json(force=True).get('data')
         print(item_data)
         items = [OrderItemLeft(v) for v in item_data]
         order_item_left_dao.batch_insert(items)
-        result = Result.entity_success(items)
-        return result.response()
+        return Result.success_response("操作成功")

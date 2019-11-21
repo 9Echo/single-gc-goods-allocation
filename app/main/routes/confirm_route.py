@@ -4,15 +4,12 @@
 # Modified: shaoluyu 2019/11/13
 
 
-from flask import current_app, jsonify
+from flask import current_app
 from flask import request
 from flask_restful import Resource
 
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.main.entity.order import Order
 from app.main.services.confirm_delivery_service import confirm
-from app.main.services.dispatch_service import dispatch
-from app.utils.code import ResponseCode, ResponseMessage
 from app.utils.result import Result
 
 

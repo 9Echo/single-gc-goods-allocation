@@ -8,6 +8,7 @@ from app.main.entity.stock import Stock
 class StockDao(BaseDao):
 
     def get_all(self):
+        """获取所有库存"""
         sql = "select * from t_ga_stock"
         results = self.select_all(sql)
         return [Stock(row) for row in results]

@@ -9,7 +9,7 @@ class OrderItem(BaseEntity):
 
     def __init__(self, item=None):
         self.rid = None  # 主键id
-        self.order_id = None  # 主订单id
+        self.order_no = None  # 主订单id
         self.product_type = None  # 产品类型
         self.spec = None  # 产品规格
         self.quantity = None  # 数量(件数)

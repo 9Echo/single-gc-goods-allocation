@@ -2,12 +2,12 @@ import json
 
 from flask import jsonify, Response
 
+from app.main.entity.base_entity import BaseEntity
 from app.utils.code import ResponseCode
-from app.utils.json_util import json_encode
 
 
 class Result:
-
+    """将结果封装为定义好的json"""
     def __init__(self):
         self.code = ""
         self.msg = ""
@@ -15,12 +15,19 @@ class Result:
         self.tag = True
 
     @staticmethod
-    def entity_success(entity):
+    def entity(obj):
         """封装成功返回的实体类"""
         result = Result()
         result.code = ResponseCode.Success
         result.msg = "成功!"
-        result.data = json_encode(entity)
+        # 为BaseEntity提供json封装
+        if isinstance(obj, list):
+            data = [item.as_dict() for item in obj]
+        elif isinstance(obj, BaseEntity):
+            data = obj.as_dict()
+        else:
+            data = obj
+        result.data = data
         return result
 
     @staticmethod
@@ -37,16 +44,15 @@ class Result:
         result.msg = msg
         return result
 
-    # @staticmethod
-    # def response(result):
-    #     return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
-    #                     mimetype='application/json')
-
-    def response(self):
-        return Response(json.dumps({"code": self.code, "msg": self.msg, "data": self.data}),
+    @staticmethod
+    def success_response(obj):
+        """返回成功信息"""
+        result = Result.entity(obj)
+        return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
                         mimetype='application/json')
 
     @staticmethod
-    def error_response():
-        return jsonify({"code": -1, "msg": "应用错误"})
-
+    def error_response(msg):
+        """返回错误信息"""
+        result = Result.error(msg)
+        return jsonify({"code": result.code, "msg": result.msg})

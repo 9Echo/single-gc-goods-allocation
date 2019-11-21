@@ -11,12 +11,12 @@ from flask import current_app
 
 from app.main.dao.delivery_item_dao import delivery_item_dao
 from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
+from app.main.entity.delivery_item import DeliveryItem
 from app.main.redis_pool import redis_pool
 from app.utils.code import ResponseCode
 from app.utils.reids_lock import RedisLock
 from app.utils.result import Result
 from app.main.dao.delivery_log_dao import delivery_log_dao
-from app.main.entity.delivery_sheet import DeliveryItem
 from app.main.entity.delivery_log import DeliveryLog
 
 # test:
@@ -131,7 +131,7 @@ def update_delviery_sheet(delivery):
     #  新数据：delivery_sheet
     #  原数据
 
-    origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+    origin_items = delivery_item_dao.get_one(delivery.delivery_no)
 
     log_insert_list = []  # log表数据
     total_quantity = 0    # 主表的总数量

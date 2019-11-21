@@ -13,8 +13,6 @@ from app.main.routes.stock_route import StockRoute
 from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.order_item_left_route import OrderLeftItemRoute
 from app.main.routes.order_route import OrderRoute
-from app.main.services.dispatch_service import get_stock
-from app.utils.json_util import json_encode
 from app.utils.result import Result
 
 blueprint = Blueprint('main', __name__)
@@ -39,14 +37,12 @@ def demo():
 @blueprint.route('/compose', methods=['GET'])
 def compose():
     ds = compose_route.compose(1)
-    result = Result.entity_success(json_encode(ds))
-    return result.response(), 200
+    return 200
 
 
 @blueprint.app_errorhandler(MySQLError)
 def handle_mysql_exception(e):
     """封装数据库错误信息"""
-    error = Result.error("数据库错误")
-    return error.response()
+    return Result.error_response("数据库错误")
 
 

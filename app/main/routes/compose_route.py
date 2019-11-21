@@ -5,12 +5,12 @@ from app.main.dao.order_item_left_dao import order_item_left_dao
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order
-from app.utils.uuid_util import UuidUtil
+from app.utils.uuid_util import UUIDUtil
 
 
 def generate_delivery_sheet(order):
     ds = DeliverySheet()
-    ds.delivery_no = UuidUtil.create_id("delivery")
+    ds.delivery_no = UUIDUtil.create_id("delivery")
     ds.free_pcs = 0
     ds.total_quantity = 0
     ds.items = []
@@ -25,7 +25,7 @@ def generate_delivery_sheet(order):
     return ds
 
 
-def compose(order_id):
+def compose(order_no):
     """进行订单分货"""
     order = Order()
     order.order_item = order_item_left_dao.get_all()

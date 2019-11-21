@@ -12,11 +12,14 @@ from app.main.db_pool import db_pool_trans_plan
 class BaseDao:
     """封装数据库操作基础类"""
 
-    def select_one(self, sql):
+    def select_one(self, sql, values=None):
         try:
             conn = db_pool_trans_plan.connection()
             cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
-            cursor.execute(sql)
+            if values:
+                cursor.execute(sql, values)
+            else:
+                cursor.execut(sql)
             return cursor.fetchone()
         except Exception as e:
             traceback.print_exc()
@@ -25,11 +28,14 @@ class BaseDao:
             cursor.close()
             conn.close()
 
-    def select_all(self, sql):
+    def select_all(self, sql, values=None):
         try:
             conn = db_pool_trans_plan.connection()
             cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
-            cursor.execute(sql)
+            if values:
+                cursor.execute(sql, values)
+            else:
+                cursor.execute(sql)
             return cursor.fetchall()
         except Exception as e:
             traceback.print_exc()
@@ -42,10 +48,10 @@ class BaseDao:
         try:
             conn = db_pool_trans_plan.connection()
             cursor = conn.cursor()
-            if values is None:
-                cursor.execute(sql)
-            else:
+            if values:
                 cursor.execute(sql, values)
+            else:
+                cursor.execute(sql)
             conn.commit()
         except Exception as e:
             traceback.print_exc()
@@ -59,10 +65,10 @@ class BaseDao:
         try:
             conn = db_pool_trans_plan.connection()
             cursor = conn.cursor()
-            if values is None:
-                cursor.executemany(sql)
-            else:
+            if values:
                 cursor.executemany(sql, values)
+            else:
+                cursor.executemany(sql)
             conn.commit()
         except Exception as e:
             traceback.print_exc()

@@ -5,7 +5,7 @@
 import uuid
 
 
-class UuidUtil:
+class UUIDUtil:
     """基于uuid1生成唯一业务号"""
 
     @staticmethod
