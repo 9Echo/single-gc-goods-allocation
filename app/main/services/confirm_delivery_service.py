@@ -15,6 +15,12 @@ from app.main.redis_pool import redis_pool
 from app.utils.code import ResponseCode
 from app.utils.reids_lock import RedisLock
 from app.utils.result import Result
+from app.main.dao.delivery_log_dao import delivery_log_dao
+
+# test:
+import json
+from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.entity.delivery_sheet import DeliveryItem
 
 
 def confirm(delivery):
@@ -106,26 +112,6 @@ def subtract_stock(delivery, stock_list):
             # 这里要改成更新发货通知单主子表,对比数据，将对比有差异的两条数据保存到log表，状态分别为初始状态、确认状态
             # threading.Thread(target=delivery_sheet_dao.insert, args=(delivery,)).start()
             # threading.Thread(target=delivery_item_dao.insert, args=(delivery.items,)).start()
-            deli_dic = delivery_sheet_dao.get_by_sheet(delivery.delivery_no)
-            deli_item_list_dic = delivery_item_dao.get_by_sheet(delivery.delivery_no)
-            print('deli_item_list_dic:  ', deli_item_list_dic)
-            for i in delivery.items:
-                flag = True
-                for j in deli_item_list_dic:
-                    pass
-                    # print(i, i.delivery_item_no)
-                    # print(j, j["delivery_item_no"])
-                    # if i["delivery_item_no"] == j["delivery_item_no"] and (i["status"] != j["status"] or
-                    # i["customer_id"] != j["customer_id"] or i["salesman_id"] != j["salesman_id"] or i["dest"] != j["dest"] or
-                    # i["product_type"] != j["product_type"] or i["spec"] != j["spec"] or i["weight"] != j["weight"] or
-                    # i["warehouse"] != j["warehouse"] or i["loc_id"] != j["loc_id"] or i["quantity"] != j["quantity"] or
-                    # i["free_pcs"] != j["free_pcs"] or i["total_pcs"] != j["total_pcs"]):
-                    #     flag = False
-
-            if flag == False:
-                pass
-            delivery_sheet_dao.update(delivery)
-            # delivery_item_dao.update(delivery.items)
             return Result.success(new_list)
         else:
             return Result.warn(msg)
@@ -133,3 +119,74 @@ def subtract_stock(delivery, stock_list):
     except Exception as e:
         current_app.logger.info("subtract stock error")
         current_app.logger.exception(e)
+
+
+def update_delviery_sheet(delivery):
+    """更新数据库中发货通知单记录"""
+    # origin = delivery_sheet_dao.get_by_order_id(delivery_sheet.order_id)
+    # origin_items =
+
+    #  新数据：delivery_sheet
+    #  原数据
+
+    origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+
+    log_insert_list = []  # log表数据
+    total_quantity = 0    # 主表的总数量
+    free_pcs = 0          # 主表的散根数
+    update_list = []      # 更新子表的数据列表
+    insert_list = []         # 添加子表的数据列表
+    delete_list = []      # 删除子表的数据列表
+    # 记录delivery_sheet中有，origin_items中也有的发货通知单号
+    list_both = []
+    for i in delivery.items:
+        i = DeliveryItem(i)
+        flag = False
+        for j in origin_items:
+            j = DeliveryItem(j)
+            if i.delivery_item_no == j.delivery_item_no:
+                # delivery_sheet中有origin_items对应的子表记录，log中记为更改：2
+                list_both.append(i.delivery_item_no)
+                flag = True
+                if int(i.quantity) != int(j.quantity) or int(i.free_pcs) != int(j.free_pcs):
+                    list_log = [i.delivery_no, i.delivery_item_no, '2', int(j.quantity),
+                                int(i.quantity), int(j.free_pcs), int(i.free_pcs)]
+                    log_insert_list.append(list_log)
+                    update_list.append(i)
+        total_quantity += i.quantity
+        free_pcs += i.free_pcs
+
+        # origin_items中没有delivery_sheet对应的子表记录，log中记为添加：1
+        if flag == False:
+            list_log = [i.delivery_no, i.delivery_item_no, '1', 0, int(i.quantity),
+                        0, int(i.free_pcs)]
+            log_insert_list.append(list_log)
+            insert_list.append(i)
+    # delivery_sheet中没有origin_items对应的子表记录，log中记为删除：0
+    # print(list_both)
+    for j in origin_items:
+        j = DeliveryItem(j)
+        if j.delivery_item_no not in list_both:
+            list_log = [j.delivery_no, j.delivery_item_no, '0', int(j.quantity), 0,
+                        int(j.free_pcs), 0]
+            log_insert_list.append(list_log)
+            delete_list.append(j)
+
+    # 更新log表数据
+    delivery_log_dao.insert(log_insert_list)
+    # 更新主表数据
+    delivery.total_quantity = total_quantity
+    delivery.free_pcs = free_pcs
+    delivery_sheet_dao.update(delivery)
+    # 更改子表数据
+    delivery_item_dao.update(update_list)
+    delivery_item_dao.delete(delete_list)
+    delivery_item_dao.insert(insert_list)
+
+
+if __name__ == '__main__':
+    with open('E:\JC\delivery.txt', 'r',encoding='UTF-8') as f:
+        datas = json.loads(f.read())
+    # 创建发货通知单实例，初始化属性
+    delivery = DeliverySheet(datas["data"])
+    update_delviery_sheet(delivery)
