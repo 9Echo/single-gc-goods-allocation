@@ -85,36 +85,6 @@ class DeliveryItemDao(BaseDao):
             traceback.print_exc()
             current_app.logger.error("delivery_item_dao_update error")
 
-    def add(self, delivery_item):
-        try:
-
-            sql_item = """
-                        insert into
-                                t_ga_delivery_item(
-                                delivery_no,
-                                delivery_item_no,
-                                customer_id,
-                                salesman_id,
-                                dest,
-                                product_type,
-                                spec,
-                                weight,
-                                warehouse,
-                                quantity,
-                                free_pcs,
-                                total_pcs,
-                                create_time
-                                ) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                        """
-            values = [tuple([item["delivery_no"], item["delivery_item_no"], item["customer_id"], item["salesman_id"], item["dest"],
-                             item["product_type"],item["spec"],item["weight"],item["warehouse"],
-                             item["quantity"], item["free_pcs"], item["total_pcs"],
-                             get_now_str()]) for item in delivery_item]
-            self.executemany(sql_item, values)
-        except Exception as e:
-                current_app.logger.info("delivery_sheet_dao error")
-                current_app.logger.exception(e)
-
 
 delivery_item_dao = DeliveryItemDao()
 

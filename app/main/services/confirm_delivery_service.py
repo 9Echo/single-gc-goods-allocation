@@ -16,12 +16,12 @@ from app.utils.code import ResponseCode
 from app.utils.reids_lock import RedisLock
 from app.utils.result import Result
 from app.main.dao.delivery_log_dao import delivery_log_dao
+from app.main.entity.delivery_sheet import DeliveryItem
 
 # test:
 import json
+import os
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.main.entity.delivery_sheet import DeliveryItem
-
 
 def confirm(delivery):
     """
@@ -185,7 +185,9 @@ def update_delviery_sheet(delivery):
 
 
 if __name__ == '__main__':
-    with open('E:\JC\delivery.txt', 'r',encoding='UTF-8') as f:
+    basedir = os.path.realpath(os.path.dirname(__file__))
+    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.py")
+    with open(json_path, 'r',encoding='UTF-8') as f:
         datas = json.loads(f.read())
     # 创建发货通知单实例，初始化属性
     delivery = DeliverySheet(datas["data"])
