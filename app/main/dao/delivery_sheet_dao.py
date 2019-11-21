@@ -39,16 +39,10 @@ class DeliverySheetDao(BaseDao):
     def update(self, delivery):
         try:
             sql = """update db_trans_plan.t_ga_delivery_sheet 
-                        set batch_no = '{0}' 
-                        and data_address = '{1}'
-                        and total_quantity = '{2}'
-                        and free_pcs = '{3}'
-                        and total_pcs = '{4}'
-                        and weight = '{5}'
-                        and create_time = '{6}'
-                        where delivery_no = '{7}'""".format(delivery.batch_no,
-                        delivery.data_address, delivery.total_quantity, delivery.free_pcs,
-                        delivery.total_pcs, delivery.weight, get_now_str(), delivery.delivery_no)
+                        set total_quantity = '{0}',
+                        free_pcs = '{1}'
+                        where delivery_no = '{2}'""".format(delivery.total_quantity, delivery.free_pcs,
+                        delivery.delivery_no)
             self.execute(sql)
         except Exception as e:
             traceback.print_exc()
