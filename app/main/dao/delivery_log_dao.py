@@ -23,8 +23,9 @@ class DeliveryLogDao(BaseDao):
                                                             create_time) 
                 value(%s,%s,%s,%s,%s,%s,%s,%s)
             """
-            values = [tuple([item[0], item[1], item[2], item[3],
-                           item[4], item[5], item[6], get_now_str()]) for item in log_insert_list]
+            values = [tuple([item.delivery_no, item.delivery_item_no, item.op, item.quantity_before,
+                             item.quantity_after, item.free_pcs_before, item.free_pcs_after, get_now_str()])
+                      for item in log_insert_list]
             self.executemany(sql, values)
         except Exception as e:
             traceback.print_exc()

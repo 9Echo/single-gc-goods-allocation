@@ -17,11 +17,13 @@ from app.utils.reids_lock import RedisLock
 from app.utils.result import Result
 from app.main.dao.delivery_log_dao import delivery_log_dao
 from app.main.entity.delivery_sheet import DeliveryItem
+from app.main.entity.delivery_log import DeliveryLog
 
 # test:
 import json
 import os
 from app.main.entity.delivery_sheet import DeliverySheet
+
 
 def confirm(delivery):
     """
@@ -149,27 +151,33 @@ def update_delviery_sheet(delivery):
                 list_both.append(i.delivery_item_no)
                 flag = True
                 if int(i.quantity) != int(j.quantity) or int(i.free_pcs) != int(j.free_pcs):
-                    list_log = [i.delivery_no, i.delivery_item_no, '2', int(j.quantity),
-                                int(i.quantity), int(j.free_pcs), int(i.free_pcs)]
-                    log_insert_list.append(list_log)
+                    log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '2',
+                               "quantity_before": int(j.quantity), "quantity_after":int(i.quantity), "free_pcs_before":
+                               int(j.free_pcs), "free_pcs_after": int(i.free_pcs)}
+                    log = DeliveryLog(log_dic)
+                    log_insert_list.append(log)
                     update_list.append(i)
         total_quantity += i.quantity
         free_pcs += i.free_pcs
 
         # origin_items中没有delivery_sheet对应的子表记录，log中记为添加：1
         if flag == False:
-            list_log = [i.delivery_no, i.delivery_item_no, '1', 0, int(i.quantity),
-                        0, int(i.free_pcs)]
-            log_insert_list.append(list_log)
+            log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '1',
+                       "quantity_before": 0, "quantity_after": int(i.quantity), "free_pcs_before": 0,
+                       "free_pcs_after": int(i.free_pcs)}
+            log = DeliveryLog(log_dic)
+            log_insert_list.append(log)
             insert_list.append(i)
     # delivery_sheet中没有origin_items对应的子表记录，log中记为删除：0
     # print(list_both)
     for j in origin_items:
         j = DeliveryItem(j)
         if j.delivery_item_no not in list_both:
-            list_log = [j.delivery_no, j.delivery_item_no, '0', int(j.quantity), 0,
-                        int(j.free_pcs), 0]
-            log_insert_list.append(list_log)
+            log_dic = {"delivery_no": j.delivery_no, "delivery_item_no": j.delivery_item_no, "op": '0',
+                       "quantity_before": int(j.quantity), "quantity_after": 0,
+                       "free_pcs_before": int(j.free_pcs), "free_pcs_after": 0}
+            log = DeliveryLog(log_dic)
+            log_insert_list.append(log)
             delete_list.append(j)
 
     # 更新log表数据
