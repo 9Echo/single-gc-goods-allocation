@@ -23,6 +23,7 @@ from app.main.entity.delivery_log import DeliveryLog
 import json
 import os
 from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.services import order_service, dispatch_service
 
 
 def confirm(delivery):
@@ -125,14 +126,12 @@ def subtract_stock(delivery, stock_list):
 
 def update_delviery_sheet(delivery):
     """更新数据库中发货通知单记录"""
-    # origin = delivery_sheet_dao.get_by_order_id(delivery_sheet.order_id)
-    # origin_items =
-
-    #  新数据：delivery_sheet
+    # de = delivery_sheet_dao.get_one(delivery.delivery_no)
+    # print(de.items[0].quantity)
+    #  新数据：delivery
     #  原数据
-
-    origin_items = delivery_item_dao.get_one(delivery.delivery_no)
-
+    origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+    # print(origin_items[1].quantity)
     log_insert_list = []  # log表数据
     total_quantity = 0    # 主表的总数量
     free_pcs = 0          # 主表的散根数
@@ -142,10 +141,8 @@ def update_delviery_sheet(delivery):
     # 记录delivery_sheet中有，origin_items中也有的发货通知单号
     list_both = []
     for i in delivery.items:
-        i = DeliveryItem(i)
         flag = False
         for j in origin_items:
-            j = DeliveryItem(j)
             if i.delivery_item_no == j.delivery_item_no:
                 # delivery_sheet中有origin_items对应的子表记录，log中记为更改：2
                 list_both.append(i.delivery_item_no)
@@ -154,8 +151,7 @@ def update_delviery_sheet(delivery):
                     log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '2',
                                "quantity_before": int(j.quantity), "quantity_after":int(i.quantity), "free_pcs_before":
                                int(j.free_pcs), "free_pcs_after": int(i.free_pcs)}
-                    log = DeliveryLog(log_dic)
-                    log_insert_list.append(log)
+                    log_insert_list.append(log_dic)
                     update_list.append(i)
         total_quantity += i.quantity
         free_pcs += i.free_pcs
@@ -165,38 +161,45 @@ def update_delviery_sheet(delivery):
             log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '1',
                        "quantity_before": 0, "quantity_after": int(i.quantity), "free_pcs_before": 0,
                        "free_pcs_after": int(i.free_pcs)}
-            log = DeliveryLog(log_dic)
-            log_insert_list.append(log)
+            log_insert_list.append(log_dic)
             insert_list.append(i)
     # delivery_sheet中没有origin_items对应的子表记录，log中记为删除：0
     # print(list_both)
     for j in origin_items:
-        j = DeliveryItem(j)
         if j.delivery_item_no not in list_both:
             log_dic = {"delivery_no": j.delivery_no, "delivery_item_no": j.delivery_item_no, "op": '0',
                        "quantity_before": int(j.quantity), "quantity_after": 0,
                        "free_pcs_before": int(j.free_pcs), "free_pcs_after": 0}
-            log = DeliveryLog(log_dic)
-            log_insert_list.append(log)
+            log_insert_list.append(log_dic)
             delete_list.append(j)
 
     # 更新log表数据
-    delivery_log_dao.insert(log_insert_list)
+    log_list = []
+    for log in log_insert_list:
+        log_list.append(DeliveryLog(log))
+    delivery_log_dao.insert(log_list)
     # 更新主表数据
     delivery.total_quantity = total_quantity
     delivery.free_pcs = free_pcs
     delivery_sheet_dao.update(delivery)
+    # delivery_item_dao.batch_update(delivery.items)
     # 更改子表数据
-    delivery_item_dao.update(update_list)
-    delivery_item_dao.delete(delete_list)
-    delivery_item_dao.insert(insert_list)
+    delivery_item_dao.batch_update(update_list)
+    delivery_item_dao.batch_delete(delete_list)
+    delivery_item_dao.batch_insert(insert_list)
 
 
 if __name__ == '__main__':
     basedir = os.path.realpath(os.path.dirname(__file__))
-    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.py")
+    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "order_delivery.py")
     with open(json_path, 'r',encoding='UTF-8') as f:
         datas = json.loads(f.read())
     # 创建发货通知单实例，初始化属性
-    delivery = DeliverySheet(datas["data"])
+    # delivery = DeliverySheet(datas["data"])
+    # update_delviery_sheet(delivery)
+
+    order = order_service.generate_order(datas['data'])
+    delivery = dispatch_service.dispatch(order)
     update_delviery_sheet(delivery)
+
+

@@ -31,20 +31,21 @@ class DeliveryItemDao(BaseDao):
             free_pcs,
             total_pcs,
             create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-        values = [(
-            item.delivery_no,
-            item.delivery_item_no,
-            item.order_no,
-            item.dest,
-            item.product_type,
-            item.spec,
-            item.weight,
-            item.warehouse,
-            item.quantity,
-            item.free_pcs,
-            item.total_pcs,
-            get_now_str()) for item in items]
-        self.executemany(sql, values)
+        if items:
+            values = [(
+                item.delivery_no,
+                item.delivery_item_no,
+                item.order_no,
+                item.dest,
+                item.product_type,
+                item.spec,
+                item.weight,
+                item.warehouse,
+                item.quantity,
+                item.free_pcs,
+                item.total_pcs,
+                get_now_str()) for item in items]
+            self.executemany(sql, values)
         return
 
     def batch_update(self, items):
@@ -63,8 +64,9 @@ class DeliveryItemDao(BaseDao):
     def batch_delete(self, delivery_item):
         """批量删除子发货单"""
         sql = "delete from t_ga_delivery_item where delivery_item_no = %s"
-        values = [(item.delivery_item_no,) for item in delivery_item]
-        self.executemany(sql, values)
+        if delivery_item:
+            values = [(item.delivery_item_no,) for item in delivery_item]
+            self.executemany(sql, values)
 
 
 delivery_item_dao = DeliveryItemDao()

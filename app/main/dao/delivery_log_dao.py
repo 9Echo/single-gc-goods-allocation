@@ -6,11 +6,11 @@ from flask import current_app
 
 from app.main.dao.base_dao import BaseDao
 from app.utils.date_util import get_now_str
-
+from app.main.entity.delivery_log import DeliveryLog
 
 class DeliveryLogDao(BaseDao):
 
-    def insert(self, log_insert_list):
+    def insert(self, log_list):
         try:
             sql = """
                 insert into db_trans_plan.t_ga_delivery_log(delivery_no,
@@ -23,10 +23,11 @@ class DeliveryLogDao(BaseDao):
                                                             create_time) 
                 value(%s,%s,%s,%s,%s,%s,%s,%s)
             """
-            values = [tuple([item.delivery_no, item.delivery_item_no, item.op, item.quantity_before,
-                             item.quantity_after, item.free_pcs_before, item.free_pcs_after, get_now_str()])
-                      for item in log_insert_list]
-            self.executemany(sql, values)
+            if log_list:
+                values = [tuple([item.delivery_no, item.delivery_item_no, item.op, item.quantity_before,
+                                 item.quantity_after, item.free_pcs_before, item.free_pcs_after, get_now_str()])
+                          for item in log_list]
+                self.executemany(sql, values)
         except Exception as e:
             traceback.print_exc()
             current_app.logger.error("delivery_sheet_dao_insert error")
