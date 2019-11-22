@@ -141,6 +141,7 @@ def update_delviery_sheet(delivery):
     # 记录delivery_sheet中有，origin_items中也有的发货通知单号
     list_both = []
     for i in delivery.items:
+        i = DeliveryItem(i)
         flag = False
         for j in origin_items:
             if i.delivery_item_no == j.delivery_item_no:
@@ -152,10 +153,9 @@ def update_delviery_sheet(delivery):
                                "quantity_before": int(j.quantity), "quantity_after":int(i.quantity), "free_pcs_before":
                                int(j.free_pcs), "free_pcs_after": int(i.free_pcs)}
                     log_insert_list.append(log_dic)
-                    update_list.append(i)
-        total_quantity += i.quantity
-        free_pcs += i.free_pcs
-
+        update_list.append(i)
+        total_quantity += int(i.quantity)
+        free_pcs += int(i.free_pcs)
         # origin_items中没有delivery_sheet对应的子表记录，log中记为添加：1
         if flag == False:
             log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '1',
@@ -182,24 +182,24 @@ def update_delviery_sheet(delivery):
     delivery.total_quantity = total_quantity
     delivery.free_pcs = free_pcs
     delivery_sheet_dao.update(delivery)
-    # delivery_item_dao.batch_update(delivery.items)
     # 更改子表数据
-    delivery_item_dao.batch_update(update_list)
-    delivery_item_dao.batch_delete(delete_list)
     delivery_item_dao.batch_insert(insert_list)
+    delivery_item_dao.batch_delete(delete_list)
+    delivery_item_dao.batch_update(update_list)
 
 
 if __name__ == '__main__':
     basedir = os.path.realpath(os.path.dirname(__file__))
-    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "order_delivery.py")
+    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.json")
     with open(json_path, 'r',encoding='UTF-8') as f:
         datas = json.loads(f.read())
-    # 创建发货通知单实例，初始化属性
-    # delivery = DeliverySheet(datas["data"])
-    # update_delviery_sheet(delivery)
-
-    order = order_service.generate_order(datas['data'])
-    delivery = dispatch_service.dispatch(order)
+    # 创建发货通知单实例，初化属性
+    delivery = DeliverySheet(datas["data"])
+    print(delivery)
     update_delviery_sheet(delivery)
+    # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
+    # print(Result.success_response(ds)._get_data_for_json())
+
+
 
 
