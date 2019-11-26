@@ -125,6 +125,14 @@ def subtract_stock(delivery, stock_list):
 
 
 def update_delviery_sheet(delivery):
+
+    """
+    1、delivery_item_no is None --->新增
+    2、filter(lambda i: i['delivery_item_no'] not in [j['delivery_item_no'] for j in delivery.items], origin_items))  --->删除
+    2、filter(lambda i: i['delivery_item_no'] in [j['delivery_item_no'] for j in delivery.items], origin_items))  --->更新
+    :param delivery:
+    :return:
+    """
     """更新数据库中发货通知单记录"""
     # de = delivery_sheet_dao.get_one(delivery.delivery_no)
     # print(de.items[0].quantity)
