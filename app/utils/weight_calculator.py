@@ -8,6 +8,8 @@ import traceback
 
 def weight_calculator(test_list):
     """
+    # 外径、壁厚、长度、系数、根/件数
+    # print(i["JM_D"], i["JM_P"], i["VER_L"], i["GS_XS"], i["GS_PER"])
     输入数据：品名、规格、件数、散根数
     :return: 理重：weight
 
