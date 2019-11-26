@@ -1,0 +1,52 @@
+{
+    "data": {
+        "rid": 146,
+        "delivery_no": "ds_39a43ec00ce911eab7eb",
+        "batch_no": "batch_39a43ec10ce911ea9d8b",
+        "status": "0",
+        "data_address": "0",
+        "items": [
+            {
+                "rid": 261,
+                "delivery_no": "ds_39a43ec00ce911eab7eb",
+                "delivery_item_no": "di_39a43ec20ce911eabdbe",
+                "order_no": "order_398ebaf00ce911ea9a8e",
+                "dest": null,
+                "product_type": "方矩管",
+                "spec": "058040*040*2.0*6000",
+                "weight": 22.0,
+                "warehouse": "方矩库",
+                "loc_id": null,
+                "quantity": "50",
+                "free_pcs": "5",
+
+                "total_pcs": null,
+                "create_time": "",
+                "update_time": ""
+            },
+            {
+                "rid": 262,
+                "delivery_no": "ds_39a43ec00ce911eab7eb",
+                "delivery_item_no": "di_39a43ec30ce911ea00aa",
+                "order_no": "order_398ebaf00ce911ea9a8e",
+                "dest": null,
+                "product_type": "热镀",
+                "spec": "02A165*4.25*6000",
+                "weight": 13.0,
+                "warehouse": "热镀库",
+                "loc_id": null,
+                "quantity": "10",
+                "free_pcs": "10",
+                "total_pcs": null,
+                "create_time": "",
+                "update_time": ""
+            }
+        ],
+        "total_quantity": "80",
+        "free_pcs": "15",
+        "total_pcs": "0",
+        "weight": "0",
+        "create_time": "",
+        "update_time": ""
+    }
+}
