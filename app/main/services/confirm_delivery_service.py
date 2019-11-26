@@ -4,6 +4,7 @@
 import copy
 import json
 import threading
+from functools import reduce
 
 import pandas
 import redis
@@ -23,7 +24,9 @@ from app.main.entity.delivery_log import DeliveryLog
 import json
 import os
 from app.main.entity.delivery_sheet import DeliverySheet
+import numpy as np
 from app.main.services import order_service, dispatch_service
+
 
 
 def confirm(delivery):
@@ -127,73 +130,50 @@ def subtract_stock(delivery, stock_list):
 def update_delviery_sheet(delivery):
 
     """
-    1、delivery_item_no is None --->新增
-    2、filter(lambda i: i['delivery_item_no'] not in [j['delivery_item_no'] for j in delivery.items], origin_items))  --->删除
-    2、filter(lambda i: i['delivery_item_no'] in [j['delivery_item_no'] for j in delivery.items], origin_items))  --->更新
-    :param delivery:
+    :param:
     :return:
     """
-    """更新数据库中发货通知单记录"""
-    # de = delivery_sheet_dao.get_one(delivery.delivery_no)
-    # print(de.items[0].quantity)
-    #  新数据：delivery
-    #  原数据
+    # 新数据
+    delivery_list = [(DeliveryItem(i)) for i in delivery.items]
+    # 原数据
     origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
-    # print(origin_items[1].quantity)
-    log_insert_list = []  # log表数据
-    total_quantity = 0    # 主表的总数量
-    free_pcs = 0          # 主表的散根数
-    update_list = []      # 更新子表的数据列表
-    insert_list = []         # 添加子表的数据列表
-    delete_list = []      # 删除子表的数据列表
-    # 记录delivery_sheet中有，origin_items中也有的发货通知单号
-    list_both = []
-    for i in delivery.items:
-        i = DeliveryItem(i)
-        flag = False
-        for j in origin_items:
-            if i.delivery_item_no == j.delivery_item_no:
-                # delivery_sheet中有origin_items对应的子表记录，log中记为更改：2
-                list_both.append(i.delivery_item_no)
-                flag = True
-                if int(i.quantity) != int(j.quantity) or int(i.free_pcs) != int(j.free_pcs):
-                    log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '2',
-                               "quantity_before": int(j.quantity), "quantity_after":int(i.quantity), "free_pcs_before":
-                               int(j.free_pcs), "free_pcs_after": int(i.free_pcs)}
-                    log_insert_list.append(log_dic)
-        update_list.append(i)
-        total_quantity += int(i.quantity)
-        free_pcs += int(i.free_pcs)
-        # origin_items中没有delivery_sheet对应的子表记录，log中记为添加：1
-        if flag == False:
-            log_dic = {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": '1',
-                       "quantity_before": 0, "quantity_after": int(i.quantity), "free_pcs_before": 0,
-                       "free_pcs_after": int(i.free_pcs)}
-            log_insert_list.append(log_dic)
-            insert_list.append(i)
-    # delivery_sheet中没有origin_items对应的子表记录，log中记为删除：0
-    # print(list_both)
-    for j in origin_items:
-        if j.delivery_item_no not in list_both:
-            log_dic = {"delivery_no": j.delivery_no, "delivery_item_no": j.delivery_item_no, "op": '0',
-                       "quantity_before": int(j.quantity), "quantity_after": 0,
-                       "free_pcs_before": int(j.free_pcs), "free_pcs_after": 0}
-            log_insert_list.append(log_dic)
-            delete_list.append(j)
-
-    # 更新log表数据
-    log_list = []
-    for log in log_insert_list:
-        log_list.append(DeliveryLog(log))
-    delivery_log_dao.insert(log_list)
-    # 更新主表数据
-    delivery.total_quantity = total_quantity
-    delivery.free_pcs = free_pcs
-    delivery_sheet_dao.update(delivery)
-    # 更改子表数据
+    # 插入列表
+    insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery_list))
+    # 删除列表
+    delete_list = list(filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery_list], origin_items))
+    # 更新列表
+    delivery_update_list = list(filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in origin_items], delivery_list))
+    origin_update_list = list(filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery_list], origin_items))
+    # log表
+    log_insert_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
+                                    "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
+                                    "free_pcs_after": i.free_pcs}) for i in insert_list]
+    log_delete_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
+                                    "quantity_before": i.quantity, "quantity_after": 0, "free_pcs_before": i.free_pcs,
+                                    "free_pcs_after": 0}) for i in delete_list]
+    log_update_list = []
+    for i in origin_update_list:
+        for j in delivery_update_list:
+            if i.delivery_item_no == j.delivery_item_no and i.delivery_no == j.delivery_no:
+                if i.quantity !=j.quantity or i.free_pcs != j.free_pcs:
+                    log_update_list.append(
+                        DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
+                                     "quantity_before": i.quantity, "quantity_after": j.quantity,"free_pcs_before": i.free_pcs,
+                                     "free_pcs_after": j.free_pcs}))
+    log_insert_list.extend(log_update_list)
+    log_insert_list.extend(log_delete_list)
+    delivery_sheet = DeliverySheet()
+    delivery_sheet.total_quantity = reduce(lambda x, y: x + y, [int(i.quantity) for i in delivery_list])
+    delivery_sheet.free_pcs = reduce(lambda x, y: x + y, [int(i.free_pcs) for i in delivery_list])
+    delivery_sheet.delivery_no = delivery.delivery_no
+    print(delivery_sheet.total_quantity)
+    print(delivery_sheet.free_pcs)
+    # 数据库操作
+    delivery_log_dao.insert(log_insert_list)
+    delivery_sheet_dao.update(delivery_sheet)
     delivery_item_dao.batch_insert(insert_list)
     delivery_item_dao.batch_delete(delete_list)
-    delivery_item_dao.batch_update(update_list)
+    delivery_item_dao.batch_update(delivery_update_list)
 
 
 if __name__ == '__main__':
@@ -203,7 +183,7 @@ if __name__ == '__main__':
         datas = json.loads(f.read())
     # 创建发货通知单实例，初化属性
     delivery = DeliverySheet(datas["data"])
-    print(delivery)
+    # print(delivery)
     update_delviery_sheet(delivery)
     # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
     # print(Result.success_response(ds)._get_data_for_json())

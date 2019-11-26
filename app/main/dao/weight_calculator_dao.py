@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/25
 # @Author  : biyushuang
-
-import pandas as pd
-import traceback
 from app.main.dao.base_dao import BaseDao
-from app.main.db_pool import db_pool_trans_plan, db_pool_ods
 
 
 class WeightCalculatorDao(BaseDao):
 
-    def get_data_from_table(self, test_list):
+    def get_data_from_table(self, cname, itemid):
         '''
         获取t_calculator_item数据
         # 更新t_calculator_item时，sql加where CNAME = '方矩管' or CNAME = '热镀方矩管'
@@ -18,7 +14,7 @@ class WeightCalculatorDao(BaseDao):
         '''
         sql = """select * from t_calculator_item 
                 where CNAME = %s and ITEMID = %s"""
-        values = [test_list[0], test_list[1]]
+        values = [cname, itemid]
         data = self.select_all(sql, values)
         return data
 
@@ -32,5 +28,6 @@ class WeightCalculatorDao(BaseDao):
                 item["CNAME"]) for item in update_list]
         self.executemany(sql, values)
         print("update fininsh!")
+
 
 weight_calculator_dao = WeightCalculatorDao()
