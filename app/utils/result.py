@@ -17,6 +17,9 @@ class Result:
     @staticmethod
     def entity(obj):
         """封装成功返回的实体类"""
+
+        if isinstance(obj, Result):
+            return obj
         result = Result()
         result.code = ResponseCode.Success
         result.msg = "成功!"
@@ -45,6 +48,16 @@ class Result:
         return result
 
     @staticmethod
+    def info(msg, data = None):
+        result = Result()
+        result.code = ResponseCode.Info
+        result.msg = msg
+        result.data = data
+        return result
+
+
+
+    @staticmethod
     def success_response(obj):
         """返回成功信息"""
         result = Result.entity(obj)
@@ -56,3 +69,5 @@ class Result:
         """返回错误信息"""
         result = Result.error(msg)
         return jsonify({"code": result.code, "msg": result.msg})
+
+

@@ -28,6 +28,20 @@ import numpy as np
 from app.main.services import order_service, dispatch_service
 
 
+def generate_delivery(delivery_data):
+    """
+    根据json数据生成对应的发货通知单
+    """
+    delivery = DeliverySheet(delivery_data)
+    delivery.items = []
+
+    for item in delivery_data['items']:
+        delivery_item = DeliveryItem(item)
+        # delivery_item.delivery_no = delivery.delivery_no
+        delivery.items.append(delivery_item)
+
+    return delivery
+
 
 def confirm(delivery):
     """
@@ -45,7 +59,7 @@ def confirm(delivery):
                 # 进行库存更新，库存不足不做更新
                 result = subtract_stock(delivery, stock_list)
                 # 如果扣减库存成功，重置Redis
-                if result.code == ResponseCode.Success:
+                if result.code == ResponseCode.Info:
                     json_data = json.dumps(result.data)
                     redis_conn.set('gc:stocks', json_data)
                     result.data = None
@@ -75,15 +89,17 @@ def subtract_stock(delivery, stock_list):
             data_list = list(filter(lambda s: s['cname'] == i.product_type
                                               and s['itemid'] == i.spec
                                               and s['whsDesc'] == i.warehouse
-                                              and s['locid'] == i.loc_id, stock_list))
-            # 如果扣减库存成功最终返回的list
-            new_list = list(filter(lambda s: s['cname'] != i.product_type
-                                              and s['itemid'] != i.spec
-                                              and s['whsDesc'] != i.warehouse
-                                              and s['locid'] != i.loc_id, stock_list))
-            # 如果没有数据
+                                              and s['locid'] == str(i.loc_id), stock_list))
+
+            # 更新stock_list
+            stock_list = list(filter(lambda s: s['cname'] != i.product_type
+                                              or s['itemid'] != i.spec
+                                              or s['whsDesc'] != i.warehouse
+                                              or s['locid'] != str(i.loc_id), stock_list))
+            # 如果没有数据，也允许开单，并做出提示
             if len(data_list) == 0:
                 msg += "品名：" + i.product_type + "规格：" + i.spec + "没有库存  "
+                # 管厂逻辑：如果库存没有找到开单的规格，在库存表插入一条库存数据，只有预留库存信息
                 tag = False
                 continue
             else:
@@ -99,12 +115,10 @@ def subtract_stock(delivery, stock_list):
                 df_data = df_data.apply(transform, axis=1)
                 # 得出库存总件数和总散根数的Series
                 series = df_data.sum()
-                # 如果库存不足
+                # 如果库存不足，也允许开单，但做出提示
                 if int(series['enterJ']) < int(i.quantity) or int(series['enterG']) < int(i.free_pcs):
-                    msg += "品名：" + i.product_type + "规格：" + i.spec + "库存不足，件数剩余："\
+                    msg += "品名" + i.product_type + " 规格" + i.spec + " 库存不足，件数剩余"\
                                     +series['enterJ'] +"件，散根剩余：" + series['enterG'] +"根   "
-                    tag = False
-                    continue
                 # 得出剩余件数和散根数
                 enter_j = int(series['enterJ']) - int(i.quantity)
                 enter_g = int(series['enterG']) - int(i.free_pcs)
@@ -112,13 +126,13 @@ def subtract_stock(delivery, stock_list):
                 new_dict = copy.deepcopy(data_list[0])
                 new_dict['enterJ'] = str(enter_j)
                 new_dict['enterG'] = str(enter_g)
-                new_list.append(new_dict)
+                stock_list.append(new_dict)
 
         if tag:
             # 这里要改成更新发货通知单主子表,对比数据，将对比有差异的两条数据保存到log表，状态分别为初始状态、确认状态
             # threading.Thread(target=delivery_sheet_dao.insert, args=(delivery,)).start()
             # threading.Thread(target=delivery_item_dao.insert, args=(delivery.items,)).start()
-            return Result.success(new_list)
+            return Result.info(msg=msg if msg != "" else "成功", data=stock_list)
         else:
             return Result.warn(msg)
 

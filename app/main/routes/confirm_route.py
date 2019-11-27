@@ -9,7 +9,7 @@ from flask import request
 from flask_restful import Resource
 
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.main.services.confirm_delivery_service import confirm
+from app.main.services.confirm_delivery_service import confirm, generate_delivery
 from app.utils.result import Result
 
 
@@ -31,9 +31,10 @@ class ConfirmRoute(Resource):
             delivery_data = request.get_json(force=True).get('data')  # 入参是json
             print('delivery_data:  ', delivery_data)
             # 创建发货通知单实例，初始化属性
-            delivery = DeliverySheet(delivery_data)
+            # delivery = DeliverySheet(delivery_data)
+            delivery = generate_delivery(delivery_data)
             result = confirm(delivery)
-            return result.response()
+            return Result.success_response(result)
         except Exception as e:
             current_app.logger.info("json error")
             current_app.logger.exception(e)
