@@ -9,6 +9,7 @@ class ResponseCode(object):
     Success = 100  # 成功
     Error = 101  # 错误
     Warn = 102   # 警告
+    Info = 200   # 提示
     NoResourceFound = 40001  # 未找到资源
     InvalidParameter = 40002  # 参数无效
     AccountOrPassWordErr = 40003  # 账户或密码错误
