@@ -25,6 +25,7 @@ if hasattr(active_config, 'MYSQL_HOST'):
         db=active_config.MYSQL_DB,
         charset=active_config.MYSQL_CHARSET)
 
+
     db_pool_ods = PooledDB(
         pymysql,
         2,
