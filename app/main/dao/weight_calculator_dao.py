@@ -9,10 +9,13 @@ class WeightCalculatorDao(BaseDao):
     def get_data_from_table(self, cname, itemid):
         '''
         获取t_calculator_item数据
-        # 更新t_calculator_item时，sql加where CNAME = '方矩管' or CNAME = '热镀方矩管'
+        # 更新t_calculator_item时:
+        #   sql = """select * from t_calculator_item
+        #            where CNAME = '方矩管' or CNAME = '热镀方矩管'"""
+        #   data = self.select_all(sql)
         :return:
         '''
-        sql = """select * from t_calculator_item 
+        sql = """select * from t_calculator_item
                 where CNAME = %s and ITEMID = %s"""
         values = [cname, itemid]
         data = self.select_all(sql, values)
