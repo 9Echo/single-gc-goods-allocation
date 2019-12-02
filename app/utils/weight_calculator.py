@@ -16,7 +16,7 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
     """
     print('input:  ', cname, itemid, pack_num, free_num)
     data = weight_calculator_dao.get_data_from_table(cname, itemid)
-    print(data)
+    # print(data)
     if len(data) == 1:
         for i in data:
             if i["CNAME"] == cname and i["ITEMID"] == itemid:
@@ -24,12 +24,12 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
                 if i["GBGZL"] is not None and float(i["GBGZL"]) > 0:
                     weight_one = float(i["GBGZL"])
                 else:
-                    weight_one = get_weight_of_each_root(i, cname)
+                    weight_one = get_weight_of_each_root(i)
                 weight = weight_one * int(pack_num) * i["GS_PER"] + weight_one * int(free_num)
         return weight
 
 
-def get_weight_of_each_root(item, cname):
+def get_weight_of_each_root(item):
     """
     :param item: 需要计算理重的数据在数据库中对应的那条数据
     :return:根重
@@ -42,13 +42,13 @@ def get_weight_of_each_root(item, cname):
     f_list = ['方矩管', '热镀方矩管']
     r_list = ['热镀', '热镀1', 'QF热镀管', '燃气专用钢管', '热度']
     # 计算未乘系数的米重
-    if cname == '螺旋焊管':
+    if item["CNAME"] == '螺旋焊管':
         weight_item = (outside - (thick - 0.9)) * (thick - 0.9) * 0.0246615
-    elif cname in h_list:
+    elif item["CNAME"] in h_list:
         weight_item = (outside - thick) * thick * 0.02466
-    elif cname in f_list:
+    elif item["CNAME"] in f_list:
         weight_item = ((outside - 3) / 3.14159 - thick) * thick * 0.02466
-    elif cname in r_list:
+    elif item["CNAME"] in r_list:
         if item["GS_XS"] is None:
             coefficient = 1.02
         else:
@@ -59,7 +59,35 @@ def get_weight_of_each_root(item, cname):
     return weight_item
 
 
+def update_gbgzl():
+    # 将表t_calculator_item中的GBGZL<=0的和为空的列替换为公式计算的根重
+    list_all = weight_calculator_dao.get_all_data()
+    update_list = []
+    for i in list_all:
+        if i["GBGZL"] is None or float(i["GBGZL"]) <= 0:
+            i["GBGZL"] = round(get_weight_of_each_root(i), 2)
+            update_list.append(i)
+    print(update_list)
+    weight_calculator_dao.update_gbgzl(update_list)
+
+
+def update_jmd():
+    # 计算出数据库中方矩管和热镀方矩管的外径，并更新JM_D列的数据
+    data = weight_calculator_dao.get_data_from_table()
+    print(data)
+    update_list = []
+    for i in data:
+        items = i["ITEMID"].split('*')
+        length = float(items[0][3:])
+        width = float(items[1])
+        i["JM_D"] = 2*(length + width)
+        update_list.append(i)
+    print(update_list)
+    weight_calculator_dao.update_data(update_list)
+
+
 def check_item():
+    # 确认根重的选取
     file_name = 'E:/JC/test.xls'
     value_list = read_excel(file_name)
     check_result_list = []
@@ -108,24 +136,13 @@ def write_excel_xls(filename, data_list):
 
 
 if __name__ == '__main__':
+    update_gbgzl()
     # print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-    weight = weight_calculator('方矩管', '052019*019*0.8*6000', 0, 1)
+    # weight = weight_calculator('螺旋焊管', '0CH660*10.0*6000', 1, 2)
     # weight = weight_calculator('热镀1', '257088*2.6*6000', 5)
     # # weight = weight_calculator(pack_num=5, cname='热镀1', itemid='257088*2.6*6000', free_num=3)
     # # weight = weight_calculator(pack_num=5, cname='热镀1', itemid='257088*2.6*6000')
-    print('output:  ', weight)
+    # print('output:  ', weight)
     # print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
     # check_item()
-    # 计算出数据库中方矩管和热镀方矩管的外径，并更新JM_D列的数据
-    # data = weight_calculator_dao.get_data_from_table()
-    # print(data)
-    # update_list = []
-    # for i in data:
-    #     items = i["ITEMID"].split('*')
-    #     length = float(items[0][3:])
-    #     width = float(items[1])
-    #     i["JM_D"] = 2*(length + width)
-    #     update_list.append(i)
-    # print(update_list)
-    # weight_calculator_dao.update_data(update_list)
 
