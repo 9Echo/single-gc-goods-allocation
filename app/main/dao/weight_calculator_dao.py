@@ -6,6 +6,18 @@ from app.main.dao.base_dao import BaseDao
 
 class WeightCalculatorDao(BaseDao):
 
+    def get_data_list_from_table(self, data_list):
+        '''
+        :return:
+        '''
+        sql = """select * from db_trans_plan.t_calculator_item
+                where ITEMID in ({})"""
+        values = "'"
+        values += "','".join([item.spec for item in data_list])
+        values += "'"
+        data = self.select_all(sql.format(values))
+        return data
+
     def get_all_data(self):
         sql = """select * 
         from db_trans_plan.t_calculator_item"""

@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/25
 # @Author  : biyushuang
-from app.main.dao.weight_calculator_dao import weight_calculator_dao
 import time
 import xlrd
 import xlsxwriter
+from app.main.entity.delivery_item import DeliveryItem
+from app.main.dao.weight_calculator_dao import weight_calculator_dao
+
+
+def weight_list_calculator(calculate_list):
+    '''
+    :param calculate_list: 需要得到根重的delivery_item列表
+    :return: 得到根重的delivery_item列表
+    '''
+    item_list = weight_calculator_dao.get_data_list_from_table(calculate_list)
+    print(item_list)
+    for i in calculate_list:
+        for item in item_list:
+            if i.spec == item["ITEMID"]:
+                # 计算根重
+                if item["GBGZL"] is not None and float(item["GBGZL"]) > 0:
+                    weight_one = float(item["GBGZL"])
+                else:
+                    weight_one = get_weight_of_each_root(i)
+                i.weightone = weight_one
+    return calculate_list
 
 
 def weight_calculator(cname, itemid, pack_num, free_num=0):
@@ -17,7 +37,7 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
     print('input:  ', cname, itemid, pack_num, free_num)
     data = weight_calculator_dao.get_data_from_table(cname, itemid)
     # print(data)
-    if len(data) == 1:
+    if len(data) != 0:
         for i in data:
             if i["CNAME"] == cname and i["ITEMID"] == itemid:
                 # 根重
@@ -25,7 +45,10 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
                     weight_one = float(i["GBGZL"])
                 else:
                     weight_one = get_weight_of_each_root(i)
-                weight = weight_one * int(pack_num) * i["GS_PER"] + weight_one * int(free_num)
+                if pack_num == 0:
+                    weight = round(weight_one) * int(free_num)
+                else:
+                    weight = round(weight_one * int(pack_num) * i["GS_PER"] + weight_one * int(free_num))
         return weight
 
 
@@ -136,13 +159,29 @@ def write_excel_xls(filename, data_list):
 
 
 if __name__ == '__main__':
-    update_gbgzl()
-    # print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-    # weight = weight_calculator('螺旋焊管', '0CH660*10.0*6000', 1, 2)
+    # update_gbgzl()
+    print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
+    # weight = weight_calculator('螺旋焊管', '0CH660*10.0*6000', 0, 1)
     # weight = weight_calculator('热镀1', '257088*2.6*6000', 5)
     # # weight = weight_calculator(pack_num=5, cname='热镀1', itemid='257088*2.6*6000', free_num=3)
     # # weight = weight_calculator(pack_num=5, cname='热镀1', itemid='257088*2.6*6000')
     # print('output:  ', weight)
     # print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
     # check_item()
+    # if i.free_pcs is not None and (i.quantity == 0 or i.quantity is None):
+    #     weight = round(weight_one) * int(i.free_pcs)
+    # elif i.quantity is not None:
+    #     if i.free_pcs is None:
+    #         i.free_pcs = 0
+    #     weight = round(weight_one * int(i.quantity) * item["GS_PER"] + weight_one * int(i.free_pcs))
+    # item_dic[i.delivery_item_no] = weight
+    # result_list.append(item_dic)
+    item1 = DeliveryItem({'delivery_item_no': '001', 'product_type': '螺旋焊管', 'spec': '0CH660*10.0*6000', 'quantity': 0})
+    item2 = DeliveryItem({'delivery_item_no': '002', 'product_type': '焊管', 'spec': '010020.5*1.8*5950'})
+    item3 = DeliveryItem({'delivery_item_no': '003', 'product_type': '方矩管', 'spec': '054025*025*0.9*5990', 'quantity': 1})
+    calculate_list = [item1, item2, item3]
+    result_list = weight_list_calculator(calculate_list)
+    for i in result_list:
+        print(i.weightone)
+    print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
 
