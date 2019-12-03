@@ -23,7 +23,7 @@ def weight_list_calculator(calculate_list):
                     weight_one = float(item["GBGZL"])
                 else:
                     weight_one = get_weight_of_each_root(i)
-                i.weightone = weight_one
+                i.weightone = round(weight_one)
     return calculate_list
 
 
