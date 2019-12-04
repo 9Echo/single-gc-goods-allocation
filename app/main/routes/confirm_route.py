@@ -28,12 +28,12 @@ class ConfirmRoute(Resource):
         try:
             # print(type(allot_app_input.get('data')))
             # 获取输入参数
-            delivery_data = request.get_json(force=True).get('data')  # 入参是json
-            print('delivery_data:  ', delivery_data)
+            delivery_list_data = request.get_json(force=True).get('data')  # 入参是json
+            print('delivery_data:  ', delivery_list_data)
             # 创建发货通知单实例，初始化属性
             # delivery = DeliverySheet(delivery_data)
-            delivery = generate_delivery(delivery_data)
-            result = confirm(delivery)
+            delivery_list = generate_delivery(delivery_list_data)
+            result = confirm(delivery_list)
             return Result.success_response(result)
         except Exception as e:
             current_app.logger.info("json error")

@@ -28,19 +28,22 @@ import numpy as np
 from app.main.services import order_service, dispatch_service
 
 
-def generate_delivery(delivery_data):
+def generate_delivery(delivery_list_data):
     """
     根据json数据生成对应的发货通知单
     """
-    delivery = DeliverySheet(delivery_data)
-    delivery.items = []
+    delivery_model_list = []
+    for delivery in delivery_list_data:
+        delivery_model = DeliverySheet(delivery)
+        delivery_model.items = []
 
-    for item in delivery_data['items']:
-        delivery_item = DeliveryItem(item)
+        for item in delivery['items']:
+            delivery_item_model = DeliveryItem(item)
         # delivery_item.delivery_no = delivery.delivery_no
-        delivery.items.append(delivery_item)
+            delivery_model.items.append(delivery_item_model)
+        delivery_model_list.append(delivery_model)
 
-    return delivery
+    return delivery_model_list
 
 
 def confirm(delivery):
