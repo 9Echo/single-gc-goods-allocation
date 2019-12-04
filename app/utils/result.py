@@ -48,7 +48,7 @@ class Result:
         return result
 
     @staticmethod
-    def info(msg, data = None):
+    def info(msg="", data=None):
         result = Result()
         result.code = ResponseCode.Info
         result.msg = msg

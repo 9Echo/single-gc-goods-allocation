@@ -67,27 +67,27 @@ class DevelopmentConfig(Config):
     REDIS_MAX_CONNECTIONS = 2
 
     # APScheduler定时任务配置，可选（不使用时可删除）
-    SCHEDULER_OPEN = True
+    SCHEDULER_OPEN = False
     SCHEDULER_API_ENABLED = True
-    JOBS = [
-        {
-            # 程序启动执行一次
-            'id': 'redis_task_start',
-            'func': 'app.task.task:update_stock_job',
-            'args': None,
-            'trigger': 'date',
-            'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
-        },
-        {
-            # 周期定时任务
-            'id': 'redis_task2',
-            'func': 'app.task.task:update_stock_job',
-            'args': None,
-            'trigger': 'interval',
-            'seconds': 60*30
-        },
-
-    ]
+    # JOBS = [
+    #     {
+    #         # 程序启动执行一次
+    #         'id': 'redis_task_start',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'date',
+    #         'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
+    #     },
+    #     {
+    #         # 周期定时任务
+    #         'id': 'redis_task2',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'interval',
+    #         'seconds': 60*30
+    #     },
+    #
+    # ]
 
     # Celery配置，可选（不使用时可删除）
     # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'

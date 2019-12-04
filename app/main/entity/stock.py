@@ -9,7 +9,7 @@ class Stock(BaseEntity):
 
     def __init__(self, stock=None):
         self.rid = None  # 表主键id
-        self.product_id = None  # 产品id
+        self.product_id = None  # 产品id(物资代码，唯一值)
         self.product_type = None  # 产品名
         self.spec = None  # 规格
         self.quantity = None  # 数量
