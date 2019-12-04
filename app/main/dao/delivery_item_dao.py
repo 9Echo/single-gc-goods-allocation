@@ -29,7 +29,7 @@ class DeliveryItemDao(BaseDao):
             quantity,
             free_pcs,
             total_pcs,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
         if items:
             values = [(
                 item.delivery_no,

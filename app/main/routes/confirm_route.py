@@ -33,6 +33,7 @@ class ConfirmRoute(Resource):
             # 创建发货通知单实例，初始化属性
             # delivery = DeliverySheet(delivery_data)
             delivery_list = generate_delivery(delivery_list_data)
+            #
             result = confirm(delivery_list)
             return Result.success_response(result)
         except Exception as e:

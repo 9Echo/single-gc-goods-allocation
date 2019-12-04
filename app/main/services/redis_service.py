@@ -7,6 +7,7 @@ import redis
 from flask import current_app
 
 from app.main.redis_pool import redis_pool
+from app.main.entity.delivery_item import DeliveryItem
 from app.utils.result import Result
 
 
@@ -48,7 +49,7 @@ def get_delivery_list(batch_no):
             delivery_list = json.loads(json_list)
             items = []
             for i in delivery_list:
-                items.extend([j for j in i.items])
+                items.extend([DeliveryItem(j) for j in i.items])
             return Result.info(data=items)
         else:
             return Result.error("数据不存在")

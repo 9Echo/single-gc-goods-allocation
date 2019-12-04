@@ -7,7 +7,7 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.utils.date_util import get_now_str
 from app.utils.uuid_util import UUIDUtil
-
+from app.main.dao.delivery_item_dao import delivery_item_dao
 
 class DeliverySheetDao(BaseDao):
 
@@ -22,24 +22,21 @@ class DeliverySheetDao(BaseDao):
         delivery_sheet.items = [DeliveryItem(row) for row in results]
         return delivery_sheet
 
-
     def insert(self, delivery):
         # 保存发货单
         sql = """insert into db_trans_plan.t_ga_delivery_sheet(
+            load_task_id,
             delivery_no,
-            batch_no,
             `status`,
-            data_address,
             total_quantity,
-            free_pcs,
+            total_free_pcs,
             total_pcs,
             weight,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
         values = (
+            delivery.load_task_id,
             delivery.delivery_no,
-            delivery.batch_no,
             delivery.status,
-            delivery.data_address,
             delivery.total_quantity,
             delivery.free_pcs,
             delivery.total_pcs,
@@ -62,6 +59,31 @@ class DeliverySheetDao(BaseDao):
             delivery.delivery_no)
         self.execute(sql, values)
 
+    def batch_insert(self, delivery_list):
+        # 保存发货单
+        sql = """insert into db_trans_plan.t_ga_delivery_sheet(
+            load_task_id,
+            delivery_no,
+            `status`,
+            total_quantity,
+            total_free_pcs,
+            total_pcs,
+            weight,
+            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
+        if delivery_list:
+            values = [(
+                delivery.load_task_id,
+                delivery.delivery_no,
+                delivery.status,
+                delivery.total_quantity,
+                delivery.free_pcs,
+                delivery.total_pcs,
+                delivery.weight,
+                get_now_str()) for delivery in delivery_list]
+        self.executemany(sql, values)
+        for item in delivery_list:
+            if item.items:
+                delivery_item_dao.batch_insert(item.items)
 
 delivery_sheet_dao = DeliverySheetDao()
 

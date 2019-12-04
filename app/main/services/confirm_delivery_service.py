@@ -19,13 +19,13 @@ from app.utils.reids_lock import RedisLock
 from app.utils.result import Result
 from app.main.dao.delivery_log_dao import delivery_log_dao
 from app.main.entity.delivery_log import DeliveryLog
+from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.services.redis_service import get_delivery_list
 
 # test:
 import json
 import os
-from app.main.entity.delivery_sheet import DeliverySheet
-import numpy as np
-from app.main.services import order_service, dispatch_service
+import time
 
 
 def generate_delivery(delivery_list_data):
@@ -143,66 +143,72 @@ def subtract_stock(delivery, stock_list):
         current_app.logger.exception(e)
 
 
-def update_delviery_sheet(delivery):
-
+def update_delviery_sheet(delivery_list):
     """
-    :param:
-    :return:
+    :param: delivery是传过来的发货通知单对象列表
+    :return:发货通知单对象列表
     """
-    # 新数据
-    delivery_list = [(DeliveryItem(i)) for i in delivery.items]
-    # 原数据
-    origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
-    # 插入列表
-    insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery_list))
-    # 删除列表
-    delete_list = list(filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery_list], origin_items))
-    # 更新列表
-    delivery_update_list = list(filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in origin_items], delivery_list))
-    origin_update_list = list(filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery_list], origin_items))
-    # log表
-    log_insert_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
-                                    "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
-                                    "free_pcs_after": i.free_pcs}) for i in insert_list]
-    log_delete_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
-                                    "quantity_before": i.quantity, "quantity_after": 0, "free_pcs_before": i.free_pcs,
-                                    "free_pcs_after": 0}) for i in delete_list]
-    log_update_list = []
-    for i in origin_update_list:
-        for j in delivery_update_list:
-            if i.delivery_item_no == j.delivery_item_no and i.delivery_no == j.delivery_no:
-                if i.quantity !=j.quantity or i.free_pcs != j.free_pcs:
-                    log_update_list.append(
-                        DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
-                                     "quantity_before": i.quantity, "quantity_after": j.quantity,"free_pcs_before": i.free_pcs,
-                                     "free_pcs_after": j.free_pcs}))
-    log_insert_list.extend(log_update_list)
-    log_insert_list.extend(log_delete_list)
-    delivery_sheet = DeliverySheet()
-    delivery_sheet.total_quantity = reduce(lambda x, y: x + y, [int(i.quantity) for i in delivery_list])
-    delivery_sheet.free_pcs = reduce(lambda x, y: x + y, [int(i.free_pcs) for i in delivery_list])
-    delivery_sheet.delivery_no = delivery.delivery_no
-    print(delivery_sheet.total_quantity)
-    print(delivery_sheet.free_pcs)
+    log_list = []
+    for delivery in delivery_list:
+        # 新数据
+        # delivery.items
+        # 原数据
+        result_data = get_delivery_list(delivery.batch_no)
+        origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+        print(origin_items)
+        # 插入列表
+        insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery.items))
+        # 删除列表
+        delete_list = list(
+            filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery.items], origin_items))
+        # 更新列表
+        delivery_update_list = list(
+            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in origin_items], delivery.items))
+        origin_update_list = list(
+            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery.items], origin_items))
+        # log表
+        log_insert_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
+                                        "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
+                                        "free_pcs_after": i.free_pcs}) for i in insert_list]
+        log_delete_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
+                                        "quantity_before": i.quantity, "quantity_after": 0,
+                                        "free_pcs_before": i.free_pcs,
+                                        "free_pcs_after": 0}) for i in delete_list]
+        log_update_list = []
+        for i in origin_update_list:
+            for j in delivery_update_list:
+                if i.delivery_item_no == j.delivery_item_no:
+                    if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
+                        log_update_list.append(
+                            DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
+                                         "quantity_before": i.quantity, "quantity_after": j.quantity,
+                                         "free_pcs_before": i.free_pcs,
+                                         "free_pcs_after": j.free_pcs}))
+        log_insert_list.extend(log_update_list)
+        log_insert_list.extend(log_delete_list)
+        log_list.extend(log_insert_list)
     # 数据库操作
-    delivery_log_dao.insert(log_insert_list)
-    delivery_sheet_dao.update(delivery_sheet)
-    delivery_item_dao.batch_insert(insert_list)
-    delivery_item_dao.batch_delete(delete_list)
-    delivery_item_dao.batch_update(delivery_update_list)
+    delivery_log_dao.insert(log_list)
+    delivery_sheet_dao.batch_insert(delivery_list)
+    return delivery_list
 
 
 if __name__ == '__main__':
     basedir = os.path.realpath(os.path.dirname(__file__))
     json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.json")
     with open(json_path, 'r',encoding='UTF-8') as f:
-        datas = json.loads(f.read())
+        delivery_data = json.loads(f.read())
     # 创建发货通知单实例，初化属性
-    delivery = DeliverySheet(datas["data"])
-    # print(delivery)
-    update_delviery_sheet(delivery)
+    delivery_list = []
+    # for data in delivery_data['data']:
+    #     delivery_list.append(generate_delivery(data))
+    delivery_list=generate_delivery(delivery_data['data'])
+    print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
+    update_delviery_sheet(delivery_list)
+    print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
     # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
     # print(Result.success_response(ds)._get_data_for_json())
+
 
 
 
