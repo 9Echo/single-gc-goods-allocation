@@ -39,7 +39,6 @@ def generate_delivery(delivery_list_data):
 
         for item in delivery['items']:
             delivery_item_model = DeliveryItem(item)
-        # delivery_item.delivery_no = delivery.delivery_no
             delivery_model.items.append(delivery_item_model)
         delivery_model_list.append(delivery_model)
 

@@ -46,7 +46,10 @@ def get_delivery_list(batch_no):
         json_list = redis_conn.get(batch_no)
         if json_list:
             delivery_list = json.loads(json_list)
-            return Result.info(data=delivery_list)
+            items = []
+            for i in delivery_list:
+                items.extend([j for j in i.items])
+            return Result.info(data=items)
         else:
             return Result.error("数据不存在")
     except Exception as e:

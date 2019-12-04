@@ -12,10 +12,12 @@ class Order(BaseEntity):
     def __init__(self, order=None):
         self.rid = None  # 主键id
         self.order_no = None  # 订单id
+        self.doc_type = None  # 开单员id
+        self.lrr = None  # 开单员首字母
         self.items = []  # 订单子项
-        # self.dest = None # 目的地
         self.customer_id = None  # 客户id
-        self.salesman_id = None  # 业务员id
+        self.salesorg = None    # 销售部门id
+        self.salesman_id = None  # 销售员id
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if order:
