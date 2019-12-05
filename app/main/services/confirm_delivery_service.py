@@ -149,48 +149,52 @@ def update_delviery_sheet(delivery_list):
     :return:发货通知单对象列表
     """
     log_list = []
-    for delivery in delivery_list:
-        # 新数据
-        # delivery.items
-        # 原数据
-        result_data = get_delivery_list(delivery.batch_no)
-        origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
-        print(origin_items)
-        # 插入列表
-        insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery.items))
-        # 删除列表
-        delete_list = list(
-            filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery.items], origin_items))
-        # 更新列表
-        delivery_update_list = list(
-            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in origin_items], delivery.items))
-        origin_update_list = list(
-            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery.items], origin_items))
-        # log表
-        log_insert_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
-                                        "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
-                                        "free_pcs_after": i.free_pcs}) for i in insert_list]
-        log_delete_list = [DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
-                                        "quantity_before": i.quantity, "quantity_after": 0,
-                                        "free_pcs_before": i.free_pcs,
-                                        "free_pcs_after": 0}) for i in delete_list]
-        log_update_list = []
-        for i in origin_update_list:
-            for j in delivery_update_list:
-                if i.delivery_item_no == j.delivery_item_no:
-                    if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
-                        log_update_list.append(
-                            DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
-                                         "quantity_before": i.quantity, "quantity_after": j.quantity,
-                                         "free_pcs_before": i.free_pcs,
-                                         "free_pcs_after": j.free_pcs}))
-        log_insert_list.extend(log_update_list)
-        log_insert_list.extend(log_delete_list)
-        log_list.extend(log_insert_list)
-    # 数据库操作
-    delivery_log_dao.insert(log_list)
-    delivery_sheet_dao.batch_insert(delivery_list)
-    return delivery_list
+    result_data = get_delivery_list(delivery_list[0].batch_no)
+    if result_data.code != ResponseCode.Error:
+        for delivery in delivery_list:
+            # 新数据
+            # delivery.items
+            # 原数据
+            origin_items = list(filter(lambda i: i.delivery_no == delivery.delivery_no, result_data.data))
+            # origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
+            print(origin_items)
+            # 插入列表
+            insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery.items))
+            # 删除列表
+            delete_list = list(
+                filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery.items], origin_items))
+            # 更新列表
+            delivery_update_list = list(
+                filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in origin_items], delivery.items))
+            origin_update_list = list(
+                filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery.items], origin_items))
+            # log表
+            log_insert_list = [
+                DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
+                             "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
+                             "free_pcs_after": i.free_pcs}) for i in insert_list]
+            log_delete_list = [
+                DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
+                             "quantity_before": i.quantity, "quantity_after": 0,
+                             "free_pcs_before": i.free_pcs,
+                             "free_pcs_after": 0}) for i in delete_list]
+            log_update_list = []
+            for i in origin_update_list:
+                for j in delivery_update_list:
+                    if i.delivery_item_no == j.delivery_item_no:
+                        if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
+                            log_update_list.append(
+                                DeliveryLog(
+                                    {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
+                                     "quantity_before": i.quantity, "quantity_after": j.quantity,
+                                     "free_pcs_before": i.free_pcs,
+                                     "free_pcs_after": j.free_pcs}))
+            log_insert_list.extend(log_update_list)
+            log_insert_list.extend(log_delete_list)
+            log_list.extend(log_insert_list)
+        # 数据库操作
+        delivery_log_dao.insert(log_list)
+        delivery_sheet_dao.batch_insert(delivery_list)
 
 
 if __name__ == '__main__':
