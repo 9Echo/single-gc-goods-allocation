@@ -145,6 +145,8 @@ def subtract_stock(delivery, stock_list):
 
 def update_delviery_sheet(delivery_list):
     """
+    1.确认发货通知单主子项，并入库
+    2.并将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
     :return:发货通知单对象列表
     """
@@ -157,7 +159,6 @@ def update_delviery_sheet(delivery_list):
             # 原数据
             origin_items = list(filter(lambda i: i.delivery_no == delivery.delivery_no, result_data.data))
             # origin_items = delivery_item_dao.get_by_sheet(delivery.delivery_no)
-            print(origin_items)
             # 插入列表
             insert_list = list(filter(lambda i: i.delivery_item_no is None, delivery.items))
             # 删除列表

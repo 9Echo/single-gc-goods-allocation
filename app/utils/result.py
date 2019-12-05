@@ -55,6 +55,13 @@ class Result:
         result.data = data
         return result
 
+    @staticmethod
+    def success(msg="", data=None):
+        result = Result()
+        result.code = ResponseCode.Success
+        result.msg = msg
+        result.data = data
+        return result
 
 
     @staticmethod

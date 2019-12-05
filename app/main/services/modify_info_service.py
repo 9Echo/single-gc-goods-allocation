@@ -18,7 +18,7 @@ def get_data(delivery_list=[]):
     data_result["data_info"] = data_info
     # 调用中间接口，判断响应
     # return json.dumps(data_result)
-    return Result.info("成功")
+    return Result.success("成功")
 
 
 def modify_info(deliveries):
@@ -26,7 +26,7 @@ def modify_info(deliveries):
     for delivery in deliveries:
         for item in delivery.items:
             # 产品代码
-            item_id = item.id
+            item_id = item.item_id
             # 产品总件数
             item_quantity = item.quantity
             # 产品散根数
@@ -76,7 +76,7 @@ def trans_format(deliveries):
             "TRX_G": "0",  # 0
             "ORDER_J": delivery.total_quantity,  # 总件数
             "ORDER_G": delivery.free_pcs,  # 散根数
-            "ORDER_ZGOO": deliveries.total_pcs,  # 总根数
+            "ORDER_ZGOO": delivery.total_pcs,  # 总根数
             "ORDER_TWE": "",  # ??数字
             "ORDER_AMT": "",  # ??数字
             "FEE_ORDER": "0.00",  # 0.00
