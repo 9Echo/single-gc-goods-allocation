@@ -2,15 +2,11 @@
 # Description: 发货通知单确认
 # Created: shaoluyu 2019/11/13
 # Modified: shaoluyu 2019/11/13
-
-
 from flask import current_app
 from flask import request
 from flask_restful import Resource
-
-from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services.confirm_delivery_service import confirm, generate_delivery, update_delviery_sheet
-from app.main.services.modify_info_service import modify_info
+from app.main.services.confirm_delivery_service import confirm, generate_delivery
 from app.utils.result import Result
 
 

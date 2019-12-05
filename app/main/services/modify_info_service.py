@@ -7,14 +7,18 @@ import requests
 from app.utils.result import Result
 
 
-def get_data(delivery=[]):
-    if not delivery:
-        return Result.error("未传入数据或传入数据为空！").msg
-    data_info = modify_info(delivery)
-    data_result = trans_format(delivery)
+def get_data(delivery_list=[]):
+    if not delivery_list:
+        return Result.error("未传入数据或传入数据为空！")
+    # 提取应扣除的库存
+    data_info = modify_info(delivery_list)
+    # 包装成管厂发货通知单
+    data_result = trans_format(delivery_list)
+
     data_result["data_info"] = data_info
+    # 调用中间接口，判断响应
     # return json.dumps(data_result)
-    return Result.success_response(None)
+    return Result.info("成功")
 
 
 def modify_info(deliveries):
