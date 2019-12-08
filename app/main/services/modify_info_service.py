@@ -10,33 +10,33 @@ from app.utils.result import Result
 def get_data(delivery_list=[]):
     if not delivery_list:
         return Result.error("未传入数据或传入数据为空！")
-    # 提取应扣除的库存
-    data_info = modify_info(delivery_list)
+    # # 提取应扣除的库存
+    # data_info = modify_info(delivery_list)
     # 包装成管厂发货通知单
     data_result = trans_format(delivery_list)
 
-    data_result["data_info"] = data_info
+    # data_result["data_info"] = data_info
     # 调用中间接口，判断响应
     # return json.dumps(data_result)
     return Result.success("成功")
 
 
-def modify_info(deliveries):
-    data_info = {}
-    for delivery in deliveries:
-        for item in delivery.items:
-            # 产品代码
-            item_id = item.item_id
-            # 产品总件数
-            item_quantity = item.quantity
-            # 产品散根数
-            item_free_pcs = item.free_pcs
-            # 将产品规格作为键 添加散根和总件
-            if item_id not in data_info:
-                data_info[item_id] = {}
-            data_info[item_id]["item_quantity"] = data_info[item_id].get("item_quantity", 0.0) + float(item_quantity)
-            data_info[item_id]["item_free_pcs"] = data_info[item_id].get("item_free_pcs", 0.0) + float(item_free_pcs)
-    return data_info
+# def modify_info(deliveries):
+#     data_info = {}
+#     for delivery in deliveries:
+#         for item in delivery.items:
+#             # 产品代码
+#             item_id = item.item_id
+#             # 产品总件数
+#             item_quantity = item.quantity
+#             # 产品散根数
+#             item_free_pcs = item.free_pcs
+#             # 将产品规格作为键 添加散根和总件
+#             if item_id not in data_info:
+#                 data_info[item_id] = {}
+#             data_info[item_id]["item_quantity"] = data_info[item_id].get("item_quantity", 0.0) + float(item_quantity)
+#             data_info[item_id]["item_free_pcs"] = data_info[item_id].get("item_free_pcs", 0.0) + float(item_free_pcs)
+#     return data_info
 
 
 def trans_format(deliveries):
@@ -62,7 +62,7 @@ def trans_format(deliveries):
             "TRX_DATE": delivery.create_time.split(" ")[0],  # CRTED_DATE 的年月日
             "TRX_QTY": "0.00",  # 0.00
             "TRX_AMT": "0.00",  # 0.00
-            "TRX_ZGOO": "",  # ??数字
+            "TRX_ZGOO": "0",  # 0
             "LRR": "",  # 录入人即开单员名字首字母-前端传入
             "BBR": " ",  # 空着
             "SALESORG": "",  # 销售部门ID-前端传入
@@ -77,16 +77,15 @@ def trans_format(deliveries):
             "ORDER_J": delivery.total_quantity,  # 总件数
             "ORDER_G": delivery.free_pcs,  # 散根数
             "ORDER_ZGOO": delivery.total_pcs,  # 总根数
-            "ORDER_TWE": "",  # ??数字
-            "ORDER_AMT": "",  # ??数字
-            "FEE_ORDER": "0.00",  # 0.00
+            "ORDER_TWE": "",  # 估重合计
+            "ORDER_AMT": "",  # 贷款合计
+            "FEE_ORDER": "0.00",  # 0.00 运费合计
             "NOTE": " ",  # 空着
             "PDBZ": "空",  # ‘空’
             "DIBZ": "N",  # N
-            "JSDOCUNO": "",  # ??例如：1908-x4-00320
-            "YWLX": "",  # ??1
+            "YWLX": " ",  # 空值
             "ORDER_CAL": delivery.weight,  # 理重
-            "THFS": "",  # ??
+            "THFS": " ",  # 空值
             "items": []
         }
         for item in delivery.items:
@@ -95,7 +94,7 @@ def trans_format(deliveries):
                         "I_O": "O",  # 出入库标记
                         "DOCTYPE": "",  # 录入人ID-前端传入
                         "DOCUNO": "",  # 提货单号-前端传入
-                        "LNO": "",  # ??数字
+                        "LNO": "",  # 序号1,2,3
                         "ORG_UNIT": "",  # 客户公司简称-前端传入
                         "TRX_DATE": item.create_time.split(" ")[0],  # CRTED_DATE 取年月日
                         "ITEMID": item.item_id,  # 物资代码item_id
@@ -103,8 +102,8 @@ def trans_format(deliveries):
                         "LOT_NO": "n",  # n
                         "UOM_ID": "kg",  # 单位kg
                         "TRX_QTY": " ",  # 空着
-                        "PRC_IN": "",  # ??数字
-                        "AMT_IN": "",  # ??数字300只有一个
+                        "PRC_IN": " ",  # 空值
+                        "AMT_IN": " ",  # 空值
                         "BZDM": " ",  # 空着
                         "JZDM": " ",  # 空着
                         "BZRS": " ",  # 空着
@@ -121,18 +120,16 @@ def trans_format(deliveries):
                         "ENTER_J": item.quantity,  # 件数
                         "ENTER_G": item.free_pcs,  # 散根
                         "ZGOO": item.total_pcs,  # 总根数
-                        "CATNO": "",  # 01、02...??
-                        "SUBCLS": "",  # 数字或字母??
-                        "BZOO": "",  # ??备注
+                        "CATNO": "",  # 物资代码大类 ITEMA.CLASSID(CATEGORIES.CATEGORY_ID)
+                        "SUBCLS": "",  # ??数字或字母
+                        "BZOO": "",  # 备注
                         "F_WHS": item.warehouse,  # 仓库 warehouse
                         "F_LOC": item.loc_id,  # 垛号 loc_id
                         "COSTPRC": " ",  # 空着
-                        "ORDER_QTY": "",  # ??
+                        "ORDER_QTY": "",  # ??合同单件重量？？？可先置为空
                         "PDBZ": "空",  # 空
                         "DIBZ": "N",  # N
-                        "JSDOCUNO": "",  # ??例如：1908-x3-00145
-                        "YWLX": "",  # ??1或2
-                        "AUTONO": "",  # ?? 例如：1257378
+                        "YWLX": " ",  # 空值
                         "ORDER_DW": "t",  # t 单位 吨
                         "UOMRATE": "1000.00",  # 1000.00 物料单位转换
                         "TRX_DW": " ",  # 空着
@@ -140,18 +137,18 @@ def trans_format(deliveries):
                         "ACNO": " ",  # 空着
                         "QUALITY": "n",  # n
                         "MAKER": "n",  # n
-                        "RKRQ": "",  # ??
+                        "RKRQ": "n",  # n
                         "ZLLEVEL": "n",  # n
-                        "PACKAGESPEC": "",  # ??
+                        "PACKAGESPEC": "n",  # n
                         "HTNO": "n",  # n
-                        "CUSTNAME": "",  # ??
-                        "DGWIDTH": "",  # ??
-                        "DGHEIGHT": "",  # ??
-                        "DGLENGTH": "",  # ??
+                        "CUSTNAME": "n",  # n
+                        "DGWIDTH": " ",  # 空值
+                        "DGHEIGHT": " ",  # 空值
+                        "DGLENGTH": " ",  # 空值
                         "ORDER_J": item.quantity,  # 件数
                         "ORDER_G": item.free_pcs,  # 散根数
                         "ORDER_ZGOO": item.total_pcs,  # 总根数
-                        "PRC_ORDER": "",  # ??
+                        "PRC_ORDER": " ",  # ?? 合同金额？？？先置为空
                         "FEE_ORDER": " ",  # 空着
                     }
             temp["items"].append(temp2)
