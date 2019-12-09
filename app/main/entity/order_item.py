@@ -15,6 +15,7 @@ class OrderItem(BaseEntity):
         self.quantity = None  # 数量(件数)
         self.free_pcs = None  # 散根数
         self.dest = None  # 目的地
+        self.weight = 0 # 重量（使用公式计算)
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if item:
