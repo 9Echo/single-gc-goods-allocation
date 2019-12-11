@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/11 16:23
 # @Author  : Zihao.Liu
+
 from app.main.entity.base_entity import BaseEntity
 
 
@@ -15,12 +16,9 @@ class DeliverySheet(BaseEntity):
         self.status = None  # 状态 00：预留 10：已生成，20：已打印
         self.customer_id = None  # 客户id
         self.salesman_id = None # 业务员id
-        self.f_whs = None # 仓库
-        self.f_loc = None # 垛号
         self.weight = None # 重量
         self.items = []  # 发货通知单子单
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if delivery_sheet:
             self.set_attr(delivery_sheet)
-
