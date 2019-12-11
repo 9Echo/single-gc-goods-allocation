@@ -27,7 +27,7 @@ def weight_list_calculator(calculate_list):
     return calculate_list
 
 
-def weight_calculator(cname, itemid, pack_num, free_num=0):
+def calculate(cname, itemid, pack_num, free_num=0):
     """
     # 外径、壁厚、长度、系数、根 / 件数
     # i["JM_D"], i["JM_P"], i["VER_L"], i["GS_XS"], i["GS_PER"]
@@ -37,6 +37,7 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
     print('input:  ', cname, itemid, pack_num, free_num)
     data = weight_calculator_dao.get_data_from_table(cname, itemid)
     # print(data)
+    weight = 0
     if len(data) != 0:
         for i in data:
             if i["CNAME"] == cname and i["ITEMID"] == itemid:
@@ -49,7 +50,7 @@ def weight_calculator(cname, itemid, pack_num, free_num=0):
                     weight = round(weight_one) * int(free_num)
                 else:
                     weight = round(weight_one * int(pack_num) * i["GS_PER"] + weight_one * int(free_num))
-        return weight
+    return weight
 
 
 def get_weight_of_each_root(item):
@@ -116,7 +117,7 @@ def check_item():
     check_result_list = []
     j = 0
     for i in value_list:
-        weight = weight_calculator(i[1], i[0], 0, 1)
+        weight = calculate(i[1], i[0], 0, 1)
         j = j+1
         if weight is not None and i[2] is not None:
             i_weight = abs(i[2] - weight)

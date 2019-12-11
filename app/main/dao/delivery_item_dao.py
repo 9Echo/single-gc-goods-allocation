@@ -21,27 +21,21 @@ class DeliveryItemDao(BaseDao):
         sql = """insert into t_ga_delivery_item(
             delivery_no,
             delivery_item_no,
-            order_no,
             product_type,
             spec,
             weight,
-            warehouse,
             quantity,
             free_pcs,
-            total_pcs,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
         if items:
             values = [(
                 item.delivery_no,
                 item.delivery_item_no,
-                item.order_no,
                 item.product_type,
                 item.spec,
                 item.weight,
-                item.warehouse,
                 item.quantity,
                 item.free_pcs,
-                item.total_pcs,
                 get_now_str()) for item in items]
             self.executemany(sql, values)
         return

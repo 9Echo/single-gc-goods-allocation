@@ -28,18 +28,16 @@ class DeliverySheetDao(BaseDao):
             load_task_id,
             delivery_no,
             `status`,
-            total_quantity,
-            total_free_pcs,
-            total_pcs,
+            customer_id,
+            salesman_id,
             weight,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
+            create_time) value(%s,%s,%s,%s,%s,%s,%s)"""
         values = (
             delivery.load_task_id,
             delivery.delivery_no,
             delivery.status,
-            delivery.total_quantity,
-            delivery.free_pcs,
-            delivery.total_pcs,
+            delivery.customer_id,
+            delivery.salesman_id,
             delivery.weight,
             get_now_str())
         self.execute(sql, values)

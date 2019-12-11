@@ -68,9 +68,11 @@ def dynamic_programming(number, capacity, weight_cost):
             j -= weight_cost[i - 1][0]
     return bestvalue(len(weight_cost), capacity), result
 
-number = 5
-capacity = 10
-weight_cost = [(2, 8), (5, 10), (3, 3), (6, 9), (2, 4)]
-bestvalue, result = dynamic_programming(number, capacity, weight_cost)
-print(bestvalue)
-print(result)
+
+if __name__ == '__main__':
+    number = 5
+    capacity = 35
+    weight_cost = [(8, 8), (11, 11), (19, 19), (6, 6), (12, 12)]
+    bestvalue, result = dynamic_programming(number, capacity, weight_cost)
+    print(bestvalue)
+    print(result)

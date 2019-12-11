@@ -50,10 +50,16 @@ class DevelopmentConfig(Config):
     """开发环境配置
     """
     # Mysql配置，可选（不使用时可删除）
-    MYSQL_HOST = '47.99.118.183'
+    # MYSQL_HOST = '47.99.118.183'
+    # MYSQL_PORT = 3306
+    # MYSQL_USER = 'v3dev_user'
+    # MYSQL_PASSWD = 'V3dev!56'
+    # MYSQL_DB = 'db_trans_plan'
+    # MYSQL_CHARSET = 'utf8'
+    MYSQL_HOST = 'localhost'
     MYSQL_PORT = 3306
-    MYSQL_USER = 'v3dev_user'
-    MYSQL_PASSWD = 'V3dev!56'
+    MYSQL_USER = 'root'
+    MYSQL_PASSWD = '123456'
     MYSQL_DB = 'db_trans_plan'
     MYSQL_CHARSET = 'utf8'
     # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
