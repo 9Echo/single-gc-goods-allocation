@@ -25,8 +25,21 @@ def weight_list_calculator(calculate_list):
                 # i.weightone = round(weight_one)
     return calculate_list
 
+def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
+    """
+    :return: t_calculator_item中有此品种规格的记录，则返回:总根数，反之返回:0
+    """
+    data = weight_calculator_dao.get_data_from_table(cname, itemid)
+    total_pcs = 0
+    if len(data) != 0:
+        i = data[0]
+        # 根重
+        if i["GS_PER"] is not None and float(i["GS_PER"]) > 0:
+            pcs = int(i["GS_PER"])
+        total_pcs = int(pack_num) * pcs + int(free_num)
+    return total_pcs
 
-def calculate(cname, itemid, pack_num=0, free_num=0):
+def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     """
     # 外径、壁厚、长度、系数、根 / 件数
     # i["JM_D"], i["JM_P"], i["VER_L"], i["GS_XS"], i["GS_PER"]
