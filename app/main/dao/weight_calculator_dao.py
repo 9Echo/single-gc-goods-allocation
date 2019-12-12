@@ -10,10 +10,10 @@ class WeightCalculatorDao(BaseDao):
         '''
         :return:
         '''
-        sql = """select * from db_trans_plan.t_calculator_item
+        sql = """select ITEMID,GBGZL,GS_PER from db_inter.t_itema
                 where ITEMID in ({})"""
         values = "'"
-        values += "','".join([item.spec for item in data_list])
+        values += "','".join([item.item_id for item in data_list])
         values += "'"
         data = self.select_all(sql.format(values))
         return data
@@ -44,7 +44,7 @@ class WeightCalculatorDao(BaseDao):
         #   data = self.select_all(sql)
         :return:
         '''
-        sql = """select * from t_calculator_item
+        sql = """select * from db_inter.t_itema
                 where CNAME = %s and ITEMID = %s"""
         values = [cname, itemid]
         data = self.select_all(sql, values)
