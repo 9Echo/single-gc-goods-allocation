@@ -21,18 +21,6 @@ def filter(delivery_items: list):
         # 根据过滤完后的item生成发货通知单
         sheet = DeliverySheet()
         sheet.items = filtered_items
-        sheet.delivery_no = UUIDUtil.create_id("ds")
-        sheet.weight = 0
-        for item in sheet.items:
-            item.delivery_item_no = UUIDUtil.create_id("di")
-            item.delivery_no = sheet.delivery_no
-            # TODO 根据计算器获取总根数
-            item.total_pcs = 100
-            sheet.customer_id = item.customer_id
-            sheet.salesman_id = item.salesman_id
-            sheet.create_time = item.create_time
-            sheet.weight += item.weight
-            sheet.total_pcs += item.total_pcs
         # 从item列表中移除已生成发货单的item
         for item in filtered_items:
             delivery_items.remove(item)
