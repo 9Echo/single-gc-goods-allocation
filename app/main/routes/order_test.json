@@ -1,0 +1,44 @@
+{
+    "data": {
+        "customer_id": "scymymygxgs",
+        "salesman_id": "4",
+        "items": [{
+            "product_type": "热镀",
+            "spec": "02A165*4.25*6000",
+            "item_id": "sth",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "17",
+            "free_pcs": "0"
+        }, {
+            "product_type": "热镀",
+            "spec": "023042*2.75*6000",
+            "item_id": "sth",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "16",
+            "free_pcs": "0"
+        }, {
+            "product_type": "热镀",
+            "spec": "02A165*3.75*6000",
+            "item_id": "sth",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "10",
+            "free_pcs": "0"
+        }, {
+            "product_type": "热镀",
+            "spec": "025060*3.0*6000",
+            "item_id": "sth",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "8",
+            "free_pcs": "0"
+        }]
+    }
+
+}

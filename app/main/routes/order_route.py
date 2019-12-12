@@ -7,7 +7,6 @@ import json
 from flask import request
 from flask_restful import Resource
 
-from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.dao.order_dao import order_dao
 from app.main.services import order_service, dispatch_service
 from app.utils.result import Result

@@ -15,7 +15,7 @@ def filter(delivery_items: list):
     weight_cost = []
     # 根据item的重量生成weight_cost的列表
     for item in delivery_items:
-        item.weight = weight_calculator.calculate(item.product_type, item.spec, item.quantity, item.free_pcs)
+        item.weight = weight_calculator.calculate_weight(item.product_type, item.spec, item.quantity, item.free_pcs)
         if item.weight == 0:
             continue
         weight_cost.append(tuple([item.weight, item.weight]))
