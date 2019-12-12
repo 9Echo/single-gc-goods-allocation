@@ -25,6 +25,7 @@ def weight_list_calculator(calculate_list):
                 # i.weightone = round(weight_one)
     return calculate_list
 
+
 def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     """
     :return: t_calculator_item中有此品种规格的记录，则返回:总根数，反之返回:0
@@ -39,6 +40,7 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
         total_pcs = int(pack_num) * pcs + int(free_num)
     return total_pcs
 
+
 def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     """
     # 外径、壁厚、长度、系数、根 / 件数
@@ -46,7 +48,7 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     输入数据：品名:cname、规格:itemid、件数:pack_num、散根数:free_num
     :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:None
     """
-    print('input:  ', cname, itemid, pack_num, free_num)
+    # print('input:  ', cname, itemid, pack_num, free_num)
     data = weight_calculator_dao.get_data_from_table(cname, itemid)
     # print(data)
     weight = 0
@@ -188,12 +190,13 @@ if __name__ == '__main__':
     #     weight = round(weight_one * int(i.quantity) * item["GS_PER"] + weight_one * int(i.free_pcs))
     # item_dic[i.delivery_item_no] = weight
     # result_list.append(item_dic)
-    item1 = DeliveryItem({'delivery_item_no': '001', 'product_type': '螺旋焊管', 'item_id': '0CH660*10.0*6000', 'quantity': 0})
+    item1 = DeliveryItem(
+        {'delivery_item_no': '001', 'product_type': '螺旋焊管', 'item_id': '0CH660*10.0*6000', 'quantity': 0})
     item2 = DeliveryItem({'delivery_item_no': '002', 'product_type': '焊管', 'item_id': '010020.5*1.8*5950'})
-    item3 = DeliveryItem({'delivery_item_no': '003', 'product_type': '方矩管', 'item_id': '054025*025*0.9*5990', 'quantity': 1})
+    item3 = DeliveryItem(
+        {'delivery_item_no': '003', 'product_type': '方矩管', 'item_id': '054025*025*0.9*5990', 'quantity': 1})
     calculate_list = [item2, item3]
     result_list = weight_list_calculator(calculate_list)
     for i in result_list:
         print(i.weightone)
     # print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-
