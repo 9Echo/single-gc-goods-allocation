@@ -18,10 +18,8 @@ def filter(delivery_items: list):
         item.weight = weight_calculator.calculate(item.product_type, item.spec, item.quantity, item.free_pcs)
         if item.weight == 0:
             continue
-        else:
-            item.weight /= 1000
         weight_cost.append(tuple([item.weight, item.weight]))
-    final_weight, result_list = package_solution.dynamic_programming(len(delivery_items), 35, weight_cost)
+    final_weight, result_list = package_solution.dynamic_programming(len(delivery_items), 35000, weight_cost)
     print(result_list)
     for i in range(0, len(result_list)):
         if result_list[i] == 1:

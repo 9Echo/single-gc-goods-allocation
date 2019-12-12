@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/15 16:17
 # @Author  : Zihao.Liu
-from app.main.dao.order_item_left_dao import order_item_left_dao
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.order import Order

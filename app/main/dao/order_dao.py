@@ -24,18 +24,18 @@ class OrderDao(BaseDao):
 
     def get_all(self):
         """获取所有订单"""
-        sql = """select o.*, oi.*, oi.rid as irid, oi.create_time as ict, oi.update_time as iut 
+        sql = """select o.*, oi.*, oi.rowid as irowid, oi.create_time as ict, oi.update_time as iut 
             from t_ga_order o 
             left join t_ga_order_item oi on o.order_no=oi.order_no
-            order by o.rid"""
+            order by o.rowid"""
         results = self.select_all(sql)
         order_dict = {}
         # 将订单项结果合并到订单中
         for row in results:
             if not order_dict.__contains__(row['order_no']):
                 order_dict[row['order_no']] = Order(row)
-            if row['irid'] is not None:
-                row['rid'] = row['irid']
+            if row['irowid'] is not None:
+                row['rowid'] = row['irowid']
                 row['create_time'] = row['ict']
                 row['update_time'] = row['iut']
                 order_dict[row['order_no']].items.append(OrderItem(row))
@@ -62,13 +62,21 @@ class OrderDao(BaseDao):
                 spec,
                 quantity,
                 free_pcs,
-                create_time) value(%s,%s,%s,%s,%s,%s)"""
+                item_id,
+                material,
+                f_whs,
+                f_loc,
+                create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             values = [(
                 item.order_no,
                 item.product_type,
                 item.spec,
                 item.quantity,
                 item.free_pcs,
+                item.item_id,
+                item.material,
+                item.f_whs,
+                item.f_loc,
                 get_now_str()) for item in order.items]
             self.executemany(sql, values)
 

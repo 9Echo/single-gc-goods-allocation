@@ -8,7 +8,7 @@ class DeliveryItem(BaseEntity):
     """发货通知单子项"""
 
     def __init__(self, delivery_item=None):
-        self.rid = None  # 主键id
+        self.rowid = None  # 主键id
         self.delivery_no = None  # 发货通知单主单号
         self.delivery_item_no = None  # 子单号
         self.product_type = None  # 产品类型

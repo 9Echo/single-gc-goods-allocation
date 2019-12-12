@@ -48,27 +48,17 @@ class DeliveryItemDao(BaseDao):
                 where delivery_item_no = %s"""
         if items:
             values = [(
-                delivery_item.quantity,
-                delivery_item.free_pcs,
-                delivery_item.delivery_item_no) for delivery_item in items]
+                item.quantity,
+                item.free_pcs,
+                item.delivery_item_no) for item in items]
             self.executemany(sql, values)
 
-    def batch_delete(self, delivery_item):
+    def batch_delete(self, items):
         """批量删除子发货单"""
         sql = "delete from t_ga_delivery_item where delivery_item_no = %s"
-        if delivery_item:
-            values = [(item.delivery_item_no,) for item in delivery_item]
+        if items:
+            values = [(item.delivery_item_no,) for item in items]
             self.executemany(sql, values)
 
 
 delivery_item_dao = DeliveryItemDao()
-
-
-if __name__ == '__main__':
-    # with open('E:\JC\delivery.txt', 'r',encoding='UTF-8') as f:
-    #     datas = json.loads(f.read())
-    # # 创建发货通知单实例，初始化属性
-    # delivery = DeliverySheet(datas["data"])
-    # print(delivery),
-    delivery_item_dao.update([('1', 'abcde1'), ('2', 'abcde2')])
-

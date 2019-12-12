@@ -9,6 +9,7 @@ from app.utils.date_util import get_now_str
 from app.utils.uuid_util import UUIDUtil
 from app.main.dao.delivery_item_dao import delivery_item_dao
 
+
 class DeliverySheetDao(BaseDao):
 
     def get_one(self, sheet_id):
@@ -22,8 +23,8 @@ class DeliverySheetDao(BaseDao):
         delivery_sheet.items = [DeliveryItem(row) for row in results]
         return delivery_sheet
 
-    def insert(self, delivery):
-        # 保存发货单
+    def insert(self, sheet):
+        """保存发货单"""
         sql = """insert into db_trans_plan.t_ga_delivery_sheet(
             load_task_id,
             delivery_no,
@@ -33,20 +34,21 @@ class DeliverySheetDao(BaseDao):
             weight,
             create_time) value(%s,%s,%s,%s,%s,%s,%s)"""
         values = (
-            delivery.load_task_id,
-            delivery.delivery_no,
-            delivery.status,
-            delivery.customer_id,
-            delivery.salesman_id,
-            delivery.weight,
+            sheet.load_task_id,
+            sheet.delivery_no,
+            sheet.status,
+            sheet.customer_id,
+            sheet.salesman_id,
+            sheet.weight,
             get_now_str())
         self.execute(sql, values)
         # 保存发货单项
-        if delivery.items:
+        if sheet.items:
             from app.main.dao.delivery_item_dao import delivery_item_dao
-            delivery_item_dao.batch_insert(delivery.items)
+            delivery_item_dao.batch_insert(sheet.items)
 
     def update(self, delivery):
+        """更新发货单"""
         sql = """update db_trans_plan.t_ga_delivery_sheet set 
             total_quantity = %s, 
             free_pcs = %s
@@ -57,55 +59,29 @@ class DeliverySheetDao(BaseDao):
             delivery.delivery_no)
         self.execute(sql, values)
 
-    def batch_insert(self, delivery_list):
-        # 保存发货单
+    def batch_insert(self, sheets):
+        """批量保存发货单"""
         sql = """insert into db_trans_plan.t_ga_delivery_sheet(
             load_task_id,
             delivery_no,
             `status`,
-            total_quantity,
-            total_free_pcs,
-            total_pcs,
+            customer_id,
+            salesman_id,
             weight,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
-        if delivery_list:
+            create_time) value(%s,%s,%s,%s,%s,%s,%s)"""
+        if sheets:
             values = [(
-                delivery.load_task_id,
-                delivery.delivery_no,
-                delivery.status,
-                delivery.total_quantity,
-                delivery.free_pcs,
-                delivery.total_pcs,
-                delivery.weight,
-                get_now_str()) for delivery in delivery_list]
-        self.executemany(sql, values)
-        for item in delivery_list:
-            if item.items:
-                delivery_item_dao.batch_insert(item.items)
+                sheet.load_task_id,
+                sheet.delivery_no,
+                sheet.status,
+                sheet.customer_id,
+                sheet.salesman_id,
+                sheet.weight,
+                get_now_str) for sheet in sheets]
+            self.executemany(sql, values)
+            for sheet in sheets:
+                if sheet.items:
+                    delivery_item_dao.batch_insert(sheet.items)
+
 
 delivery_sheet_dao = DeliverySheetDao()
-
-if __name__ == "__main__":
-    delivery = DeliverySheet()
-    delivery.delivery_no = UUIDUtil.create_id("ds")
-    delivery.batch_no = UUIDUtil.create_id("batch")
-    delivery.status = 0
-    delivery.data_address = 00
-    delivery.total_quantity = 1000
-    delivery.free_pcs = 1000
-    delivery.total_pcs = 0
-    delivery.weight = 1000
-    for i in range(0, 3):
-        item = DeliveryItem()
-        item.delivery_no = delivery.delivery_no
-        item.delivery_item_no = UUIDUtil.create_id("di")
-        item.order_no = "abc"
-        item.product_type = "方矩管"
-        item.spec = "058040*040*2.0*6000"
-        item.quantity = 500
-        item.free_pcs = 10
-        item.total_pcs = 0
-        item.warehouse = "方矩库"
-        item.weight = 30
-        delivery.items.append(item)
-    delivery_sheet_dao.insert(delivery)
