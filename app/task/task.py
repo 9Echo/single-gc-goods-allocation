@@ -13,9 +13,9 @@ from app.main.redis_pool import redis_pool
 from app.main.services.update_stock_task_service import update_stock
 
 
-def update_stock_job():
-    print('update stock start!')
-    update_stock()
+# def update_stock_job():
+#     print('update stock start!')
+#     update_stock()
 
 
 

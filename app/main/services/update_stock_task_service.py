@@ -11,11 +11,11 @@ from app.main.redis_pool import redis_pool
 from app.utils.reids_lock import RedisLock
 
 
-def update_stock():
-    """
-    定时获取最新库存，更新Redis中库存
-    :return:
-    """
+# def update_stock():
+#     """
+#     定时获取最新库存，更新Redis中库存
+#     :return:
+#     """
     # try:
     #     redis_conn = redis.Redis(connection_pool=redis_pool)
     #     lock_id = RedisLock.try_lock(redis_conn, 'stock_lock', wait_time=20)
