@@ -45,11 +45,13 @@ class OrderDao(BaseDao):
         # 保存订单
         sql = """insert into t_ga_order(
             order_no,
+            company_id,
             customer_id,
             salesman_id,
-            create_time) value (%s,%s,%s,%s)"""
+            create_time) value (%s,%s,%s,%s,%s)"""
         values = (
             order.order_no,
+            order.company_id,
             order.customer_id,
             order.salesman_id,
             get_now_str())
