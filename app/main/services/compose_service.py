@@ -23,35 +23,15 @@ def generate_delivery(delivery_list_data):
 
     return delivery_model_list
 
+
 def compose(delivery_list):
     """
     拼单推荐逻辑
     :param delivery_list:
     :return:
     """
-
-    # 客户列表
-    customer_id_list = []
-    # 品种列表
-    product_type_list = []
-    # 现有重量
-    weight = 0
-    # 特殊分组
-    group1 = ['热镀', '热度', '热镀1', 'QF热镀管']
-    group2 = ['焊管', '焊管1']
-    for i in delivery_list:
-        customer_id_list.append(i.customer_id)
-        weight += i.weight
-        for j in i.items:
-            if group1.__contains__(j.product_type):
-                product_type_list.extend(group1)
-                continue
-            if group2.__contains__(j.product_type):
-                product_type_list.extend(group2)
-                continue
-            product_type_list.append(j.product_type)
-    items = compose_dao.get_compose_items(customer_id_list, product_type_list)
-    if items:
-        return compose_filter.filter(items, weight)
+    delivery_dict_list = compose_filter.filter(delivery_list)
+    if delivery_dict_list:
+        return [DeliverySheet(i) for i in delivery_dict_list]
     else:
         return None

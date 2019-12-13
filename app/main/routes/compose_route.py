@@ -20,8 +20,8 @@ class ComposeRoute(Resource):
             delivery_list_data = request.get_json(force=True).get('data')  # 入参是json
             if delivery_list_data:
                 delivery_list = generate_delivery(delivery_list_data)
-                item_list = compose(delivery_list)
-                return jsonify({"code": 100, "msg": "成功", "data": item_list})
+                result_delivery_list = compose(delivery_list)
+                return Result.success_response(result_delivery_list)
             else:
                 return Result.error_response('数据为空！')
         except Exception as e:

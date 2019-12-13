@@ -4,28 +4,28 @@ from app.main.dao.base_dao import BaseDao
 class ComposeDao(BaseDao):
 
     """
-
+    筛选可推荐的预留提货单
     """
 
-    def get_compose_items(self, customer_id_list, product_type_list):
+    def get_compose_delivery(self, company_id, customer_id_list):
         sql = """
-        select
-        i.*
-        from
-        (SELECT delivery_no, customer_id from `t_ga_delivery_sheet` where `status` = 'FHZT00') s
-        left join t_ga_delivery_item i on s.delivery_no = i.delivery_no and s.customer_id in ({})
-        where product_name in ({})
+        SELECT 
+        delivery_no, 
+        customer_id,
+        weight
+        from 
+        `t_ga_delivery_sheet` 
+        where 
+        `status` = 'FHZT00' and company_id = '{}' and customer_id in ({})
+
+
         
         """
-        #
+        #客户条件
         cus_values = "'"
         cus_values += "','".join([i for i in customer_id_list])
         cus_values += "'"
-        #
-        pro_values = "'"
-        pro_values += "','".join([i for i in product_type_list])
-        pro_values += "'"
-        data = self.select_all(sql.format(cus_values, pro_values))
+        data = self.select_all(sql.format(company_id, cus_values))
         return data
 
 

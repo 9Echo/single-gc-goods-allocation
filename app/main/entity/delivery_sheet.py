@@ -12,6 +12,7 @@ class DeliverySheet(BaseEntity):
         self.rowid = None  # 主键id
         self.load_task_id = None  # 所属车次号
         self.delivery_no = None  # 发货通知单号
+        self.company_id = None  # 公司id
         self.batch_no = None  # 批次号
         self.status = None  # 状态 00：预留 10：已生成，20：已打印
         self.customer_id = None  # 客户id
