@@ -5,7 +5,7 @@
 from flask import current_app
 from flask import request
 from flask_restful import Resource
-from app.main.services.confirm_delivery_service import update_delviery_sheet
+from app.main.services.confirm_delivery_service import confirm
 from app.main.services.confirm_delivery_service import generate_delivery
 from app.utils.result import Result
 
@@ -28,11 +28,11 @@ class ConfirmRoute(Resource):
             if delivery_list_data:
                 delivery_list = generate_delivery(delivery_list_data)
                 # 对比
-                update_delviery_sheet(delivery_list)
+                confirm(delivery_list)
                 return Result.success_response({})
             else:
                 return Result.error_response('数据为空！')
         except Exception as e:
-            current_app.logger.info("json error")
+            current_app.logger.info("confirm error")
             current_app.logger.exception(e)
             return Result.error_response()

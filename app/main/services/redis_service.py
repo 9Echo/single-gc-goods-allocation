@@ -25,7 +25,7 @@ def set_delivery_list(delivery_list):
         if batch_no:
             dict_list = Result.entity(delivery_list).data
             json_data = json.dumps(dict_list)
-            redis_conn.set(batch_no, json_data, ex=60)
+            redis_conn.set(batch_no, json_data, ex=300)
             return Result.info(msg="保存成功")
     except Exception as e:
         current_app.logger.info("set_delivery_list error")
@@ -46,7 +46,7 @@ def get_delivery_list(batch_no):
         redis_conn = redis.Redis(connection_pool=redis_pool)
         json_list = redis_conn.get(batch_no)
         if json_list:
-            delivery_list = json.loads(json_list).get('data')
+            delivery_list = json.loads(json_list)
             items = []
             for i in delivery_list:
                 items.extend([DeliveryItem(j) for j in i.get('items')])

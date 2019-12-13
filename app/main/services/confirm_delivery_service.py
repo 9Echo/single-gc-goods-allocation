@@ -1,31 +1,12 @@
 # -*- coding: utf-8 -*-
 # Description: 确认发货通知单
 # Created: shaoluyu 2019/11/13
-import copy
-import json
-import threading
-from functools import reduce
-
-import pandas
-import redis
-from flask import current_app
-
-from app.main.dao.delivery_item_dao import delivery_item_dao
-from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.entity.delivery_item import DeliveryItem
-from app.main.redis_pool import redis_pool
 from app.utils.code import ResponseCode
-from app.utils.reids_lock import RedisLock
-from app.utils.result import Result
 from app.main.dao.delivery_log_dao import delivery_log_dao
 from app.main.entity.delivery_log import DeliveryLog
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services.redis_service import get_delivery_list
-
-# test:
-import json
-import os
-import time
 
 
 def generate_delivery(delivery_list_data):
@@ -143,7 +124,7 @@ def generate_delivery(delivery_list_data):
 #         current_app.logger.exception(e)
 
 
-def update_delviery_sheet(new_delivery_list):
+def confirm(new_delivery_list):
     """
     将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
@@ -160,7 +141,7 @@ def update_delviery_sheet(new_delivery_list):
     #如果原明细数据在
     if result_data.code != ResponseCode.Error:
         # 插入列表
-        insert_list = list(filter(lambda i: i.delivery_item_no is None, new_item_list))
+        insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
         # 删除列表
         delete_list = list(
             filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in new_item_list], old_item_list))
@@ -196,24 +177,25 @@ def update_delviery_sheet(new_delivery_list):
         log_list = log_delete_list + log_insert_list + log_update_list
         # 数据库操作
         delivery_log_dao.insert(log_list)
+        return True
 
 
-
-if __name__ == '__main__':
-    basedir = os.path.realpath(os.path.dirname(__file__))
-    json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.json")
-    with open(json_path, 'r',encoding='UTF-8') as f:
-        delivery_data = json.loads(f.read())
-    # 创建发货通知单实例，初化属性
-    delivery_list = []
-    # for data in delivery_data['data']:
-    #     delivery_list.append(generate_delivery(data))
-    delivery_list=generate_delivery(delivery_data['data'])
-    print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-    update_delviery_sheet(delivery_list)
-    print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-    # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
-    # print(Result.success_response(ds)._get_data_for_json())
+#
+# if __name__ == '__main__':
+#     basedir = os.path.realpath(os.path.dirname(__file__))
+#     json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.json")
+#     with open(json_path, 'r',encoding='UTF-8') as f:
+#         delivery_data = json.loads(f.read())
+#     # 创建发货通知单实例，初化属性
+#     delivery_list = []
+#     # for data in delivery_data['data']:
+#     #     delivery_list.append(generate_delivery(data))
+#     delivery_list=generate_delivery(delivery_data['data'])
+#     print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
+#     confirm(delivery_list)
+#     print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
+#     # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
+#     # print(Result.success_response(ds)._get_data_for_json())
 
 
 
