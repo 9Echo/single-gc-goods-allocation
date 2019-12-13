@@ -28,5 +28,5 @@ def generate_order(order_data):
         oi.f_loc = item['f_loc']
         order.items.append(oi)
     # 生成的订单入库
-    #order_dao.insert(order)
+    order_dao.insert(order)
     return order

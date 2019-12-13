@@ -6,16 +6,16 @@
         "items": [{
             "product_type": "热镀",
             "spec": "02A165*4.25*6000",
-            "item_id": "sth",
+            "item_id": "02A165*4.25*6000",
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
             "quantity": "17",
             "free_pcs": "0"
         }, {
-            "product_type": "热镀",
-            "spec": "023042*2.75*6000",
-            "item_id": "sth",
+            "product_type": "焊管",
+            "spec": "016075.5*2.3*6000",
+            "item_id": "016075.5*2.3*6000",
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
@@ -24,16 +24,16 @@
         }, {
             "product_type": "热镀",
             "spec": "02A165*3.75*6000",
-            "item_id": "sth",
+            "item_id": "02A165*3.75*6000",
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
             "quantity": "10",
             "free_pcs": "0"
         }, {
-            "product_type": "热镀",
+            "product_type": "焊管",
             "spec": "025060*3.0*6000",
-            "item_id": "sth",
+            "item_id": "025060*3.0*6000",
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
@@ -41,5 +41,4 @@
             "free_pcs": "0"
         }]
     }
-
 }
