@@ -13,6 +13,7 @@ class Order(BaseEntity):
         self.rowid = None  # 主键id
         self.order_no = None # 订单号
         self.items = []  # 订单子项
+        self.company_id = None # 公司id
         self.customer_id = None  # 客户id
         self.salesman_id = None  # 销售员id
         self.create_time = None  # 创建时间

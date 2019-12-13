@@ -2,6 +2,7 @@
     "data": {
         "customer_id": "scymymygxgs",
         "salesman_id": "4",
+        "company_id": "00",
         "items": [{
             "product_type": "热镀",
             "spec": "02A165*4.25*6000",
