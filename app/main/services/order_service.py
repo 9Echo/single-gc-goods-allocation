@@ -9,7 +9,6 @@ from app.utils.uuid_util import UUIDUtil
 
 def generate_order(order_data):
     """根据json数据生成对应的订单"""
-    print(order_data)
     order = Order()
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
@@ -29,5 +28,5 @@ def generate_order(order_data):
         oi.f_loc = item['f_loc']
         order.items.append(oi)
     # 生成的订单入库
-    order_dao.insert(order)
+    #order_dao.insert(order)
     return order

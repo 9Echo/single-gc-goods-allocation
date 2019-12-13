@@ -24,6 +24,8 @@ def dispatch(order):
         di.material = item.material
         di.f_whs = item.f_whs
         di.f_loc = item.f_loc
+        di.weight = weight_calculator.calculate_weight(di.product_type, di.spec, di.quantity, di.free_pcs)
+        di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.spec, di.quantity, di.free_pcs)
         delivery_items.append(di)
     # 使用模型过滤器生成发货通知单
     sheets = dispatch_filter.filter(delivery_items)
@@ -40,7 +42,6 @@ def dispatch(order):
         for di in sheet.items:
             di.delivery_item_no = UUIDUtil.create_id("di")
             di.delivery_no = sheet.delivery_no
-            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.spec, di.quantity, di.free_pcs)
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
     #将推荐发货通知单暂存redis
