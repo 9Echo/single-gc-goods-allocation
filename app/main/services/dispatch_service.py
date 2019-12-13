@@ -27,8 +27,11 @@ def dispatch(order):
     # 使用模型过滤器生成发货通知单
     sheets = dispatch_filter.filter(delivery_items)
     # 补充发货单的属性
+    batch_no = UUIDUtil.create_id("ba")
     for sheet in sheets:
+        sheet.load_task_id = UUIDUtil.create_id("lt")
         sheet.delivery_no = sheet.delivery_no = UUIDUtil.create_id("ds")
+        sheet.batch_no = batch_no
         sheet.customer_id = order.customer_id
         sheet.salesman_id = order.salesman_id
         sheet.weight = 0
