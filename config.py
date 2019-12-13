@@ -41,6 +41,11 @@ class Config:
     ODS_MYSQL_DB = 'db_dw'
     ODS_MYSQL_CHARSET = 'utf8'
 
+    # 开单参数配置
+    # 车载最大重量
+    MAX_WEIGHT = 35000
+
+
     @staticmethod
     def init_app(app):
         pass

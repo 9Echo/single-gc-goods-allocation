@@ -10,7 +10,7 @@ def filter(delivery_items: list):
     filtered_items = []
     # 将产品品类分组，属于group1或group2的可以分到同一单，其余的每个品类各一单
     group1 = ['热镀', '热度', '热镀1', 'QF热镀管']
-    group2 = ['焊管', '焊管1', '螺旋焊管']
+    group2 = ['焊管', '焊管 ','焊管1']
     target_group = None
     for item in delivery_items:
         if group1.__contains__(item.product_type):

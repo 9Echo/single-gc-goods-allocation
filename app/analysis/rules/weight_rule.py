@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/11 17:15
 # @Author  : Zihao.Liu
-
+from config import Config
 from app.analysis.rules import package_solution
-from app.utils import weight_calculator
 
 
 def filter(delivery_items: list):
@@ -13,6 +12,7 @@ def filter(delivery_items: list):
     """
     filtered_items = []
     weight_cost = []
+    print(Config.MAX_WEIGHT)
     # 根据item的重量生成weight_cost的列表
     for item in delivery_items:
         # 如果出现重量为0，则该重量为0的单成一单
@@ -20,7 +20,7 @@ def filter(delivery_items: list):
             filtered_items.append(item)
             return filtered_items
         weight_cost.append((item.weight, item.weight))
-    final_weight, result_list = package_solution.dynamic_programming(len(delivery_items), 35000, weight_cost)
+    final_weight, result_list = package_solution.dynamic_programming(len(delivery_items), Config.MAX_WEIGHT, weight_cost)
     for i in range(0, len(result_list)):
         if result_list[i] == 1:
             filtered_items.append(delivery_items[i])

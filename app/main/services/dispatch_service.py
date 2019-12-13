@@ -7,6 +7,7 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.services import redis_service
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
+from config import Config
 
 
 def dispatch(order):
@@ -64,7 +65,7 @@ def dispatch_load_task(sheets: list):
         weight_cost = []
         for sheet in left_sheets:
             weight_cost.append((sheet.weight, sheet.weight))
-        final_weight, result_list = package_solution.dynamic_programming(len(left_sheets), 35000, weight_cost)
+        final_weight, result_list = package_solution.dynamic_programming(len(left_sheets), Config.MAX_WEIGHT, weight_cost)
         load_task_id = UUIDUtil.create_id("lt")
         # 记录未命中的单子
         missed_sheets = []
