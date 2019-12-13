@@ -14,6 +14,7 @@ class DeliveryLogDao(BaseDao):
         try:
             sql = """
                 insert into db_trans_plan.t_ga_delivery_log(
+                company_id,
                 delivery_no,
                 delivery_item_no,
                 op,
@@ -21,9 +22,10 @@ class DeliveryLogDao(BaseDao):
                 quantity_after,
                 free_pcs_before,
                 free_pcs_after,
-                create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
+                create_time) value(%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             if log_list:
                 values = [tuple([
+                    item.company_id,
                     item.delivery_no,
                     item.delivery_item_no,
                     item.op,

@@ -130,13 +130,15 @@ def confirm(new_delivery_list):
     :param: delivery是传过来的发货通知单对象列表
     :return:发货通知单对象列表
     """
-    log_list = []
     result_data = get_delivery_list(new_delivery_list[0].batch_no)
     # 原明细数据
     old_item_list = result_data.data
     # 新明细数据
     new_item_list = []
+    # 公司id
+    company_id = ''
     for i in new_delivery_list:
+        company_id = i.company_id if not company_id else company_id
         new_item_list.extend(i.items)
     #如果原明细数据在
     if result_data.code != ResponseCode.Error:
@@ -150,34 +152,49 @@ def confirm(new_delivery_list):
             filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], new_item_list))
         old_update_list = list(
             filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in new_item_list], old_item_list))
-        # update状态
-        log_update_list = []
-        for i in old_update_list:
-            for j in new_update_list:
-                if i.delivery_item_no == j.delivery_item_no:
-                    if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
-                        log_update_list.append(
-                            DeliveryLog(
-                                {"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
-                                 "quantity_before": i.quantity, "quantity_after": j.quantity,
-                                 "free_pcs_before": i.free_pcs,
-                                 "free_pcs_after": j.free_pcs}))
-        # insert状态
-        log_insert_list = [
-            DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
-                         "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
-                         "free_pcs_after": i.free_pcs}) for i in insert_list]
-        # delete状态
-        log_delete_list = [
-            DeliveryLog({"delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
-                         "quantity_before": i.quantity, "quantity_after": 0,
-                         "free_pcs_before": i.free_pcs,
-                         "free_pcs_after": 0}) for i in delete_list]
-        # 合并
-        log_list = log_delete_list + log_insert_list + log_update_list
+        # 合并列表
+        log_list = merge(insert_list, delete_list, new_update_list, old_update_list, company_id)
         # 数据库操作
         delivery_log_dao.insert(log_list)
         return True
+
+
+def merge(insert_list, delete_list, new_update_list, old_update_list, company_id):
+    """
+    合并列表，并做更新前后的对比
+    :param insert_list:
+    :param delete_list:
+    :param new_update_list:
+    :param old_update_list:
+    :param company_id:
+    :return:
+    """
+    # update状态
+    log_update_list = []
+    for i in old_update_list:
+        for j in new_update_list:
+            if i.delivery_item_no == j.delivery_item_no:
+                if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
+                    log_update_list.append(
+                        DeliveryLog(
+                            {"company_id":company_id, "delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
+                             "quantity_before": i.quantity, "quantity_after": j.quantity,
+                             "free_pcs_before": i.free_pcs,
+                             "free_pcs_after": j.free_pcs}))
+    # insert状态
+    log_insert_list = [
+        DeliveryLog({"company_id":company_id, "delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 1,
+                     "quantity_before": 0, "quantity_after": i.quantity, "free_pcs_before": 0,
+                     "free_pcs_after": i.free_pcs}) for i in insert_list]
+    # delete状态
+    log_delete_list = [
+        DeliveryLog({"company_id":company_id, "delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 0,
+                     "quantity_before": i.quantity, "quantity_after": 0,
+                     "free_pcs_before": i.free_pcs,
+                     "free_pcs_after": 0}) for i in delete_list]
+    # 合并
+    log_list = log_delete_list + log_insert_list + log_update_list
+    return log_list
 
 
 #

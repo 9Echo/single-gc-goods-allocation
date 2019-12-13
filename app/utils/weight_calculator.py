@@ -35,7 +35,7 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     if len(data) != 0:
         i = data[0]
         # 根重
-        if i["GS_PER"] is not None and float(i["GS_PER"]) > 0:
+        if i["GS_PER"] and float(i["GS_PER"]) > 0:
             pcs = int(i["GS_PER"])
         total_pcs = int(pack_num) * pcs + int(free_num)
     return total_pcs
@@ -46,11 +46,9 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     # 外径、壁厚、长度、系数、根 / 件数
     # i["JM_D"], i["JM_P"], i["VER_L"], i["GS_XS"], i["GS_PER"]
     输入数据：品名:cname、规格:itemid、件数:pack_num、散根数:free_num
-    :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:None
+    :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:0
     """
-    # print('input:  ', cname, itemid, pack_num, free_num)
     data = weight_calculator_dao.get_data_from_table(cname, itemid)
-    # print(data)
     weight = 0
     if len(data) != 0:
         i = data[0]
@@ -61,7 +59,7 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
         #     weight_one = get_weight_of_each_root(i)
         # if pack_num == 0:
         #     weight = round(weight_one) * int(free_num)
-        GS_PER = i["GS_PER"] if i["GS_PER"] is not None else 0
+        GS_PER = i["GS_PER"] if i["GS_PER"] else 0
         weight = round(weight_one * int(pack_num) * GS_PER + weight_one * int(free_num))
     return weight
 
