@@ -4,6 +4,7 @@
 # Modified: shaoluyu 2019/11/13
 from app.analysis.rules import dispatch_filter
 from app.main.entity.delivery_item import DeliveryItem
+from app.main.services import redis_service
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
 
@@ -42,4 +43,6 @@ def dispatch(order):
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.spec, di.quantity, di.free_pcs)
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
+    #将推荐发货通知单暂存redis
+    redis_service.set_delivery_list(sheets)
     return sheets
