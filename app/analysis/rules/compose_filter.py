@@ -27,7 +27,8 @@ def filter(delivery_list: list):
             company_id = i.company_id
         if i.delivery_no:
             delivery_no_list.append(i.delivery_no)
-        customer_id_list.append(i.customer_id)
+        if i.customer_id:
+            customer_id_list.append(i.customer_id)
         weight += float(i.weight)
     if not delivery_no_list:
         raise MyException('提货单号为空！', ResponseCode.Error)
