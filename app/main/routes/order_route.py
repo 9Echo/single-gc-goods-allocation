@@ -7,15 +7,14 @@ import json
 from flask import request
 from flask_restful import Resource
 
-from app.main.dao.order_dao import order_dao
 from app.main.services import order_service, dispatch_service
 from app.utils.result import Result
 
 
 class OrderRoute(Resource):
 
-    def get(self):
-        return Result.success_response(order_dao.get_all())
+    # def get(self):
+    #     return Result.success_response(order_dao.get_all())
 
     def post(self):
         """输入订单，返回开单结果

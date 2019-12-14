@@ -18,10 +18,10 @@ def set_delivery_list(delivery_list):
     :return:
     """
     try:
+        redis_conn = redis.Redis(connection_pool=redis_pool)
         if not delivery_list:
             return Result.error("无数据！")
         batch_no = getattr(delivery_list[0], "batch_no", None)
-        redis_conn = redis.Redis(connection_pool=redis_pool)
         if batch_no:
             dict_list = Result.entity(delivery_list).data
             json_data = json.dumps(dict_list)

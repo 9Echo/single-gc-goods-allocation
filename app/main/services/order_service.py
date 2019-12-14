@@ -12,7 +12,7 @@ def generate_order(order_data):
     order = Order()
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
-    order.company_id = order_data['company_id']
+    order.company_id = order_data.get("company_id")
     order.customer_id = order_data['customer_id']
     order.salesman_id = order_data['salesman_id']
     for item in order_data['items']:

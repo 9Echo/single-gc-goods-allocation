@@ -19,7 +19,8 @@ def filter(delivery_list: list):
     # 现有重量
     weight = 0
     for i in delivery_list:
-        company_id = i.company_id if not company_id else company_id
+        if not company_id:
+            company_id = i.company_id
         customer_id_list.append(i.customer_id)
         weight += float(i.weight)
     delivery_dict_list = compose_dao.get_compose_delivery(company_id, customer_id_list)

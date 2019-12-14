@@ -13,7 +13,7 @@ def filter(delivery_dict_list: list, weight):
     weight_cost = []
     # 根据item的重量生成weight_cost的列表
     for item in delivery_dict_list:
-        weight_cost.append(tuple([float(item.get('weight')), float(item.get('weight'))]))
+        weight_cost.append((float(item.get('weight')), float(item.get('weight'))))
     final_weight, result_list = package_solution.dynamic_programming(len(delivery_dict_list), Config.MAX_WEIGHT - weight, weight_cost)
     print(result_list)
     for i in range(0, len(result_list)):
