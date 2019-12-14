@@ -31,10 +31,10 @@ def demo():
     return jsonify({"name": "gc goods allocation"})
 
 
-@blueprint.route('/compose', methods=['GET'])
-def compose():
-    ds = compose_route.compose(1)
-    return 200
+# @blueprint.route('/compose', methods=['GET'])
+# def compose():
+#     ds = compose_route.compose(1)
+#     return 200
 
 
 @blueprint.app_errorhandler(MySQLError)

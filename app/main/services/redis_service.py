@@ -18,7 +18,7 @@ def set_delivery_list(delivery_list):
     :return:
     """
     try:
-        if delivery_list is None or len(delivery_list) == 0:
+        if not delivery_list:
             return Result.error("无数据！")
         batch_no = getattr(delivery_list[0], "batch_no", None)
         redis_conn = redis.Redis(connection_pool=redis_pool)

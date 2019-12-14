@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # Description: 定时更新库存
 # Created: shaoluyu 2019/11/13
-import json
-
-import redis
-import requests
-from flask import current_app
-
-from app.main.redis_pool import redis_pool
-from app.utils.reids_lock import RedisLock
+# import json
+#
+# import redis
+# import requests
+# from flask import current_app
+#
+# from app.main.redis_pool import redis_pool
+# from app.utils.reids_lock import RedisLock
 
 
 # def update_stock():

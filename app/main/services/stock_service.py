@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Description: 获取库存服务
 # Created: shaoluyu 2019/11/13
-import json
-
-import requests
-from flask import current_app
+# import json
+#
+# import requests
+# from flask import current_app
 
 
 # def get_stock():
