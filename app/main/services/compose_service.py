@@ -14,11 +14,11 @@ def generate_delivery(delivery_list_data):
     delivery_model_list = []
     for delivery in delivery_list_data:
         delivery_model = DeliverySheet(delivery)
-        delivery_model.items = []
+        # delivery_model.items = []
 
-        for item in delivery['items']:
-            delivery_item_model = DeliveryItem(item)
-            delivery_model.items.append(delivery_item_model)
+        # for item in delivery['items']:
+        #     delivery_item_model = DeliveryItem(item)
+        #     delivery_model.items.append(delivery_item_model)
         delivery_model_list.append(delivery_model)
 
     return delivery_model_list
