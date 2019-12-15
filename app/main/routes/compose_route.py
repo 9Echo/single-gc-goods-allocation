@@ -25,10 +25,10 @@ class ComposeRoute(Resource):
                 return Result.success_response(result_delivery_list)
             else:
                 return Result.error_response('数据为空！')
-        except MyException as e:
-            current_app.logger.info(e.message)
-            current_app.logger.exception(e)
-            return Result.error_response(e.message)
+        except MyException as me:
+            current_app.logger.info(me.message)
+            current_app.logger.exception(me)
+            return Result.error_response(me.message)
         except Exception as e:
             current_app.logger.info("ComposeRoute error")
             current_app.logger.exception(e)

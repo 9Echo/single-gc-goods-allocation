@@ -7,6 +7,7 @@ from flask import request
 from flask_restful import Resource
 from app.main.services.confirm_delivery_service import confirm
 from app.main.services.confirm_delivery_service import generate_delivery
+from app.utils.my_exception import MyException
 from app.utils.result import Result
 
 
@@ -32,6 +33,10 @@ class ConfirmRoute(Resource):
                 return Result.success_response({})
             else:
                 return Result.error_response('数据为空！')
+        except MyException as me:
+            current_app.logger.info(me.message)
+            current_app.logger.exception(me)
+            return Result.error_response(me.message)
         except Exception as e:
             current_app.logger.info("confirm error")
             current_app.logger.exception(e)

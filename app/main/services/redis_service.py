@@ -41,8 +41,6 @@ def get_delivery_list(batch_no):
     :return:
     """
     try:
-        if batch_no is None or batch_no.strip() == "":
-            return Result.error("批次号为空")
         redis_conn = redis.Redis(connection_pool=redis_pool)
         json_list = redis_conn.get(batch_no)
         if json_list:
@@ -50,7 +48,7 @@ def get_delivery_list(batch_no):
             items = []
             for i in delivery_list:
                 items.extend([DeliveryItem(j) for j in i.get('items')])
-            return Result.info(data=items)
+            return Result.success(data=items)
         else:
             return Result.error("数据不存在")
     except Exception as e:

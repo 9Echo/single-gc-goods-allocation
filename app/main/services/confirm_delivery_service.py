@@ -7,6 +7,7 @@ from app.main.dao.delivery_log_dao import delivery_log_dao
 from app.main.entity.delivery_log import DeliveryLog
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services.redis_service import get_delivery_list
+from app.utils.my_exception import MyException
 
 
 def generate_delivery(delivery_list_data):
@@ -130,7 +131,13 @@ def confirm(new_delivery_list):
     :param: delivery是传过来的发货通知单对象列表
     :return:发货通知单对象列表
     """
+    # 判断批次号的存在
+    if not getattr(new_delivery_list[0], 'batch_no', None):
+        raise MyException('批次号为空！', ResponseCode.Error)
     result_data = get_delivery_list(new_delivery_list[0].batch_no)
+    # 如果没获取到原数据，结束操作
+    if not getattr(result_data, 'data', None):
+        return
     # 原明细数据
     old_item_list = result_data.data
     # 新明细数据
@@ -138,25 +145,24 @@ def confirm(new_delivery_list):
     # 公司id
     company_id = ''
     for i in new_delivery_list:
-        company_id = i.company_id if not company_id else company_id
+        if not company_id:
+            company_id = i.company_id
         new_item_list.extend(i.items)
-    #如果原明细数据在
-    if result_data.code != ResponseCode.Error:
-        # 插入列表
-        insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
-        # 删除列表
-        delete_list = list(
-            filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in new_item_list], old_item_list))
-        # 更新列表
-        new_update_list = list(
-            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], new_item_list))
-        old_update_list = list(
-            filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in new_item_list], old_item_list))
-        # 合并列表
-        log_list = merge(insert_list, delete_list, new_update_list, old_update_list, company_id)
-        # 数据库操作
-        delivery_log_dao.insert(log_list)
-        return True
+    # 插入列表
+    insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
+    # 删除列表
+    delete_list = list(
+        filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in new_item_list], old_item_list))
+    # 更新列表
+    new_update_list = list(
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], new_item_list))
+    old_update_list = list(
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in new_item_list], old_item_list))
+    # 合并列表
+    log_list = merge(insert_list, delete_list, new_update_list, old_update_list, company_id)
+    # 数据库操作
+    delivery_log_dao.insert(log_list)
+    return True
 
 
 def merge(insert_list, delete_list, new_update_list, old_update_list, company_id):
