@@ -42,4 +42,9 @@ def handle_mysql_exception(e):
     """封装数据库错误信息"""
     return Result.error_response("数据库错误")
 
+@blueprint.app_errorhandler(KeyError)
+def handle_key_exception(e):
+    """封装数据库错误信息"""
+    return Result.error_response("缺少输入参数")
+
 
