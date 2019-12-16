@@ -12,9 +12,9 @@ class Sheet:
 
 class AnalysisDao(BaseDao):
 
-    def generate_load_task_id(self):
+    def generate(self):
         """为重量为0或超过30吨的车生成load_task_id"""
-        sql = "select delivery_no from t_ga_delivery_sheet where weight=0 or weight > 30"
+        sql = "select delivery_no from t_ga_delivery_sheet where weight > 33000"
         rs = self.select_all(sql)
         dn_list = []
         for row in rs:
@@ -42,7 +42,7 @@ class AnalysisDao(BaseDao):
                     left = current[30:len(current)]
                     current = current[0:30]
                 weight_cost = [(float(sheet.weight), float(sheet.weight)) for sheet in current]
-                bestvalue, result = package_solution.dynamic_programming(len(current), 35, weight_cost)
+                bestvalue, result = package_solution.dynamic_programming(len(current), 34000, weight_cost)
                 if bestvalue == 0:
                     break
                 print("weight:" + str(bestvalue))
@@ -53,7 +53,7 @@ class AnalysisDao(BaseDao):
                         left.append(current[i])
                 current = left
                 for s in composed:
-                    print(s.delivery_no + ":" + s.weight)
+                    print(s.delivery_no + ":" + str(s.weight))
                 update_sql = "update t_ga_delivery_sheet set load_task_id=%s where delivery_no=%s"
                 load_task_id = UUIDUtil.create_id('lt')
                 values = [(load_task_id, s.delivery_no) for s in composed]
@@ -62,4 +62,5 @@ class AnalysisDao(BaseDao):
 
 if __name__ == '__main__':
     dao = AnalysisDao()
+    dao.generate()
     dao.compose()

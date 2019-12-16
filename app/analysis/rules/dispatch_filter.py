@@ -4,7 +4,6 @@
 
 from app.analysis.rules import product_type_rule, weight_rule
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.utils.uuid_util import UUIDUtil
 
 
 def filter(delivery_items: list):
@@ -28,3 +27,4 @@ def filter(delivery_items: list):
         if sheet:
             sheets.append(sheet)
     return sheets
+

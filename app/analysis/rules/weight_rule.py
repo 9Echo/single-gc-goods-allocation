@@ -12,7 +12,6 @@ def filter(delivery_items: list):
     """
     filtered_items = []
     weight_cost = []
-    print(Config.MAX_WEIGHT)
     # 根据item的重量生成weight_cost的列表
     for item in delivery_items:
         # 如果出现重量为0，则该重量为0的单成一单
