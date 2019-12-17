@@ -126,6 +126,73 @@ class DevelopmentConfig(Config):
 class TestConfig(Config):
     """测试环境配置
     """
+    # Mysql配置，可选（不使用时可删除）
+    MYSQL_HOST = '192.168.1.12'
+    MYSQL_PORT = 3307
+    MYSQL_USER = 'v3test_user'
+    MYSQL_PASSWD = 'V3Test@56'
+    MYSQL_DB = 'db_trans_plan'
+    MYSQL_CHARSET = 'utf8'
+
+    # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
+        MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
+
+    # Redis配置，可选（不使用时可删除）
+    REDIS_HOST = '47.99.118.183'
+    REDIS_PORT = '6379'
+    REDIS_PASSWD = 'wobugaoxing'
+    REDIS_MAX_CONNECTIONS = 2
+
+    # APScheduler定时任务配置，可选（不使用时可删除）
+    SCHEDULER_OPEN = False
+    SCHEDULER_API_ENABLED = True
+    # JOBS = [
+    #     {
+    #         # 程序启动执行一次
+    #         'id': 'redis_task_start',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'date',
+    #         'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
+    #     },
+    #     {
+    #         # 周期定时任务
+    #         'id': 'redis_task2',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'interval',
+    #         'seconds': 60*30
+    #     },
+    #
+    # ]
+
+    # Celery配置，可选（不使用时可删除）
+    # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'
+    # CELERY_RESULT_BACKEND = 'redis://:wobugaoxing@47.99.118.183:6379/0'
+    # # 导入任务所在的模块
+    # CELERY_IMPORTS = ('app.task.celery_task', 'app.task.celery_task2')
+    # # 设置定时任务
+    # from datetime import timedelta
+    # from celery.schedules import crontab
+    # CELERY_TIMEZONE = 'Asia/Shanghai'  # 指定时区，不指定默认为 'UTC'
+    # CELERYBEAT_SCHEDULE = {
+    #     'add-every-30-seconds': {
+    #         'task': 'app.task.celery_task.add_together',
+    #         'schedule': timedelta(seconds=30),  # 每30秒执行一次
+    #         'args': (5, 8)  # 任务函数参数
+    #     },
+    #     'print-at-some-time': {
+    #         'task': 'app.task.celery_task.print_hello',
+    #         'schedule': crontab(minute='0-59/2'),
+    #         'args': None
+    #     },
+    #     'multiply-every-60-seconds': {
+    #         'task': 'app.task.celery_task2.multiply_together',
+    #         'schedule': timedelta(seconds=60),  # 每30秒执行一次
+    #         'args': (3, 4)  # 任务函数参数
+    #     },
+    # }
 
 
 class UatConfig(Config):
