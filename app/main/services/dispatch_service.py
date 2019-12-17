@@ -56,12 +56,12 @@ def dispatch_load_task(sheets: list):
     # 先为重量为空的单子生成单独车次
 
     # 根据前端要求，将车次号置成普通的数字
-    load_task_id = 0
+    task_id = 0
     left_sheets = []
     for sheet in sheets:
         if sheet.weight == 0:
-            load_task_id += 1
-            sheet.load_task_id = load_task_id
+            task_id += 1
+            sheet.load_task_id = task_id
         else:
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
@@ -70,12 +70,13 @@ def dispatch_load_task(sheets: list):
         for sheet in left_sheets:
             weight_cost.append((sheet.weight, sheet.weight))
         final_weight, result_list = package_solution.dynamic_programming(len(left_sheets), Config.MAX_WEIGHT, weight_cost)
-        load_task_id = UUIDUtil.create_id("lt")
+        task_id += 1
+        load_task_id = task_id
         # 记录未命中的单子
         missed_sheets = []
         for i in range(0, len(result_list)):
             if result_list[i] == 1:
-                load_task_id += 1
+
                 left_sheets[i].load_task_id = load_task_id
             else:
                 missed_sheets.append(left_sheets[i])
