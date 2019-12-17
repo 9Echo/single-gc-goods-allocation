@@ -54,10 +54,14 @@ def dispatch(order):
 def dispatch_load_task(sheets: list):
     """将发货单根据重量组合到对应的车次上"""
     # 先为重量为空的单子生成单独车次
+
+    # 根据前端要求，将车次号置成普通的数字
+    load_task_id = 0
     left_sheets = []
     for sheet in sheets:
         if sheet.weight == 0:
-            sheet.load_task_id = UUIDUtil.create_id("lt")
+            load_task_id += 1
+            sheet.load_task_id = load_task_id
         else:
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
@@ -71,6 +75,7 @@ def dispatch_load_task(sheets: list):
         missed_sheets = []
         for i in range(0, len(result_list)):
             if result_list[i] == 1:
+                load_task_id += 1
                 left_sheets[i].load_task_id = load_task_id
             else:
                 missed_sheets.append(left_sheets[i])
