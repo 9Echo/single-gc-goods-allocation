@@ -32,8 +32,12 @@ def dispatch(order):
     sheets = dispatch_filter.filter(delivery_items)
     # 补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
+    # 提货单号序号
+    doc_type = '提货单'
+    sheet_no = 0
     for sheet in sheets:
-        sheet.delivery_no = sheet.delivery_no = UUIDUtil.create_id("ds")
+        sheet_no += 1
+        sheet.delivery_no = sheet.delivery_no = doc_type + str(sheet_no)
         sheet.batch_no = batch_no
         sheet.customer_id = order.customer_id
         sheet.salesman_id = order.salesman_id
