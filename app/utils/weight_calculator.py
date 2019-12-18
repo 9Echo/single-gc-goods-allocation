@@ -54,7 +54,7 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
         i = data[0]
         # 根重
         weight_one = 0
-        if i["GBGZL"] is not None and float(i["GBGZL"]) > 0:
+        if i["GBGZL"] and float(i["GBGZL"]) > 0:
             weight_one = float(i["GBGZL"])
         # else:
         #     weight_one = get_weight_of_each_root(i)
