@@ -35,6 +35,7 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     if len(data) != 0:
         i = data[0]
         # 根重
+        pcs = 0
         if i["GS_PER"] and float(i["GS_PER"]) > 0:
             pcs = int(i["GS_PER"])
         total_pcs = int(pack_num) * pcs + int(free_num)
