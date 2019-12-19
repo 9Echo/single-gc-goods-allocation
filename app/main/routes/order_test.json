@@ -10,30 +10,21 @@
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
-            "quantity": "17",
-            "free_pcs": "0"
+            "quantity": "30",
+            "free_pcs": "5"
         }, {
+            "product_type": "热度",
+            "spec": "021025*1.9*5950",
+            "item_id": "021025*1.9*5950",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "30",
+            "free_pcs": "6"
+        },{
             "product_type": "焊管",
             "spec": "016075.5*2.3*6000",
             "item_id": "016075.5*2.3*6000",
-            "f_whs": "sth",
-            "f_loc": "sth",
-            "material": "sth",
-            "quantity": "16",
-            "free_pcs": "0"
-        }, {
-            "product_type": "热镀",
-            "spec": "02A165*3.75*6000",
-            "item_id": "02A165*3.75*6000",
-            "f_whs": "sth",
-            "f_loc": "sth",
-            "material": "sth",
-            "quantity": "10",
-            "free_pcs": "0"
-        }, {
-            "product_type": "焊管",
-            "spec": "025060*3.0*6000",
-            "item_id": "025060*3.0*6000",
             "f_whs": "sth",
             "f_loc": "sth",
             "material": "sth",
@@ -41,4 +32,5 @@
             "free_pcs": "0"
         }]
     }
+
 }

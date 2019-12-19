@@ -63,7 +63,7 @@ def dispatch_load_task(sheets: list):
     task_id = 0
     left_sheets = []
     for sheet in sheets:
-        if sheet.weight == 0:
+        if sheet.weight == 0 or sheet.weight >= Config.MAX_WEIGHT:
             task_id += 1
             sheet.load_task_id = task_id
         else:
