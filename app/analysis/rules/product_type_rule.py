@@ -16,6 +16,7 @@ def filter(delivery_items: list):
             if similar_groups[i].__contains__(item.product_type):
                 target_group = similar_groups[i]
                 break
+        if target_group:
             break
     if target_group is None:
         # 订单中没有属于分组内的产品时
