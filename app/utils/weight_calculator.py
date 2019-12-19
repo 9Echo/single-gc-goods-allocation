@@ -35,10 +35,9 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     if len(data) != 0:
         i = data[0]
         # 根重
-        pcs = 0
         if i["GS_PER"] and float(i["GS_PER"]) > 0:
             pcs = int(i["GS_PER"])
-        total_pcs = int(pack_num) * pcs + int(free_num)
+            total_pcs = int(pack_num) * pcs + int(free_num)
     return total_pcs
 
 
@@ -54,15 +53,14 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     if len(data) != 0:
         i = data[0]
         # 根重
-        weight_one = 0
         if i["GBGZL"] and float(i["GBGZL"]) > 0:
             weight_one = float(i["GBGZL"])
         # else:
         #     weight_one = get_weight_of_each_root(i)
         # if pack_num == 0:
         #     weight = round(weight_one) * int(free_num)
-        GS_PER = i["GS_PER"] if i["GS_PER"] else 0
-        weight = round(weight_one * int(pack_num) * GS_PER + weight_one * int(free_num))
+            GS_PER = i["GS_PER"] or 0
+            weight = round(weight_one * int(pack_num) * GS_PER + weight_one * int(free_num))
     return weight
 
 
