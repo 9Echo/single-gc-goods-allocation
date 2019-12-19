@@ -20,8 +20,8 @@ def generate_order(order_data):
         oi.order_no = order.order_no
         oi.product_type = item['product_type']
         oi.spec = item['spec']
-        oi.quantity = int(item['quantity']) or 0
-        oi.free_pcs = int(item['free_pcs']) or 0
+        oi.quantity = int(item['quantity'] or 0)
+        oi.free_pcs = int(item['free_pcs'] or 0)
         oi.item_id = item['item_id']
         oi.material = item['material']
         oi.f_whs = item['f_whs']
