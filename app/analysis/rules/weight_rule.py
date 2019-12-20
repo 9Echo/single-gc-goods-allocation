@@ -45,22 +45,28 @@ def compose(filtered_items: list, left_items: list):
 
 def split_item(item, delta_weight):
     """拆分超重的订单，将子项全部转为散根计算"""
-    total_pcs = item.total_pcs
-    over_pcs = math.ceil(total_pcs * (delta_weight / item.weight))
-    if over_pcs < total_pcs:
-        # 超重的数量小于子发货单的数量时对子单进行拆分
-        new_item = copy.deepcopy(item)
-        new_item.total_pcs = over_pcs
-        new_item.weight = weight_calculator.calculate_weight(new_item.product_type, new_item.item_id, 0, over_pcs)
+    left_pcs = item.total_pcs - math.ceil(item.total_pcs * (delta_weight / item.weight))
+    if left_pcs > 0:
         # 根据转化倍数将散根转为整根
         times = weight_calculator.get_quantity_pcs(item.product_type, item.item_id)
-        new_item.quantity = int(over_pcs / times)
-        new_item.free_pcs = over_pcs % times
+        # 计算分单后的子单数量
+        quantity = int(left_pcs / times)
+        free_pcs = left_pcs % times
+        if free_pcs > item.free_pcs:
+            free_pcs = item.free_pcs
+        left_pcs = quantity * times + free_pcs
+        weight = weight_calculator.calculate_weight(item.product_type, item.item_id, quantity, free_pcs)
+        # 超重的部分生成新的子单
+        new_item = copy.deepcopy(item)
+        new_item.total_pcs = item.total_pcs - left_pcs
+        new_item.weight = item.weight - weight
+        new_item.quantity = item.quantity - quantity
+        new_item.free_pcs = item.free_pcs - free_pcs
         # 更新原子单的数量
-        item.total_pcs -= new_item.total_pcs
-        item.weight -= new_item.weight
-        item.quantity = int(item.total_pcs / times)
-        item.free_pcs = item.total_pcs % times
+        item.quantity = quantity
+        item.free_pcs = free_pcs
+        item.total_pcs = left_pcs
+        item.weight = weight
         return item, new_item
     else:
         # 超重的数量等于子发货单数量时忽略该子发货单
