@@ -21,7 +21,9 @@ def filter(delivery_items: list):
     if target_group is None:
         # 订单中没有属于分组内的产品时
         product_type = delivery_items[0].product_type
-        filtered_items.extend(filter(lambda i:i.product_type == product_type,delivery_items))
+        for i in delivery_items:
+            if i.product_type == product_type:
+                filtered_items.append(i)
     else:
         for item in delivery_items[:]:
             if target_group.__contains__(item.product_type):
