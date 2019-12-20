@@ -19,7 +19,7 @@ def filter(delivery_items: list):
         if target_group:
             break
     if target_group is None:
-        # 订单中没有属于分组内的产品时
+        # 订单中没有属于分组内的产品时,首选第一条数据，将跟第一条数据品种一样的数据筛选出来
         product_type = delivery_items[0].product_type
         for i in delivery_items:
             if i.product_type == product_type:

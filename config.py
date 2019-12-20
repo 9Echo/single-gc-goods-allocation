@@ -43,7 +43,7 @@ class Config:
 
     # 开单参数配置
     # 车载最大重量
-    MAX_WEIGHT = 35000
+    MAX_WEIGHT = 33000
 
 
     @staticmethod
