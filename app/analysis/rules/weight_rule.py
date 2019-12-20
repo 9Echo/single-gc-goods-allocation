@@ -24,8 +24,6 @@ def compose(filtered_items: list, left_items: list):
             candidate_items.append(item)
             left_items.remove(item)
             return candidate_items, left_items
-    # 给candidates从大到小排序
-    filtered_items.sort(key=lambda i: i.weight, reverse=True)
     # 依次将子发货单装入发货单中
     total_weight = 0
     for item in filtered_items:
@@ -40,27 +38,29 @@ def compose(filtered_items: list, left_items: list):
             if new_item:
                 candidate_items.append(item)
                 left_items.remove(item)
-                left_items.append(new_item)
+                left_items.insert(0, new_item)
             break
     return candidate_items, left_items
 
 
 def split_item(item, delta_weight):
-    """拆分超重的订单"""
-    quantity = item.quantity + 1 if item.free_pcs else item.quantity
-    over_quantity = math.ceil(quantity * (delta_weight / item.weight))
-    if over_quantity < quantity:
+    """拆分超重的订单，将子项全部转为散根计算"""
+    total_pcs = item.total_pcs
+    over_pcs = math.ceil(total_pcs * (delta_weight / item.weight))
+    if over_pcs < total_pcs:
         # 超重的数量小于子发货单的数量时对子单进行拆分
         new_item = copy.deepcopy(item)
-        new_item.quantity = over_quantity - 1 if item.free_pcs else over_quantity
-        new_item.weight = weight_calculator.calculate_weight(new_item.product_type, new_item.item_id, new_item.quantity,
-                                                             new_item.free_pcs)
-        new_item.total_pcs = weight_calculator.calculate_pcs(new_item.product_type, new_item.item_id, new_item.quantity,
-                                                             new_item.free_pcs)
-        item.quantity = quantity - over_quantity
-        item.free_pcs = 0
-        item.weight -= new_item.weight
+        new_item.total_pcs = over_pcs
+        new_item.weight = weight_calculator.calculate_weight(new_item.product_type, new_item.item_id, 0, over_pcs)
+        # 根据转化倍数将散根转为整根
+        times = weight_calculator.get_quantity_pcs(item.product_type, item.item_id)
+        new_item.quantity = int(over_pcs / times)
+        new_item.free_pcs = over_pcs % times
+        # 更新原子单的数量
         item.total_pcs -= new_item.total_pcs
+        item.weight -= new_item.weight
+        item.quantity = int(item.total_pcs / times)
+        item.free_pcs = item.total_pcs % times
         return item, new_item
     else:
         # 超重的数量等于子发货单数量时忽略该子发货单

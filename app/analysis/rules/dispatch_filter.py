@@ -12,6 +12,7 @@ def filter(delivery_items: list):
     """
     sheets = []
     left_items = delivery_items
+    left_items.sort(key=lambda i: i.weight, reverse=True)
     while left_items:
         filtered_items = product_type_rule.filter(left_items)
         filtered_items, left_items = weight_rule.compose(filtered_items, left_items)

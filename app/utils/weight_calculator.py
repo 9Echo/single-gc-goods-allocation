@@ -41,6 +41,13 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     return total_pcs
 
 
+def get_quantity_pcs(cname, itemid):
+    """
+    根据品类和规格查询一件有多少根
+    """
+    return calculate_pcs(cname, itemid, 1, 0)
+
+
 def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     """
     # 外径、壁厚、长度、系数、根 / 件数
