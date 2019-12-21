@@ -84,7 +84,8 @@ def dispatch_load_task(sheets: list):
                 no += 1
                 left_sheets[i].load_task_id = task_id
                 left_sheets[i].delivery_no = '提货单' + str(task_id) + '-' + str(no)
-                left_sheets[i].items = list(map(lambda de: de.delivery_no == left_sheets[i].delivery_no, left_sheets[i].items))
+                for de_item in left_sheets[i].items:
+                    de_item.delivery_no = left_sheets[i].delivery_no
             else:
                 missed_sheets.append(left_sheets[i])
         left_sheets = missed_sheets
