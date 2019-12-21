@@ -75,13 +75,16 @@ def dispatch_load_task(sheets: list):
             weight_cost.append((sheet.weight, sheet.weight))
         final_weight, result_list = package_solution.dynamic_programming(len(left_sheets), Config.MAX_WEIGHT, weight_cost)
         task_id += 1
-        load_task_id = task_id
+        # load_task_id = task_id
         # 记录未命中的单子
         missed_sheets = []
         for i in range(0, len(result_list)):
+            no = 0
             if result_list[i] == 1:
-
-                left_sheets[i].load_task_id = load_task_id
+                no += 1
+                left_sheets[i].load_task_id = task_id
+                left_sheets[i].delivery_no = '提货单' + str(task_id) + '-' + str(no)
+                left_sheets[i].items = list(map(lambda de: de.delivery_no == left_sheets[i].delivery_no, left_sheets[i].items))
             else:
                 missed_sheets.append(left_sheets[i])
         left_sheets = missed_sheets

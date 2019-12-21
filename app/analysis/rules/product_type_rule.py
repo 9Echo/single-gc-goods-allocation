@@ -24,6 +24,7 @@ def filter(delivery_items: list):
         for i in delivery_items:
             if i.product_type == product_type:
                 filtered_items.append(i)
+        # filtered_items.append(delivery_items[0])
     else:
         for item in delivery_items[:]:
             if target_group.__contains__(item.product_type):
