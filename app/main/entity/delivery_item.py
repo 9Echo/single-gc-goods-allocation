@@ -19,7 +19,7 @@ class DeliveryItem(BaseEntity):
         self.f_loc = None # 垛号
         self.material = None # 材质
         self.weight = None  # 产品重量
-        self.quantity = None  # 总数
+        self.quantity = None  # 件数
         self.free_pcs = None  # 散根数
         self.total_pcs = None # 总根数
         self.create_time = None  # 创建时间
