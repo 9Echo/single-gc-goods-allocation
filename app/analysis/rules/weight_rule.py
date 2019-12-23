@@ -7,6 +7,7 @@ import math
 from app.analysis.rules import dispatch_filter
 from app.main.entity.delivery_item import DeliveryItem
 from app.utils import weight_calculator
+from app.utils.uuid_util import UUIDUtil
 from config import Config
 
 
@@ -59,6 +60,7 @@ def split_item(item, delta_weight):
         # 超重的部分生成新的子单
         new_item = copy.deepcopy(item)
         new_item.total_pcs = item.total_pcs - left_pcs
+        new_item.delivery_item_no = UUIDUtil.create_id("di")
         new_item.weight = item.weight - weight
         new_item.quantity = item.quantity - quantity
         new_item.free_pcs = item.free_pcs - free_pcs
