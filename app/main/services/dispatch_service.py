@@ -2,7 +2,9 @@
 # @Time    : 2019/11/11 17:20
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
-from app.analysis.rules import dispatch_filter, package_solution
+import copy
+
+from app.analysis.rules import dispatch_filter, package_solution, weight_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.services import redis_service
 from app.utils import weight_calculator
@@ -50,6 +52,7 @@ def dispatch(order):
             sheet.total_pcs += di.total_pcs
     # 为发货单分配车次
     dispatch_load_task(sheets)
+    sorted(sheets, key=lambda v:v.load_task_id)
     # 将推荐发货通知单暂存redis
     redis_service.set_delivery_list(sheets)
     return sheets
@@ -57,11 +60,12 @@ def dispatch(order):
 
 def dispatch_load_task(sheets: list):
     """将发货单根据重量组合到对应的车次上"""
-    # 先为重量为空的单子生成单独车次
 
     # 根据前端要求，将车次号置成普通的数字
     task_id = 0
+    new_sheet_no = len(sheets) + 1
     left_sheets = []
+    # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
         if sheet.weight == 0 or sheet.weight >= Config.MAX_WEIGHT:
             task_id += 1
@@ -70,23 +74,62 @@ def dispatch_load_task(sheets: list):
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
     while left_sheets:
-        weight_cost = []
-        for sheet in left_sheets:
-            weight_cost.append((sheet.weight, sheet.weight))
-        final_weight, result_list = package_solution.dynamic_programming(len(left_sheets), Config.MAX_WEIGHT, weight_cost)
+        total_weight = 0
         task_id += 1
-        # load_task_id = task_id
-        # 记录未命中的单子
-        missed_sheets = []
-        for i in range(0, len(result_list)):
-            no = 0
-            if result_list[i] == 1:
-                no += 1
-                left_sheets[i].load_task_id = task_id
-                left_sheets[i].delivery_no = '提货单' + str(task_id) + '-' + str(no)
-                for de_item in left_sheets[i].items:
-                    de_item.delivery_no = left_sheets[i].delivery_no
+        for sheet in copy.copy(left_sheets):
+            total_weight += sheet.weight
+            if total_weight <= Config.MAX_WEIGHT:
+                # 不超重时将当前发货单装到车上
+                sheet.load_task_id = task_id
+                left_sheets.remove(sheet)
+                if Config.MAX_WEIGHT - total_weight < Config.TRUCK_SPLIT_RANGE:
+                    # 接近每车临界值时停止本次装车
+                    break
             else:
-                missed_sheets.append(left_sheets[i])
-        left_sheets = missed_sheets
+                # 超重时对发货单进行分单
+                if sheet.weight < Config.TRUCK_SPLIT_RANGE:
+                    # 重量不超过1吨（可配置）的发货单不分单
+                    break
+                else:
+                    # 对满足条件的发货单进行分单
+                    limit_weight = Config.MAX_WEIGHT - (total_weight - sheet.weight)
+                    sheet, new_sheet = split_sheet(sheet, limit_weight, new_sheet_no)
+                    if new_sheet:
+                        # 分单成功时旧单放入当前车上，新单放入等待列表
+                        new_sheet_no += 1
+                        sheet.load_task_id = task_id
+                        left_sheets.remove(sheet)
+                        left_sheets.insert(0, new_sheet)
+                        sheets.append(new_sheet)
+                    break
 
+
+def split_sheet(sheet, limit_weight, new_sheet_no):
+    """对超重的发货单进行分单"""
+    total_weight = 0
+    new_sheet = copy.copy(sheet)
+    sheet_items = []
+    new_sheet_items = copy.copy(sheet.items)
+    for item in sheet.items:
+        # 计算发货单中的哪一子项超重
+        total_weight += item.weight
+        if total_weight <= limit_weight:
+            sheet_items.append(item)
+            new_sheet_items.remove(item)
+        else:
+            # 子单总重超过限制时分单
+            item, new_item = weight_rule.split_item(item, total_weight - limit_weight)
+            if new_item:
+                sheet_items.append(item)
+                new_sheet_items.remove(item)
+                new_sheet_items.insert(0, new_item)
+            break
+    if sheet_items:
+        new_sheet.delivery_no = '提货单' + str(new_sheet_no)
+        sheet.items = sheet_items
+        sheet.weight = sum([i.weight for i in sheet.items])
+        new_sheet.items = new_sheet_items
+        new_sheet.weight = sum([i.weight for i in new_sheet.items])
+        return sheet, new_sheet
+    else:
+        return sheet, None

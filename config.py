@@ -44,7 +44,8 @@ class Config:
     # 开单参数配置
     # 车载最大重量
     MAX_WEIGHT = 33000
-
+    # 分车次限制重量
+    TRUCK_SPLIT_RANGE = 1000
 
     @staticmethod
     def init_app(app):
