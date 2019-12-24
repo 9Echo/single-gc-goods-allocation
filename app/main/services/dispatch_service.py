@@ -77,8 +77,8 @@ def dispatch_load_task(sheets: list):
     while left_sheets:
         total_weight = 0
         task_id += 1
+        no = 0
         for sheet in copy.copy(left_sheets):
-            no = 0
             total_weight += sheet.weight
             if total_weight <= Config.MAX_WEIGHT:
                 # 不超重时将当前发货单装到车上
