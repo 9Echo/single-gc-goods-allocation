@@ -19,7 +19,7 @@ def generate_delivery(delivery_data):
     #     delivery_model = DeliverySheet(delivery)
     #     delivery_model.items = []
 
-    for item in delivery_data['items']:
+    for item in delivery_data.get('items'):
         delivery_item_model = DeliveryItem(item)
         delivery_item_list.append(delivery_item_model)
 
