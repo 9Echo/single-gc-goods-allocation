@@ -29,7 +29,7 @@ class ConfirmRoute(Resource):
             if delivery_data:
                 delivery_item_list = generate_delivery(delivery_data)
                 # 对比
-                confirm(delivery_data['company_id'], delivery_item_list)
+                confirm(delivery_data['company_id'], delivery_data['batch_no'], delivery_item_list)
                 return Result.success_response({})
             else:
                 return Result.error_response('数据为空！')

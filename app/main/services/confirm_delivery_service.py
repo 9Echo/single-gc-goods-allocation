@@ -124,14 +124,14 @@ def generate_delivery(delivery_data):
 #         current_app.logger.exception(e)
 
 
-def confirm(company_id, new_delivery_list):
+def confirm(company_id, batch_no, new_delivery_list):
     """
     将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
     :return:发货通知单对象列表
     """
     # 判断批次号的存在
-    if not getattr(new_delivery_list[0], 'batch_no', None):
+    if not batch_no:
         raise MyException('批次号为空！', ResponseCode.Error)
     result_data = get_delivery_list(new_delivery_list[0].batch_no)
     # 如果没获取到原数据，结束操作
