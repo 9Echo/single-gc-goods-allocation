@@ -171,7 +171,7 @@ def merge(insert_list, delete_list, new_update_list, old_update_list, company_id
     for i in old_update_list:
         for j in new_update_list:
             if i.delivery_item_no == j.delivery_item_no:
-                if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
+                if int(i.quantity) != int(j.quantity) or int(i.free_pcs) != int(j.free_pcs):
                     log_update_list.append(
                         DeliveryLog(
                             {"company_id":company_id, "delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,
