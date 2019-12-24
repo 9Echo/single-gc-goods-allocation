@@ -210,6 +210,8 @@ def combine_sheets(sheets):
         for sheet in current_sheets:
             no += 1
             sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            for j in sheet.items:
+                j.delivery_no = sheet.delivery_no
 
 
 def print_sheets(sheets):
