@@ -24,12 +24,12 @@ class ConfirmRoute(Resource):
         """
         try:
             # 获取输入参数
-            delivery_list_data = request.get_json(force=True).get('data')  # 入参是json
+            delivery_data = request.get_json(force=True).get('data')  # 入参是json
             # 创建发货通知单实例，初始化属性
-            if delivery_list_data:
-                delivery_list = generate_delivery(delivery_list_data)
+            if delivery_data:
+                delivery_item_list = generate_delivery(delivery_data)
                 # 对比
-                confirm(delivery_list)
+                confirm(delivery_data['company_id'], delivery_item_list)
                 return Result.success_response({})
             else:
                 return Result.error_response('数据为空！')
