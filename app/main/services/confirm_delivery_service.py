@@ -133,7 +133,7 @@ def confirm(company_id, batch_no, new_delivery_list):
     # 判断批次号的存在
     if not batch_no:
         raise MyException('批次号为空！', ResponseCode.Error)
-    result_data = get_delivery_list(new_delivery_list[0].batch_no)
+    result_data = get_delivery_list(batch_no)
     # 如果没获取到原数据，结束操作
     if not getattr(result_data, 'data', None):
         return
