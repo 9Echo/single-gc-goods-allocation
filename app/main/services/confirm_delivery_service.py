@@ -10,21 +10,20 @@ from app.main.services.redis_service import get_delivery_list
 from app.utils.my_exception import MyException
 
 
-def generate_delivery(delivery_list_data):
+def generate_delivery(delivery_data):
     """
     根据json数据生成对应的发货通知单
     """
-    delivery_model_list = []
-    for delivery in delivery_list_data:
-        delivery_model = DeliverySheet(delivery)
-        delivery_model.items = []
+    delivery_item_list = []
+    # for delivery in delivery_data:
+    #     delivery_model = DeliverySheet(delivery)
+    #     delivery_model.items = []
 
-        for item in delivery['items']:
-            delivery_item_model = DeliveryItem(item)
-            delivery_model.items.append(delivery_item_model)
-        delivery_model_list.append(delivery_model)
+    for item in delivery_data['items']:
+        delivery_item_model = DeliveryItem(item)
+        delivery_item_list.append(delivery_item_model)
 
-    return delivery_model_list
+    return delivery_item_list
 
 
 # def confirm(delivery):
@@ -125,7 +124,7 @@ def generate_delivery(delivery_list_data):
 #         current_app.logger.exception(e)
 
 
-def confirm(new_delivery_list):
+def confirm(company_id, new_delivery_list):
     """
     将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
@@ -142,12 +141,6 @@ def confirm(new_delivery_list):
     old_item_list = result_data.data
     # 新明细数据
     new_item_list = []
-    # 公司id
-    company_id = ''
-    for i in new_delivery_list:
-        if not company_id:
-            company_id = i.company_id
-        new_item_list.extend(i.items)
     # 插入列表
     insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
     # 删除列表
