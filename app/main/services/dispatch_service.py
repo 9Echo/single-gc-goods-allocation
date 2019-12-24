@@ -177,7 +177,7 @@ def combine_sheets(sheets):
     load_task_dict = {}
     for sheet in sheets:
         load_task_dict.setdefault(sheet.load_task_id, []).append(sheet)
-    for sheet_group in load_task_dict.values():
+    for load_task_id, sheet_group in load_task_dict.items():
         product_dict = {}
         for current in sheet_group:
             # 取出当前组内的发货单，根据发货单中第一个子单的品类映射到product_dict上，每个品类对应的发货单作为合并的母体
@@ -203,6 +203,13 @@ def combine_sheets(sheets):
                         sitem.total_pcs +=citem.total_pcs
                         sitem.weight += citem.weight
                         source.items.remove(citem)
+        # 对当前车次做完合并后，重新对单号赋值
+        current_sheets = list(filter(lambda i:i.load_task_id == load_task_id, sheets))
+        doc_type = '提货单'
+        no = 0
+        for sheet in current_sheets:
+            no += 1
+            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
 
 
 def print_sheets(sheets):
