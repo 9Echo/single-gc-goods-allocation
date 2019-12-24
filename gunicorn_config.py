@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Description: Gunicorn服务器配置文件
-# Created: shaoluyu 2019/06/19
-# Modified: shaoluyu 2019/06/19
+# Created: shaoluyu 2019/10/29
+# Modified: shaoluyu 2019/10/29
 
 from gevent import monkey
 
@@ -28,7 +28,7 @@ debug = True
 proc_name = 'gunicorn_app'
 pidfile = '/app/{}/logs/gunicorn.pid'.format(APP_NAME)
 capture_output = True
-# logfile = '/app/{}/logs/gunicorn.log'.format(APP_NAME)
+logfile = '/app/{}/logs/gunicorn.log'.format(APP_NAME)
 
 # 访问日志格式，错误日志无法设置
 """
@@ -47,13 +47,16 @@ D          request time in microseconds
 L          request time in decimal seconds
 p          process ID
 """
-# access_log_format = \
-#     '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
-# accesslog = '/app/{}/logs/gunicorn_access.log'.format(APP_NAME)
+
+access_log_format = \
+    '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
+# 访问日志文件
+accesslog = '/app/{}/logs/gunicorn_access.log'.format(APP_NAME)
 
 # 错误日志级别，访问日志级别无法设置
-# loglevel = 'debug'
-# errorlog = '/app/{}/logs/Server-log.log'.format(APP_NAME)
+loglevel = 'debug'
+# 错误日志文件
+errorlog = '/app/{}/logs/gunicorn_server.log'.format(APP_NAME)
 
 logconfig_dict = {
     'version': 1,
@@ -80,7 +83,7 @@ logconfig_dict = {
             "backupCount": 14,  # 备份多少份
             "formatter": "generic",  # 对应下面的键
             # 'mode': 'w+',
-            "filename": '/app/{}/logs/Server-log.log'.format(APP_NAME),  # 日志文件路径
+            "filename": '/app/{}/logs/gunicorn_server.log'.format(APP_NAME),  # 日志文件路径
             'encoding': 'utf-8'  # 日志文件编码
         },
         "access_file": {

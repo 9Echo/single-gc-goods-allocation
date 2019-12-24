@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Description: 应用配置文件
-# Created: shaoluyu 2019/06/19
-# Modified: shaoluyu 2019/06/19; shaoluyu 2019/06/20
+# Created: shaoluyu 2019/10/29
+# Modified: shaoluyu 2019/10/29
 
 import datetime
 import os
@@ -33,6 +33,20 @@ class Config:
     # 任务调度器lock文件名称
     SCHEDULER_LOCK_FILE_NAME = 'scheduler-{}.lock'.format(APP_NAME)
 
+    # 数仓连接
+    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
+    ODS_MYSQL_PORT = 3306
+    ODS_MYSQL_USER = 'bigdata_user1'
+    ODS_MYSQL_PASSWD = 'user1!0927'
+    ODS_MYSQL_DB = 'db_dw'
+    ODS_MYSQL_CHARSET = 'utf8'
+
+    # 开单参数配置
+    # 车载最大重量
+    MAX_WEIGHT = 33000
+    # 分车次限制重量
+    TRUCK_SPLIT_RANGE = 1000
+
     @staticmethod
     def init_app(app):
         pass
@@ -48,6 +62,7 @@ class DevelopmentConfig(Config):
     MYSQL_PASSWD = 'V3dev!56'
     MYSQL_DB = 'db_trans_plan'
     MYSQL_CHARSET = 'utf8'
+
     # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
         MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
@@ -61,39 +76,25 @@ class DevelopmentConfig(Config):
     # APScheduler定时任务配置，可选（不使用时可删除）
     SCHEDULER_OPEN = False
     SCHEDULER_API_ENABLED = True
-    JOBS = [
-        # {
-        #     # 单次立即任务。有不执行的可能！
-        #     'id': 'job_1_0',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2)
-        # },
-        # {
-        #   # 单次定时任务
-        #     'id': 'job_1_01',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2),
-        #     'trigger': 'date',
-        #     'run_date': datetime.datetime.now() + datetime.timedelta(seconds=20)
-        # },
-        # {
-        #       # 周期定时任务
-        #     'id': 'redis_task',
-        #     'func': 'app.task.task:Task1.redis_task',
-        #     'args': None,
-        #     'trigger': 'interval',
-        #     'seconds': 30
-        # },
-        # {
-        #     # cron定时任务
-        #     'id': 'job_1',
-        #     'func': 'app.task.task:job_1',
-        #     'args': (1, 2),
-        #     'trigger': 'cron',
-        #     # 'hour': '17',
-        #     'minute': '2-59/5'
-        # }
-    ]
+    # JOBS = [
+    #     {
+    #         # 程序启动执行一次
+    #         'id': 'redis_task_start',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'date',
+    #         'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
+    #     },
+    #     {
+    #         # 周期定时任务
+    #         'id': 'redis_task2',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'interval',
+    #         'seconds': 60*30
+    #     },
+    #
+    # ]
 
     # Celery配置，可选（不使用时可删除）
     # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'
@@ -126,6 +127,73 @@ class DevelopmentConfig(Config):
 class TestConfig(Config):
     """测试环境配置
     """
+    # Mysql配置，可选（不使用时可删除）
+    MYSQL_HOST = '192.168.1.12'
+    MYSQL_PORT = 3307
+    MYSQL_USER = 'v3test_user'
+    MYSQL_PASSWD = 'V3Test@56'
+    MYSQL_DB = 'db_trans_plan'
+    MYSQL_CHARSET = 'utf8'
+
+    # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
+        MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
+
+    # Redis配置，可选（不使用时可删除）
+    REDIS_HOST = '47.99.118.183'
+    REDIS_PORT = '6379'
+    REDIS_PASSWD = 'wobugaoxing'
+    REDIS_MAX_CONNECTIONS = 2
+
+    # APScheduler定时任务配置，可选（不使用时可删除）
+    SCHEDULER_OPEN = False
+    SCHEDULER_API_ENABLED = True
+    # JOBS = [
+    #     {
+    #         # 程序启动执行一次
+    #         'id': 'redis_task_start',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'date',
+    #         'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
+    #     },
+    #     {
+    #         # 周期定时任务
+    #         'id': 'redis_task2',
+    #         'func': 'app.task.task:update_stock_job',
+    #         'args': None,
+    #         'trigger': 'interval',
+    #         'seconds': 60*30
+    #     },
+    #
+    # ]
+
+    # Celery配置，可选（不使用时可删除）
+    # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'
+    # CELERY_RESULT_BACKEND = 'redis://:wobugaoxing@47.99.118.183:6379/0'
+    # # 导入任务所在的模块
+    # CELERY_IMPORTS = ('app.task.celery_task', 'app.task.celery_task2')
+    # # 设置定时任务
+    # from datetime import timedelta
+    # from celery.schedules import crontab
+    # CELERY_TIMEZONE = 'Asia/Shanghai'  # 指定时区，不指定默认为 'UTC'
+    # CELERYBEAT_SCHEDULE = {
+    #     'add-every-30-seconds': {
+    #         'task': 'app.task.celery_task.add_together',
+    #         'schedule': timedelta(seconds=30),  # 每30秒执行一次
+    #         'args': (5, 8)  # 任务函数参数
+    #     },
+    #     'print-at-some-time': {
+    #         'task': 'app.task.celery_task.print_hello',
+    #         'schedule': crontab(minute='0-59/2'),
+    #         'args': None
+    #     },
+    #     'multiply-every-60-seconds': {
+    #         'task': 'app.task.celery_task2.multiply_together',
+    #         'schedule': timedelta(seconds=60),  # 每30秒执行一次
+    #         'args': (3, 4)  # 任务函数参数
+    #     },
+    # }
 
 
 class UatConfig(Config):

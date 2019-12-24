@@ -24,7 +24,7 @@ class MultiProcessSafeTimedRotatingFileHandler(TimedRotatingFileHandler):
         the one with the oldest suffix.
 
         Override,   1. if dfn not exist then do rename
-                    2. _open with "a" model
+                    2. _open with "a" models
         """
         if self.stream:
             self.stream.close()
