@@ -52,6 +52,7 @@ def dispatch(order):
             sheet.total_pcs += di.total_pcs
     # 为发货单分配车次
     dispatch_load_task(sheets)
+    # 车次提货单合并
     combine_sheets(sheets)
     # 将推荐发货通知单暂存redis
     redis_service.set_delivery_list(sheets)

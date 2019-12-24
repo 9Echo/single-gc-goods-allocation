@@ -124,7 +124,7 @@ def generate_delivery(delivery_data):
 #         current_app.logger.exception(e)
 
 
-def confirm(company_id, batch_no, new_delivery_list):
+def confirm(company_id, batch_no, delivery_item_list):
     """
     将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
@@ -139,18 +139,16 @@ def confirm(company_id, batch_no, new_delivery_list):
         return
     # 原明细数据
     old_item_list = result_data.data
-    # 新明细数据
-    new_item_list = []
     # 插入列表
-    insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
+    insert_list = list(filter(lambda i: not i.delivery_item_no, delivery_item_list))
     # 删除列表
     delete_list = list(
-        filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in new_item_list], old_item_list))
+        filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery_item_list], old_item_list))
     # 更新列表
     new_update_list = list(
-        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], new_item_list))
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], delivery_item_list))
     old_update_list = list(
-        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in new_item_list], old_item_list))
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery_item_list], old_item_list))
     # 合并列表
     log_list = merge(insert_list, delete_list, new_update_list, old_update_list, company_id)
     # 数据库操作
