@@ -15,7 +15,7 @@ from config import Config
 def dispatch(order):
     """根据订单执行分货
     """
-    # 将订单项转为发货通知单子单
+    # 1、将订单项转为发货通知单子单
     delivery_items = []
     for item in order.items:
         di = DeliveryItem()
@@ -30,16 +30,11 @@ def dispatch(order):
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         delivery_items.append(di)
-    # 使用模型过滤器生成发货通知单
+    # 2、使用模型过滤器生成发货通知单
     sheets = dispatch_filter.filter(delivery_items)
-    # 补充发货单的属性
+    # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
-    # 提货单号序号
-    # doc_type = '提货单'
-    # sheet_no = 0
     for sheet in sheets:
-        # sheet_no += 1
-        # sheet.delivery_no = sheet.delivery_no = doc_type + str(sheet_no)
         sheet.batch_no = batch_no
         sheet.customer_id = order.customer_id
         sheet.salesman_id = order.salesman_id
@@ -50,11 +45,11 @@ def dispatch(order):
             # di.delivery_no = sheet.delivery_no
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
-    # 为发货单分配车次
+    # 4、为发货单分配车次
     dispatch_load_task(sheets)
-    # 车次提货单合并
+    # 5、车次提货单合并
     combine_sheets(sheets)
-    # 将推荐发货通知单暂存redis
+    # 6、将推荐发货通知单暂存redis
     redis_service.set_delivery_list(sheets)
     return sheets
 
@@ -62,10 +57,8 @@ def dispatch(order):
 def dispatch_load_task(sheets: list):
     """将发货单根据重量组合到对应的车次上"""
 
-    # 根据前端要求，将车次号置成普通的数字
     task_id = 0
     doc_type = '提货单'
-    # new_sheet_no = len(sheets) + 1
     left_sheets = []
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
@@ -153,14 +146,14 @@ def split_sheet(sheet, limit_weight):
                 new_sheet_items.insert(0, new_item)
             break
     if sheet_items:
-        # 新单子单号
-        # new_sheet.delivery_no = '提货单' + str(new_sheet_no)
         # 原单子明细重新赋值
         sheet.items = sheet_items
         sheet.weight = sum([i.weight for i in sheet.items])
+        sheet.total_pcs = sum([i.total_pcs for i in sheet.items])
         # 新单子明细赋值
         new_sheet.items = new_sheet_items
         new_sheet.weight = sum([i.weight for i in new_sheet.items])
+        new_sheet.total_pcs = sum([i.total_pcs for i in new_sheet.items])
         return sheet, new_sheet
     else:
         return sheet, None
