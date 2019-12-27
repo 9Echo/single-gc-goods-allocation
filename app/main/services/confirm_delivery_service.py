@@ -10,21 +10,20 @@ from app.main.services.redis_service import get_delivery_list
 from app.utils.my_exception import MyException
 
 
-def generate_delivery(delivery_list_data):
+def generate_delivery(delivery_data):
     """
     根据json数据生成对应的发货通知单
     """
-    delivery_model_list = []
-    for delivery in delivery_list_data:
-        delivery_model = DeliverySheet(delivery)
-        delivery_model.items = []
+    delivery_item_list = []
+    # for delivery in delivery_data:
+    #     delivery_model = DeliverySheet(delivery)
+    #     delivery_model.items = []
 
-        for item in delivery['items']:
-            delivery_item_model = DeliveryItem(item)
-            delivery_model.items.append(delivery_item_model)
-        delivery_model_list.append(delivery_model)
+    for item in delivery_data.get('items'):
+        delivery_item_model = DeliveryItem(item)
+        delivery_item_list.append(delivery_item_model)
 
-    return delivery_model_list
+    return delivery_item_list
 
 
 # def confirm(delivery):
@@ -125,39 +124,31 @@ def generate_delivery(delivery_list_data):
 #         current_app.logger.exception(e)
 
 
-def confirm(new_delivery_list):
+def confirm(company_id, batch_no, delivery_item_list):
     """
     将新数据删除、添加、更新的项写入log表
     :param: delivery是传过来的发货通知单对象列表
     :return:发货通知单对象列表
     """
     # 判断批次号的存在
-    if not getattr(new_delivery_list[0], 'batch_no', None):
+    if not batch_no:
         raise MyException('批次号为空！', ResponseCode.Error)
-    result_data = get_delivery_list(new_delivery_list[0].batch_no)
+    result_data = get_delivery_list(batch_no)
     # 如果没获取到原数据，结束操作
     if not getattr(result_data, 'data', None):
         return
     # 原明细数据
     old_item_list = result_data.data
-    # 新明细数据
-    new_item_list = []
-    # 公司id
-    company_id = ''
-    for i in new_delivery_list:
-        if not company_id:
-            company_id = i.company_id
-        new_item_list.extend(i.items)
     # 插入列表
-    insert_list = list(filter(lambda i: not i.delivery_item_no, new_item_list))
+    insert_list = list(filter(lambda i: not i.delivery_item_no, delivery_item_list))
     # 删除列表
     delete_list = list(
-        filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in new_item_list], old_item_list))
+        filter(lambda i: i.delivery_item_no not in [j.delivery_item_no for j in delivery_item_list], old_item_list))
     # 更新列表
     new_update_list = list(
-        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], new_item_list))
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in old_item_list], delivery_item_list))
     old_update_list = list(
-        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in new_item_list], old_item_list))
+        filter(lambda i: i.delivery_item_no in [j.delivery_item_no for j in delivery_item_list], old_item_list))
     # 合并列表
     log_list = merge(insert_list, delete_list, new_update_list, old_update_list, company_id)
     # 数据库操作
@@ -180,7 +171,7 @@ def merge(insert_list, delete_list, new_update_list, old_update_list, company_id
     for i in old_update_list:
         for j in new_update_list:
             if i.delivery_item_no == j.delivery_item_no:
-                if i.quantity != j.quantity or i.free_pcs != j.free_pcs:
+                if int(i.quantity) != int(j.quantity) or int(i.free_pcs) != int(j.free_pcs):
                     log_update_list.append(
                         DeliveryLog(
                             {"company_id":company_id, "delivery_no": i.delivery_no, "delivery_item_no": i.delivery_item_no, "op": 2,

@@ -4,7 +4,7 @@
 # Modified: shaoluyu 2019/11/13
 import copy
 
-from app.analysis.rules import dispatch_filter, weight_rule
+from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.services import redis_service
 from app.utils import weight_calculator
@@ -15,7 +15,7 @@ from config import Config
 def dispatch(order):
     """根据订单执行分货
     """
-    # 将订单项转为发货通知单子单
+    # 1、将订单项转为发货通知单子单
     delivery_items = []
     for item in order.items:
         di = DeliveryItem()
@@ -30,16 +30,11 @@ def dispatch(order):
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         delivery_items.append(di)
-    # 使用模型过滤器生成发货通知单
+    # 2、使用模型过滤器生成发货通知单
     sheets = dispatch_filter.filter(delivery_items)
-    # 补充发货单的属性
+    # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
-    # 提货单号序号
-    # doc_type = '提货单'
-    # sheet_no = 0
     for sheet in sheets:
-        # sheet_no += 1
-        # sheet.delivery_no = sheet.delivery_no = doc_type + str(sheet_no)
         sheet.batch_no = batch_no
         sheet.customer_id = order.customer_id
         sheet.salesman_id = order.salesman_id
@@ -50,10 +45,11 @@ def dispatch(order):
             # di.delivery_no = sheet.delivery_no
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
-    # 为发货单分配车次
+    # 4、为发货单分配车次
     dispatch_load_task(sheets)
-    # sorted(sheets, key=lambda v:v.load_task_id)
-    # 将推荐发货通知单暂存redis
+    # 5、车次提货单合并
+    combine_sheets(sheets)
+    # 6、将推荐发货通知单暂存redis
     redis_service.set_delivery_list(sheets)
     return sheets
 
@@ -61,10 +57,8 @@ def dispatch(order):
 def dispatch_load_task(sheets: list):
     """将发货单根据重量组合到对应的车次上"""
 
-    # 根据前端要求，将车次号置成普通的数字
     task_id = 0
     doc_type = '提货单'
-    # new_sheet_no = len(sheets) + 1
     left_sheets = []
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
@@ -75,6 +69,7 @@ def dispatch_load_task(sheets: list):
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
     while left_sheets:
+        # print_sheets(left_sheets)
         total_weight = 0
         task_id += 1
         no = 0
@@ -151,14 +146,68 @@ def split_sheet(sheet, limit_weight):
                 new_sheet_items.insert(0, new_item)
             break
     if sheet_items:
-        # 新单子单号
-        # new_sheet.delivery_no = '提货单' + str(new_sheet_no)
         # 原单子明细重新赋值
         sheet.items = sheet_items
         sheet.weight = sum([i.weight for i in sheet.items])
+        sheet.total_pcs = sum([i.total_pcs for i in sheet.items])
         # 新单子明细赋值
         new_sheet.items = new_sheet_items
         new_sheet.weight = sum([i.weight for i in new_sheet.items])
+        new_sheet.total_pcs = sum([i.total_pcs for i in new_sheet.items])
         return sheet, new_sheet
     else:
         return sheet, None
+
+
+def combine_sheets(sheets):
+    """合并因拼单被打散的发货单
+    合并场景1：品类和物资代码相同的子发货单合并为1个子发货单
+    合并场景2：品类相同物资代码不同的子发货单合并为1个发货单
+    合并场景3：品类不同但是同属于一个similar group内的子发货单合并为1个发货单
+    合并后如果被合并的发货单中没有剩余子单则删除该发货单
+    """
+    # 先根据车次号将发货单分组，然后对每组内发货单进行合并
+    load_task_dict = {}
+    for sheet in sheets:
+        load_task_dict.setdefault(sheet.load_task_id, []).append(sheet)
+    for load_task_id, sheet_group in load_task_dict.items():
+        product_dict = {}
+        for current in sheet_group:
+            # 取出当前组内的发货单，根据发货单中第一个子单的品类映射到product_dict上，每个品类对应的发货单作为合并的母体
+            product_type = product_type_rule.get_product_type(current.items[0])
+            if not product_dict.__contains__(product_type):
+                product_dict[product_type] = current
+            else:
+                source = product_dict[product_type]
+                # 先将current的所有子单合并到source中，然后从sheets中删除被合并的发货单
+                source.items.extend(current.items)
+                source.weight += current.weight
+                source.total_pcs += current.total_pcs
+                sheets.remove(current)
+                # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
+                item_id_dict = {}
+                for citem in copy.copy(source.items):
+                    if not item_id_dict.__contains__(citem.item_id):
+                        item_id_dict[citem.item_id] = citem
+                    else:
+                        sitem = item_id_dict[citem.item_id]
+                        sitem.quantity += citem.quantity
+                        sitem.free_pcs += citem.free_pcs
+                        sitem.total_pcs +=citem.total_pcs
+                        sitem.weight += citem.weight
+                        source.items.remove(citem)
+        # 对当前车次做完合并后，重新对单号赋值
+        current_sheets = list(filter(lambda i:i.load_task_id == load_task_id, sheets))
+        doc_type = '提货单'
+        no = 0
+        for sheet in current_sheets:
+            no += 1
+            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            for j in sheet.items:
+                j.delivery_no = sheet.delivery_no
+
+
+def print_sheets(sheets):
+    """输出发货单摘要"""
+    prt = [(s.delivery_no, s.weight) for s in sheets]
+    print(prt)
