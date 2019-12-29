@@ -37,7 +37,8 @@ def compose(filtered_items: list, left_items: list):
             # 当总重量超过发货单最大重量时，对最后一个放入的子发货单进行分单
             item, new_item = split_item(item, total_weight - Config.MAX_WEIGHT)
             if new_item:
-                candidate_items.append(item)
+                if int(item.weight) != 0:
+                    candidate_items.append(item)
                 left_items.remove(item)
                 left_items.insert(0, new_item)
             break
