@@ -9,7 +9,7 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.services import redis_service
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
-from config import Config
+from model_config import ModelConfig
 
 
 def dispatch(order):
@@ -63,9 +63,9 @@ def dispatch_load_task(sheets: list):
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
         max_weight = 0
-        if sheet.items and sheet.items[0].product_type in Config.RD_LX_GROUP:
-            max_weight = Config.MAX_WEIGHT + 1000
-        if sheet.weight == 0 or sheet.weight >= (max_weight or Config.MAX_WEIGHT):
+        if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
+            max_weight = ModelConfig.MAX_WEIGHT + 1000
+        if sheet.weight == 0 or sheet.weight >= (max_weight or ModelConfig.MAX_WEIGHT):
             task_id += 1
             sheet.load_task_id = task_id
         else:
@@ -83,13 +83,13 @@ def dispatch_load_task(sheets: list):
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
             # 如果是下差过大的品种，重量累加
-            if sheet.items and sheet.items[0].product_type in Config.RD_LX_GROUP:
+            if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
                 rd_lx_total_weight += sheet.weight
             # 如果有下差过大的品种，动态计算重量上限
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/新最大载重 * 1000
-                new_max_weight = round(Config.MAX_WEIGHT + (rd_lx_total_weight / (Config.MAX_WEIGHT + 1000)) * 1000)
-            if total_weight <= (new_max_weight or Config.MAX_WEIGHT):
+                new_max_weight = round(ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / (ModelConfig.MAX_WEIGHT + 1000)) * 1000)
+            if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
                 # 不超重时将当前发货单装到车上
                 sheet.load_task_id = task_id
                 # 给当前提货单赋单号
@@ -100,17 +100,17 @@ def dispatch_load_task(sheets: list):
                     item.delivery_no = sheet.delivery_no
                 # 将拼车成功的单子移除
                 left_sheets.remove(sheet)
-                if (new_max_weight or Config.MAX_WEIGHT) - total_weight < Config.TRUCK_SPLIT_RANGE:
+                if (new_max_weight or ModelConfig.MAX_WEIGHT) - total_weight < ModelConfig.TRUCK_SPLIT_RANGE:
                     # 接近每车临界值时停止本次装车
                     break
             else:
                 # 超重时对发货单进行分单
-                if sheet.weight < Config.TRUCK_SPLIT_RANGE:
+                if sheet.weight < ModelConfig.TRUCK_SPLIT_RANGE:
                     # 重量不超过1吨（可配置）的发货单不分单
                     break
                 else:
                     # 对满足条件的发货单进行分单
-                    limit_weight = (new_max_weight or Config.MAX_WEIGHT) - (total_weight - sheet.weight)
+                    limit_weight = (new_max_weight or ModelConfig.MAX_WEIGHT) - (total_weight - sheet.weight)
                     sheet, new_sheet = split_sheet(sheet, limit_weight)
                     if new_sheet:
                         # 分单成功时旧单放入当前车上，新单放入等待列表
