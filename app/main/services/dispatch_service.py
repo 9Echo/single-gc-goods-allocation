@@ -187,10 +187,12 @@ def combine_sheets(sheets):
     for load_task_id, sheet_group in load_task_dict.items():
         product_dict = {}
         for current in sheet_group:
+            source = None
             # 取出当前组内的发货单，根据发货单中第一个子单的品类映射到product_dict上，每个品类对应的发货单作为合并的母体
             product_type = product_type_rule.get_product_type(current.items[0])
             if not product_dict.__contains__(product_type):
                 product_dict[product_type] = current
+                source = current
             else:
                 source = product_dict[product_type]
                 # 先将current的所有子单合并到source中，然后从sheets中删除被合并的发货单
@@ -198,18 +200,18 @@ def combine_sheets(sheets):
                 source.weight += current.weight
                 source.total_pcs += current.total_pcs
                 sheets.remove(current)
-                # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
-                item_id_dict = {}
-                for citem in copy.copy(source.items):
-                    if not item_id_dict.__contains__(citem.item_id):
-                        item_id_dict[citem.item_id] = citem
-                    else:
-                        sitem = item_id_dict[citem.item_id]
-                        sitem.quantity += citem.quantity
-                        sitem.free_pcs += citem.free_pcs
-                        sitem.total_pcs +=citem.total_pcs
-                        sitem.weight += citem.weight
-                        source.items.remove(citem)
+            # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
+            item_id_dict = {}
+            for citem in copy.copy(source.items):
+                if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
+                    item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
+                else:
+                    sitem = item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)]
+                    sitem.quantity += citem.quantity
+                    sitem.free_pcs += citem.free_pcs
+                    sitem.total_pcs +=citem.total_pcs
+                    sitem.weight += citem.weight
+                    source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
         current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
         doc_type = '提货单'
