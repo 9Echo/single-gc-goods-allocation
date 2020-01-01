@@ -73,9 +73,20 @@ def dispatch_load_task(sheets: list):
         total_weight = 0
         task_id += 1
         no = 0
+        # 动态计算的车次总重量
+        new_max_weight = 0
+        # 下差组别的总重量
+        rd_lx_total_weight = 0
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
-            if total_weight <= Config.MAX_WEIGHT:
+            # 如果是下差过大的品种，重量累加
+            if sheet.items and sheet.items[0].product_type in ['热镀', '热度', '热镀1', '螺旋焊管']:
+                rd_lx_total_weight += sheet.weight
+            # 如果有下差过大的品种，动态计算重量上限
+            if rd_lx_total_weight:
+                # 新最大载重上调 下差组别总重量/新最大载重 * 1000
+                new_max_weight = round(Config.MAX_WEIGHT + (rd_lx_total_weight / Config.MAX_WEIGHT) * 1000)
+            if total_weight <= (new_max_weight or Config.MAX_WEIGHT):
                 # 不超重时将当前发货单装到车上
                 sheet.load_task_id = task_id
                 # 给当前提货单赋单号
@@ -86,7 +97,7 @@ def dispatch_load_task(sheets: list):
                     item.delivery_no = sheet.delivery_no
                 # 将拼车成功的单子移除
                 left_sheets.remove(sheet)
-                if Config.MAX_WEIGHT - total_weight < Config.TRUCK_SPLIT_RANGE:
+                if (new_max_weight or Config.MAX_WEIGHT) - total_weight < Config.TRUCK_SPLIT_RANGE:
                     # 接近每车临界值时停止本次装车
                     break
             else:
@@ -96,7 +107,7 @@ def dispatch_load_task(sheets: list):
                     break
                 else:
                     # 对满足条件的发货单进行分单
-                    limit_weight = Config.MAX_WEIGHT - (total_weight - sheet.weight)
+                    limit_weight = (new_max_weight or Config.MAX_WEIGHT) - (total_weight - sheet.weight)
                     sheet, new_sheet = split_sheet(sheet, limit_weight)
                     if new_sheet:
                         # 分单成功时旧单放入当前车上，新单放入等待列表
@@ -197,7 +208,7 @@ def combine_sheets(sheets):
                         sitem.weight += citem.weight
                         source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
-        current_sheets = list(filter(lambda i:i.load_task_id == load_task_id, sheets))
+        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
         doc_type = '提货单'
         no = 0
         for sheet in current_sheets:

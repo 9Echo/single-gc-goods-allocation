@@ -27,15 +27,19 @@ def compose(filtered_items: list, left_items: list):
             return candidate_items, left_items
     # 依次将子发货单装入发货单中
     total_weight = 0
+    new_max_weight = 0
+    # 热镀组别和螺旋，MAX_WEIGHT加1000
+    if filtered_items and filtered_items[0].product_type in ['热镀', '热度', '热镀1', '螺旋焊管']:
+        new_max_weight = Config.MAX_WEIGHT + 1000
     for item in filtered_items:
         total_weight += item.weight
-        if total_weight <= Config.MAX_WEIGHT:
+        if total_weight <= (new_max_weight or Config.MAX_WEIGHT):
             # 总重量不超过最大重量时，把当前子发货单放入发货单中
             candidate_items.append(item)
             left_items.remove(item)
         else:
             # 当总重量超过发货单最大重量时，对最后一个放入的子发货单进行分单
-            item, new_item = split_item(item, total_weight - Config.MAX_WEIGHT)
+            item, new_item = split_item(item, total_weight - (new_max_weight or Config.MAX_WEIGHT))
             if new_item:
                 if int(item.weight) != 0:
                     candidate_items.append(item)

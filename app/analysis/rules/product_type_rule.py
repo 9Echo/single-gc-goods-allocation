@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 
 # 将产品品类分组，属于一个group的可以分到同一单，其余的每个品类各一单
-similar_groups = [('热镀', '热度', '热镀1'), ('焊管', '焊管 ','焊管1')]
+similar_groups = [('热镀', '热度', '热镀1'), ('焊管', '焊管 ', '焊管1')]
 
 
 def filter(delivery_items: list):
