@@ -63,7 +63,7 @@ def dispatch_load_task(sheets: list):
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
         max_weight = 0
-        if sheet.items and sheet.items[0].product_type in ['热镀', '热度', '热镀1', '螺旋焊管']:
+        if sheet.items and sheet.items[0].product_type in Config.RD_LX_GROUP:
             max_weight = Config.MAX_WEIGHT + 1000
         if sheet.weight == 0 or sheet.weight >= (max_weight or Config.MAX_WEIGHT):
             task_id += 1
@@ -83,7 +83,7 @@ def dispatch_load_task(sheets: list):
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
             # 如果是下差过大的品种，重量累加
-            if sheet.items and sheet.items[0].product_type in ['热镀', '热度', '热镀1', '螺旋焊管']:
+            if sheet.items and sheet.items[0].product_type in Config.RD_LX_GROUP:
                 rd_lx_total_weight += sheet.weight
             # 如果有下差过大的品种，动态计算重量上限
             if rd_lx_total_weight:

@@ -29,7 +29,7 @@ def compose(filtered_items: list, left_items: list):
     total_weight = 0
     new_max_weight = 0
     # 热镀组别和螺旋，MAX_WEIGHT加1000
-    if filtered_items and filtered_items[0].product_type in ['热镀', '热度', '热镀1', '螺旋焊管']:
+    if filtered_items and filtered_items[0].product_type in Config.RD_LX_GROUP:
         new_max_weight = Config.MAX_WEIGHT + 1000
     for item in filtered_items:
         total_weight += item.weight
