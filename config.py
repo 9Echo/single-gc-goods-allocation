@@ -46,6 +46,7 @@ class Config:
     MAX_WEIGHT = 33000
     # 分车次限制重量
     TRUCK_SPLIT_RANGE = 1000
+    RD_LX_GROUP = ['热镀', '热度', '热镀1', '螺旋焊管', '热镀方矩管', 'QF热镀管']
 
     @staticmethod
     def init_app(app):
