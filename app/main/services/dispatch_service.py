@@ -64,7 +64,7 @@ def dispatch_load_task(sheets: list):
     for sheet in sheets:
         max_weight = 0
         if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
-            max_weight = ModelConfig.MAX_WEIGHT + 1000
+            max_weight = ModelConfig.RD_LX_MAX_WEIGHT
         if sheet.weight == 0 or sheet.weight >= (max_weight or ModelConfig.MAX_WEIGHT):
             task_id += 1
             sheet.load_task_id = task_id
@@ -87,8 +87,9 @@ def dispatch_load_task(sheets: list):
                 rd_lx_total_weight += sheet.weight
             # 如果有下差过大的品种，动态计算重量上限
             if rd_lx_total_weight:
-                # 新最大载重上调 下差组别总重量/新最大载重 * 1000
-                new_max_weight = round(ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / (ModelConfig.MAX_WEIGHT + 1000)) * 1000)
+                # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
+                new_max_weight = round(ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
+                new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
             if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
                 # 不超重时将当前发货单装到车上
                 sheet.load_task_id = task_id
