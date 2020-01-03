@@ -58,7 +58,7 @@ def filter(delivery_items: list):
         print(result_list)
         temp_item_list = copy.copy(item_list)
         # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
-        if (ModelConfig.RD_LX_MAX_WEIGHT - 2000) < final_weight < ModelConfig.PACKAGE_MAX_WEIGHT:
+        if (ModelConfig.PACKAGE_MAX_WEIGHT - 2000) < final_weight < ModelConfig.PACKAGE_MAX_WEIGHT:
             task_id += 1
             is_full = True
         for i in range(0, len(result_list)):
