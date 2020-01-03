@@ -56,6 +56,8 @@ def filter(delivery_items: list):
                                                                          ModelConfig.PACKAGE_MAX_WEIGHT, weight_cost)
         print(final_weight)
         print(result_list)
+        if final_weight == 0:
+            break
         temp_item_list = copy.copy(item_list)
         # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
         if (ModelConfig.PACKAGE_MAX_WEIGHT - 2000) < final_weight < ModelConfig.PACKAGE_MAX_WEIGHT:
