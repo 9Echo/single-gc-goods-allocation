@@ -62,6 +62,7 @@ def dispatch_load_task(sheets: list, task_id):
     left_sheets = []
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
+        # 如果已经生成车次的sheet，则跳过不处理
         if sheet.load_task_id:
             continue
         max_weight = 0

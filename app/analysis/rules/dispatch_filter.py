@@ -25,7 +25,8 @@ def filter(delivery_items: list):
         if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
             item_list.append(i)
             left_items.remove(i)
-    left_items.sort(key=lambda i: i.weight, reverse=True)
+    if left_items:
+        left_items.sort(key=lambda i: i.weight, reverse=True)
     # 如果有超重的子单，进行compose
     while left_items:
         # filtered_items = product_type_rule.filter(left_items)
@@ -45,18 +46,19 @@ def filter(delivery_items: list):
     # filtered_items = []
     task_id = 0
     while item_list:
+        # 是否满载标记
         is_full = False
         weight_cost = []
         for item in item_list:
             weight_cost.append((int(item.weight), int(item.weight)))
         # 将所有子单进行背包选举
         final_weight, result_list = package_solution.dynamic_programming(len(item_list),
-                                                                         ModelConfig.RD_LX_MAX_WEIGHT, weight_cost)
+                                                                         ModelConfig.PACKAGE_MAX_WEIGHT, weight_cost)
         print(final_weight)
         print(result_list)
         temp_item_list = copy.copy(item_list)
-        # 如果本次选举的组合在合理值范围内，直接赋车次号，不参于后续的操作
-        if (ModelConfig.RD_LX_MAX_WEIGHT - 2000) < final_weight < ModelConfig.RD_LX_MAX_WEIGHT:
+        # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
+        if (ModelConfig.RD_LX_MAX_WEIGHT - 2000) < final_weight < ModelConfig.PACKAGE_MAX_WEIGHT:
             task_id += 1
             is_full = True
         for i in range(0, len(result_list)):
