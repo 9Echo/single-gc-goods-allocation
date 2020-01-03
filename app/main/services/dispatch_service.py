@@ -6,6 +6,7 @@ import copy
 
 from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
+from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
@@ -29,6 +30,11 @@ def dispatch(order):
         di.f_loc = item.f_loc
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+        if di.weight == 0:
+            sheet = DeliverySheet()
+            sheet.weight = '0'
+            sheet.items = [di]
+            return [sheet]
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
     sheets, task_id = dispatch_filter.filter(delivery_items)
