@@ -33,6 +33,7 @@ def dispatch(order):
         if di.weight == 0:
             sheet = DeliverySheet()
             sheet.weight = '0'
+            sheet.items = [di]
             return [sheet]
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
