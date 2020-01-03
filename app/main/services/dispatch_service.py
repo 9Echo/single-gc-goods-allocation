@@ -31,7 +31,7 @@ def dispatch(order):
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
-    sheets = dispatch_filter.filter(delivery_items)
+    sheets, task_id = dispatch_filter.filter(delivery_items)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
     for sheet in sheets:
@@ -46,7 +46,7 @@ def dispatch(order):
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
     # 4、为发货单分配车次
-    dispatch_load_task(sheets)
+    dispatch_load_task(sheets, task_id)
     # 5、车次提货单合并
     combine_sheets(sheets)
     # 6、将推荐发货通知单暂存redis
@@ -54,14 +54,16 @@ def dispatch(order):
     return sheets
 
 
-def dispatch_load_task(sheets: list):
+def dispatch_load_task(sheets: list, task_id):
     """将发货单根据重量组合到对应的车次上"""
 
-    task_id = 0
+    # task_id = 0
     doc_type = '提货单'
     left_sheets = []
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
+        if sheet.load_task_id:
+            continue
         max_weight = 0
         if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
             max_weight = ModelConfig.RD_LX_MAX_WEIGHT
