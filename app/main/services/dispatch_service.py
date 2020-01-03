@@ -32,7 +32,7 @@ def dispatch(order):
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         if di.weight == 0:
             sheet = DeliverySheet()
-            sheet.weight = 0
+            sheet.weight = '0'
             return [sheet]
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
