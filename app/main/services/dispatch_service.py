@@ -78,6 +78,7 @@ def dispatch(order):
     dispatch_load_task(sheets, task_id)
     # 5、车次提货单合并
     combine_sheets(sheets)
+    sheets.sort(key=lambda i: i.load_task_id)
     # 6、将推荐发货通知单暂存redis
     redis_service.set_delivery_list(sheets)
     return sheets
