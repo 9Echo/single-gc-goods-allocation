@@ -28,13 +28,36 @@ def dispatch(order):
         di.material = item.material
         di.f_whs = item.f_whs
         di.f_loc = item.f_loc
+        di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
+        di.volume = di.quantity/ di.max_quantity if di.max_quantity else 0
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+        # 如果遇到计算不出来的明细，返回0
         if di.weight == 0:
             sheet = DeliverySheet()
             sheet.weight = '0'
             sheet.items = [di]
             return [sheet]
+        if di.max_quantity and di.quantity > di.max_quantity:
+            # copy次数
+            count = round(di.quantity / di.max_quantity)
+            # 最后一个件数余量
+            surplus = di.quantity % di.max_quantity
+            new_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.max_quantity, 0)
+            new_total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.max_quantity, 0)
+            for i in range(0, count):
+                copy_di = copy.deepcopy(di)
+                copy_di.free_pcs = 0
+                copy_di.quantity = di.max_quantity
+                copy_di.volume = 1
+                copy_di.weight = new_weight
+                copy_di.total_pcs = new_total_pcs
+                delivery_items.append(copy_di)
+            di.quantity = surplus
+            di.volume = di.quantity/ di.max_quantity if di.max_quantity else 0
+            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
     sheets, task_id = dispatch_filter.filter(delivery_items)
@@ -81,8 +104,8 @@ def dispatch_load_task(sheets: list, task_id):
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
     while left_sheets:
-        # print_sheets(left_sheets)
         total_weight = 0
+        total_volume = 0
         task_id += 1
         no = 0
         # 动态计算的车次总重量
@@ -91,14 +114,22 @@ def dispatch_load_task(sheets: list, task_id):
         rd_lx_total_weight = 0
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
+            total_volume += sheet.volume
             # 如果是下差过大的品种，重量累加
             if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
                 rd_lx_total_weight += sheet.weight
             # 如果有下差过大的品种，动态计算重量上限
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
-                new_max_weight = round(ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
+                new_max_weight = round(
+                    ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
                 new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
+            # 如果当前车次总体积占比超出，跳出此次分单
+            if total_volume > ModelConfig.MAX_VOLUME:
+                total_volume -= sheet.volume
+                total_weight -= sheet.weight
+                rd_lx_total_weight -= sheet.weight
+                continue
             if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
                 # 不超重时将当前发货单装到车上
                 sheet.load_task_id = task_id
@@ -174,10 +205,12 @@ def split_sheet(sheet, limit_weight):
         sheet.items = sheet_items
         sheet.weight = sum([i.weight for i in sheet.items])
         sheet.total_pcs = sum([i.total_pcs for i in sheet.items])
+        sheet.volume = sum([i.volume for i in sheet.items])
         # 新单子明细赋值
         new_sheet.items = new_sheet_items
         new_sheet.weight = sum([i.weight for i in new_sheet.items])
         new_sheet.total_pcs = sum([i.total_pcs for i in new_sheet.items])
+        new_sheet.volume = sum([i.volume for i in new_sheet.items])
         return sheet, new_sheet
     else:
         return sheet, None
@@ -219,7 +252,7 @@ def combine_sheets(sheets):
                     sitem = item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)]
                     sitem.quantity += citem.quantity
                     sitem.free_pcs += citem.free_pcs
-                    sitem.total_pcs +=citem.total_pcs
+                    sitem.total_pcs += citem.total_pcs
                     sitem.weight += citem.weight
                     source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
