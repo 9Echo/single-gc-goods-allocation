@@ -236,7 +236,7 @@ def split_sheet(sheet, limit_weight, total_volume):
             # 如果超重并且体积超出，按照体积占比上限切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 temp_weight = (1 - (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume) * item.weight
-                temp_weight = total_weight - limit_weight if temp_weight > total_weight - limit_weight else temp_weight
+                temp_weight = 0 if temp_weight > (total_weight - limit_weight) else temp_weight
                 # item, new_item = weight_rule.split_item(item, (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * (total_weight - limit_weight))
                 # sheet.items.append(new_item)
                 # return sheet, None
