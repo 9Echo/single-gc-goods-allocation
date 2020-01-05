@@ -9,7 +9,7 @@ class ModelConfig:
     # 背包上限
     PACKAGE_MAX_WEIGHT = 33500
     # 体积上限
-    MAX_VOLUME = 1.1
+    MAX_VOLUME = 1.2
     # 分车次限制重量
     TRUCK_SPLIT_RANGE = 1000
     # 下差严重品类，后续改成通过物资代码前三位

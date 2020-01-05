@@ -91,7 +91,6 @@ def dispatch(order):
 def dispatch_load_task(sheets: list, task_id):
     """将发货单根据重量组合到对应的车次上"""
 
-    # task_id = 0
     doc_type = '提货单'
     left_sheets = []
     # 先为重量为空或已满的单子生成单独车次
