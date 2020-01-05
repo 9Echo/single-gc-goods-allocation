@@ -67,11 +67,13 @@ def split_item(item, delta_weight):
         new_item.weight = item.weight - weight
         new_item.quantity = item.quantity - quantity
         new_item.free_pcs = item.free_pcs - free_pcs
+        new_item.volume = new_item.quantity / new_item.max_quantity if new_item.max_quantity else 0
         # 更新原子单的数量
         item.quantity = quantity
         item.free_pcs = free_pcs
         item.total_pcs = left_pcs
         item.weight = weight
+        item.volume = item.quantity / item.max_quantity if item.max_quantity else 0
         return item, new_item
     else:
         # 超重的数量等于子发货单数量时忽略该子发货单

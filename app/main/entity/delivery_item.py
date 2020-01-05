@@ -15,8 +15,10 @@ class DeliveryItem(BaseEntity):
         self.company_id = None  # 公司id
         self.spec = None  # 产品规格
         self.item_id = None # 物资代码
-        self.f_whs = None # 仓库
-        self.f_loc = None # 垛号
+        self.f_whs = None  # 仓库
+        self.max_quantity = None  # 体积限制的物资装载最大件数
+        self.volume = None  # 所占体积
+        self.f_loc = None  # 垛号
         self.material = None # 材质
         self.weight = None  # 产品重量
         self.quantity = None  # 件数
