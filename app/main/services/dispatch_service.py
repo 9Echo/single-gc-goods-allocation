@@ -217,9 +217,8 @@ def split_sheet(sheet, limit_weight, total_volume):
             if total_volume > ModelConfig.MAX_VOLUME:
                 item, new_item = weight_rule.split_item(item, (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
             if new_item:
-                if int(item.weight) != 0:
-                    # 原单子追加明细
-                    sheet_items.append(item)
+                # 原单子追加明细
+                sheet_items.append(item)
                 # 新单子减少明细
                 new_sheet_items.remove(item)
                 # 新单子加入新切分出来的明细
@@ -244,9 +243,8 @@ def split_sheet(sheet, limit_weight, total_volume):
                 # 子单总重超过限制时分单
             item, new_item = weight_rule.split_item(item, (temp_weight or (total_weight - limit_weight)))
             if new_item:
-                if int(item.weight) != 0:
-                    # 原单子追加明细
-                    sheet_items.append(item)
+                # 原单子追加明细
+                sheet_items.append(item)
                 # 新单子减少明细
                 new_sheet_items.remove(item)
                 # 新单子加入新切分出来的明细
@@ -298,7 +296,10 @@ def combine_sheets(sheets):
                 sheets.remove(current)
             # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
             item_id_dict = {}
+            # 如果发现重量为0的明细，移除
             for citem in copy.copy(source.items):
+                if citem.weight == 0:
+                    source.items.remove(citem)
                 if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
                     item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
                 else:
