@@ -16,7 +16,6 @@ class OrderRoute(Resource):
 
     # def get(self):
     #     return Result.success_response(order_dao.get_all())
-
     def post(self):
         """输入订单，返回开单结果
         """

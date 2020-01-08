@@ -11,7 +11,7 @@ class WeightCalculatorDao(BaseDao):
         :return:
         '''
         sql = """select ITEMID,GBGZL,GS_PER from db_inter.t_itema
-                where ITEMID in ({})"""
+                where ITEMID in ({}) and ifnull(GBGZL,'') <> '' and ifnull(GS_PER,'') <> ''"""
         values = "'"
         values += "','".join([item.item_id for item in data_list])
         values += "'"

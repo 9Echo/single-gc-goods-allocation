@@ -10,6 +10,8 @@ class ModelConfig:
     PACKAGE_MAX_WEIGHT = 33500
     # 体积上限
     MAX_VOLUME = 1.2
+    # 计算重量、根数基础数据加载
+    ITEM_A_DICT = {}
     # 分车次限制重量
     TRUCK_SPLIT_RANGE = 1000
     # 下差严重品类，后续改成通过物资代码前三位识别

@@ -19,15 +19,21 @@ def test_df():
     data = [{'a': 1, 'b': 2}, {'a': 5, 'b': 10},{'a': 1, 'b': 10},{'a': 5, 'b': 10},{'a': 5, 'b': 10}]
     df = pd.DataFrame(data)
     print('dict list to df:\n', df)
-    group = df.groupby(df['a'])
-    print(group.groups)
-    print(type(group.groups))
-    for k, v in group.groups.items():
+    group = df.groupby(by = ['a'])['b'].sum().sort_values(ascending=False)
+    print(group)
+    for k,v in group.items():
         print(k)
-        print(list(v))
-        print(type(v))
-        for i in list(v):
-            print(i)
+        print(v)
+    print(type(group))
+    print(data)
+    # print(group.groups)   dict
+    # print(type(group.groups)) dict
+    # for k, v in group.groups.items():
+    #     print(k)
+    #     print(v.sum())
+        # print(type(v))
+        # for i in list(v):
+        #     print(i)
 
     # doc_type = '提货单'
     # delivery_no = 0

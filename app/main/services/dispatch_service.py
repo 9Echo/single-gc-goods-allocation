@@ -3,16 +3,20 @@
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
 import copy
+from threading import Thread
 
 from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.utils import weight_calculator
+from app.utils.aop_util import get_item_a
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
+import pandas as pd
 
 
+@get_item_a
 def dispatch(order):
     """根据订单执行分货
     """
@@ -82,10 +86,10 @@ def dispatch(order):
     dispatch_load_task(sheets, task_id)
     # 5、车次提货单合并
     combine_sheets(sheets)
-    sheets.sort(key=lambda i: i.load_task_id)
+    new_sheets = sort_by_weight(sheets)
     # 6、将推荐发货通知单暂存redis
-    redis_service.set_delivery_list(sheets)
-    return sheets
+    Thread(target=redis_service.set_delivery_list, args=(new_sheets,)).start()
+    return new_sheets
 
 
 def dispatch_load_task(sheets: list, task_id):
@@ -136,7 +140,9 @@ def dispatch_load_task(sheets: list, task_id):
                     # total_weight -= sheet.weight
                     # rd_lx_total_weight -= sheet.weight
                     # continue
-                    sheet, new_sheet = split_sheet(sheet, (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight, total_volume - sheet.volume)
+                    sheet, new_sheet = split_sheet(sheet, (
+                            ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight,
+                                                   total_volume - sheet.volume)
                     if new_sheet:
                         # 分单成功时旧单放入当前车上，新单放入等待列表
                         sheet.load_task_id = task_id
@@ -215,7 +221,8 @@ def split_sheet(sheet, limit_weight, total_volume):
         if total_weight <= limit_weight:
             # 如果在不超重的情况下超体积，进行比例切单
             if total_volume > ModelConfig.MAX_VOLUME:
-                item, new_item = weight_rule.split_item(item, (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
+                item, new_item = weight_rule.split_item(item, (
+                        ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
             if new_item:
                 if int(item.weight) != 0:
                     # 原单子追加明细
@@ -310,17 +317,39 @@ def combine_sheets(sheets):
                     sitem.volume += citem.volume
                     source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
-        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
-        doc_type = '提货单'
-        no = 0
-        for sheet in current_sheets:
-            no += 1
-            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
-            for j in sheet.items:
-                j.delivery_no = sheet.delivery_no
+        # current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
+        # doc_type = '提货单'
+        # no = 0
+        # for sheet in current_sheets:
+        #     no += 1
+        #     sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+        #     for j in sheet.items:
+        #         j.delivery_no = sheet.delivery_no
 
 
 def print_sheets(sheets):
     """输出发货单摘要"""
     prt = [(s.delivery_no, s.weight) for s in sheets]
     print(prt)
+
+
+def sort_by_weight(sheets):
+    sheets_dict = [sheet.as_dict() for sheet in sheets]
+    new_sheets = []
+    if sheets_dict:
+        df = pd.DataFrame(sheets_dict)
+        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
+        task_id = 0
+        for k, v in series.items():
+            task_id += 1
+            doc_type = '提货单'
+            no = 0
+            current_sheets = list(filter(lambda i: i.load_task_id == k, sheets))
+            for sheet in current_sheets:
+                no += 1
+                sheet.load_task_id = task_id
+                sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
+                for item in sheet.items: item.delivery_no = sheet.delivery_no
+            new_sheets.append(sheet)
+            sheets.remove(sheet)
+    return new_sheets
