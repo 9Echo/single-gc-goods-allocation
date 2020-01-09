@@ -8,8 +8,8 @@ class ModelConfig:
     RD_LX_MAX_WEIGHT = 34000
     # 背包上限
     PACKAGE_MAX_WEIGHT = 33500
-    # 体积上限
-    MAX_VOLUME = 1.2
+    # 体积上限系数
+    MAX_VOLUME = 1.18
     # 计算重量、根数基础数据加载
     ITEM_A_DICT = {}
     # 分车次限制重量
