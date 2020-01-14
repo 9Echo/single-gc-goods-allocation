@@ -21,11 +21,16 @@ class OrderRoute(Resource):
         """输入订单，返回开单结果
         """
         try:
-            json_data = json.loads(request.get_data().decode("utf-8"))
-            order = order_service.generate_order(json_data['data'])
-            sheets = dispatch_service.dispatch(order)
-            return Result.success_response(sheets)
+            if request.get_data():
+                json_data = json.loads(request.get_data().decode("utf-8"))
+                order = order_service.generate_order(json_data['data'])
+                sheets = dispatch_service.dispatch(order)
+                return Result.success_response(sheets)
         except MyException as me:
             current_app.logger.info(me.message)
             current_app.logger.exception(me)
             return Result.error_response(me.message)
+        except Exception as e:
+            current_app.logger.info(e.msg)
+            current_app.logger.exception(e)
+            return Result.error_response('系统错误')

@@ -17,14 +17,15 @@ class ComposeRoute(Resource):
     def post():
         """进行拼货推荐"""
         try:
-            # 获取输入参数（发货通知单列表）
-            delivery_list_data = request.get_json(force=True).get('items')  # 入参是json
-            if delivery_list_data:
-                delivery_list = generate_delivery(delivery_list_data)
-                result_delivery_list = compose(delivery_list)
-                return Result.success_response(result_delivery_list)
-            else:
-                return Result.error_response('数据为空！')
+            if request.get_data():
+                # 获取输入参数（发货通知单列表）
+                delivery_list_data = request.get_json(force=True).get('items')  # 入参是json
+                if delivery_list_data:
+                    delivery_list = generate_delivery(delivery_list_data)
+                    result_delivery_list = compose(delivery_list)
+                    return Result.success_response(result_delivery_list)
+                else:
+                    return Result.error_response('数据为空！')
         except MyException as me:
             current_app.logger.info(me.message)
             current_app.logger.exception(me)

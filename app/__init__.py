@@ -14,7 +14,7 @@ from app.utils.core import JSONEncoder
 from app.utils.actuator import Actuator
 
 # SQLAlchemy数据库访问实例
-db = SQLAlchemy()
+# db = SQLAlchemy()
 
 # APScheduler任务调度器
 scheduler = APScheduler()
@@ -55,8 +55,8 @@ def create_app(config_name):
     app.after_request(_access_control)
 
     # 数据库连接初始化
-    if app.config.get('SQLALCHEMY_DATABASE_URI'):
-        db.init_app(app)
+    # if app.config.get('SQLALCHEMY_DATABASE_URI'):
+    #     db.init_app(app)
 
     # 启动定时任务
     if app.config.get('SCHEDULER_OPEN'):

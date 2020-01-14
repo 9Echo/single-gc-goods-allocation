@@ -8,6 +8,7 @@ from app.utils.code import ResponseCode
 
 class Result:
     """将结果封装为定义好的json"""
+
     def __init__(self):
         self.code = ""
         self.msg = ""
@@ -63,7 +64,6 @@ class Result:
         result.data = data
         return result
 
-
     @staticmethod
     def success_response(obj):
         """返回成功信息"""
@@ -76,5 +76,3 @@ class Result:
         """返回错误信息"""
         result = Result.error(msg)
         return jsonify({"code": result.code, "msg": result.msg})
-
-

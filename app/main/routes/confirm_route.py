@@ -23,16 +23,17 @@ class ConfirmRoute(Resource):
         :return:
         """
         try:
-            # 获取输入参数
-            delivery_data = request.get_json(force=True).get('data')  # 入参是json
-            # 创建发货通知单实例，初始化属性
-            if delivery_data:
-                delivery_item_list = generate_delivery(delivery_data)
-                # 对比
-                confirm(delivery_data['company_id'], delivery_data['batch_no'], delivery_item_list)
-                return Result.success_response({})
-            else:
-                return Result.error_response('数据为空！')
+            if request.get_data():
+                # 获取输入参数
+                delivery_data = request.get_json(force=True).get('data')  # 入参是json
+                # 创建发货通知单实例，初始化属性
+                if delivery_data:
+                    delivery_item_list = generate_delivery(delivery_data)
+                    # 对比
+                    confirm(delivery_data['company_id'], delivery_data['batch_no'], delivery_item_list)
+                    return Result.success_response({})
+                else:
+                    return Result.error_response('数据为空！')
         except MyException as me:
             current_app.logger.info(me.message)
             current_app.logger.exception(me)
