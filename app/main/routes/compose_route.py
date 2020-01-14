@@ -29,25 +29,7 @@ class ComposeRoute(Resource):
             current_app.logger.info(me.message)
             current_app.logger.exception(me)
             return Result.error_response(me.message)
-        except Exception as e:
-            current_app.logger.info("ComposeRoute error")
-            current_app.logger.exception(e)
-            return Result.error_response("服务器错误")
 
 
 
-    # def generate_delivery_sheet(order):
-    #     ds = DeliverySheet()
-    #     ds.delivery_no = UUIDUtil.create_id("delivery")
-    #     ds.free_pcs = 0
-    #     ds.total_quantity = 0
-    #     ds.items = []
-    #     for orderitem in order.order_item:
-    #         di = DeliveryItem()
-    #         di.quantity = orderitem.quantity
-    #         ds.total_quantity += di.quantity
-    #         di.free_pcs = orderitem.free_pcs
-    #         ds.free_pcs += di.free_pcs
-    #         di.product_type = orderitem.product_type
-    #         ds.items.append(di)
-    #     return ds
+
