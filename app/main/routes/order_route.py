@@ -30,7 +30,3 @@ class OrderRoute(Resource):
             current_app.logger.info(me.message)
             current_app.logger.exception(me)
             return Result.error_response(me.message)
-        except Exception as e:
-            current_app.logger.info(e.msg)
-            current_app.logger.exception(e)
-            return Result.error_response('系统错误')

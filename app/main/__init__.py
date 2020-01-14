@@ -69,10 +69,10 @@ def handle_type_exception(e):
     return Result.error_response("传入参数的类型错误")
 
 
-# @blueprint.app_errorhandler(Exception)
-# def handle_type_exception(e):
-#     """系统错误"""
-#     current_app.logger.error(e.msg)
-#     current_app.logger.exception(e)
-#     return Result.error_response("系统错误")
+@blueprint.app_errorhandler(Exception)
+def handle_type_exception(e):
+    """系统错误"""
+    current_app.logger.error(e.msg)
+    current_app.logger.exception(e)
+    return Result.error_response("系统错误")
 
