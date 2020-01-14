@@ -15,8 +15,8 @@ class ConfirmRoute(Resource):
     """
        确认发货通知单，扣减库存
        """
-
-    def post(self):
+    @staticmethod
+    def post():
         """
         获取人工确认后的发货通知单
         对比分析保存差异信息

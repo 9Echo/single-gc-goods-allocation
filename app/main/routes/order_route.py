@@ -16,7 +16,8 @@ class OrderRoute(Resource):
 
     # def get(self):
     #     return Result.success_response(order_dao.get_all())
-    def post(self):
+    @staticmethod
+    def post():
         """输入订单，返回开单结果
         """
         try:
@@ -28,5 +29,3 @@ class OrderRoute(Resource):
             current_app.logger.info(me.message)
             current_app.logger.exception(me)
             return Result.error_response(me.message)
-
-
