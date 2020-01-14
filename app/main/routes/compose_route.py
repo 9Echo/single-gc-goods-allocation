@@ -20,7 +20,6 @@ class ComposeRoute(Resource):
             # 获取输入参数（发货通知单列表）
             delivery_list_data = request.get_json(force=True).get('items')  # 入参是json
             if delivery_list_data:
-
                 delivery_list = generate_delivery(delivery_list_data)
                 result_delivery_list = compose(delivery_list)
                 return Result.success_response(result_delivery_list)
