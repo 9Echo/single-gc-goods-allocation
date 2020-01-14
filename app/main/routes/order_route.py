@@ -27,6 +27,6 @@ class OrderRoute(Resource):
                 sheets = dispatch_service.dispatch(order)
                 return Result.success_response(sheets)
         except MyException as me:
-            current_app.logger.info(me.message)
+            current_app.logger.error(me.message)
             current_app.logger.exception(me)
             return Result.error_response(me.message)

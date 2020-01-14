@@ -40,7 +40,6 @@ def demo():
 @blueprint.app_errorhandler(MySQLError)
 def handle_mysql_exception(e):
     """封装数据库错误信息"""
-    current_app.logger.error(e.msg)
     current_app.logger.exception(e)
     return Result.error_response("数据库错误")
 
@@ -48,7 +47,6 @@ def handle_mysql_exception(e):
 @blueprint.app_errorhandler(KeyError)
 def handle_key_exception(e):
     """缺少输入参数错误信息"""
-    current_app.logger.error(e.msg)
     current_app.logger.exception(e)
     return Result.error_response("缺少输入参数")
 
@@ -56,7 +54,6 @@ def handle_key_exception(e):
 @blueprint.app_errorhandler(ValueError)
 def handle_value_exception(e):
     """传入参数的值错误信息"""
-    current_app.logger.error(e.msg)
     current_app.logger.exception(e)
     return Result.error_response("传入参数的值错误")
 
@@ -64,7 +61,6 @@ def handle_value_exception(e):
 @blueprint.app_errorhandler(TypeError)
 def handle_type_exception(e):
     """传入参数的类型错误信息"""
-    current_app.logger.error(e.msg)
     current_app.logger.exception(e)
     return Result.error_response("传入参数的类型错误")
 
@@ -72,7 +68,6 @@ def handle_type_exception(e):
 @blueprint.app_errorhandler(Exception)
 def handle_type_exception(e):
     """系统错误"""
-    current_app.logger.error(e.msg)
     current_app.logger.exception(e)
     return Result.error_response("系统错误")
 
