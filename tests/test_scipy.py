@@ -6,11 +6,12 @@ import numpy as np
 
 """
 
-
+计算  (2+x1)/(1+x2) - 3*x1+4*x3 的最小值  x1,x2,x3的范围都在0.1到0.9 之间
 
 """
 volume = [22, 16, 34, 1000, 1000]
-one_weight = []
+one_weight = [1108, 2030, 1459, 775, 1137]
+order_j = [30, 30, 30, 20, 20]
 
 
 def fun(args):

@@ -3,6 +3,7 @@
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
 import copy
+import math
 from threading import Thread
 
 from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
@@ -45,7 +46,7 @@ def dispatch(order):
         # 如果该明细有件数上限并且单规格件数超出，进行切单
         if di.max_quantity and di.quantity > di.max_quantity:
             # copy次数
-            count = round(di.quantity / di.max_quantity)
+            count = math.floor(di.quantity / di.max_quantity)
             # 最后一个件数余量
             surplus = di.quantity % di.max_quantity
             # 标准件数的重量和总根数
@@ -352,4 +353,5 @@ def sort_by_weight(sheets):
                 sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
                 for item in sheet.items: item.delivery_no = sheet.delivery_no
             new_sheets.append(sheet)
+            sheets.remove(sheet)
     return new_sheets
