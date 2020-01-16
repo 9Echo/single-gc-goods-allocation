@@ -352,4 +352,5 @@ def sort_by_weight(sheets):
                 sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
                 for item in sheet.items: item.delivery_no = sheet.delivery_no
             new_sheets.append(sheet)
+            sheets.remove(sheet)
     return new_sheets
