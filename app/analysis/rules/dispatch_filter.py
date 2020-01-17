@@ -16,20 +16,27 @@ def filter(delivery_items: list):
     sheets = []
     # 提货单明细列表
     item_list = []
+    # 剩余的发货子单
     left_items = delivery_items
     new_max_weight = 0
     # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
-    for i in copy.copy(delivery_items):
-        if i.product_type in ModelConfig.RD_LX_GROUP:
-            new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
-        if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
-            item_list.append(i)
-            left_items.remove(i)
+    if ModelConfig.INCOMING_WEIGHT:
+        for i in copy.copy(delivery_items):
+            if i.weight < ModelConfig.INCOMING_WEIGHT:
+                item_list.append(i)
+                left_items.remove(i)
+    else:
+        for i in copy.copy(delivery_items):
+            if i.product_type in ModelConfig.RD_LX_GROUP:
+                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+            if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
+                item_list.append(i)
+                left_items.remove(i)
     if left_items:
         left_items.sort(key=lambda i: i.weight, reverse=True)
     # 如果有超重的子单，进行compose
     while left_items:
-        # 每次取第一个元素进行compose
+        # 每次取第一个元素进行compose,  filtered_items是得到的一个饱和(饱和即已达到重量上限)的子单
         filtered_items, left_items = weight_rule.compose([left_items[0]], left_items)
         # 如果过滤完后没有可用的发货子单则返回
         if not filtered_items:
