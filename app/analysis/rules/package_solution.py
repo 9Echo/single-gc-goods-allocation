@@ -34,7 +34,7 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def dynamic_programming(number, capacity, weight_cost):
+def dynamic_programming(number, capacity, weight_cost, volum):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than
@@ -50,29 +50,32 @@ def dynamic_programming(number, capacity, weight_cost):
     # Return the value of the most valuable subsequence of the first i
     # elements in items whose weights sum to no more than j.
     @memoized
-    def bestvalue(i, j):
+    def bestvalue(i, v, j):
         if i == 0:
             return 0
-        weight, cost = weight_cost[i - 1]
-        if weight > j:
-            return bestvalue(i - 1, j)
+        weight, vol, cost = weight_cost[i - 1]
+        if weight > j or vol > v:
+            return bestvalue(i - 1, v, j)
         else:
             # maximizing the cost
-            return max(bestvalue(i - 1, j), bestvalue(i - 1, j - weight) + cost)
+            return max(bestvalue(i - 1, v, j), bestvalue(i - 1, v - vol, j - weight) + cost)
 
     j = capacity
+    v = volum
     result = [0] * number
     for i in range(len(weight_cost), 0, -1):
-        if bestvalue(i, j) != bestvalue(i - 1, j):
+        if bestvalue(i, v, j) != bestvalue(i - 1, v, j):
             result[i - 1] = 1
             j -= weight_cost[i - 1][0]
-    return bestvalue(len(weight_cost), capacity), result
+            v -= weight_cost[i - 1][1]
+    return bestvalue(len(weight_cost), volum, capacity), result
 
 
 if __name__ == '__main__':
-    number = 5
+    volum = 1.18
+    number = 6
     capacity = 35
-    weight_cost = [(8, 8), (11, 11), (19, 19), (6, 6), (12, 12)]
-    bestvalue, result = dynamic_programming(number, capacity, weight_cost)
+    weight_cost = [(16, 0.4, 16), (9, 0.4, 9), (3, 0.2, 3), (1, 0.2, 1), (8, 0.2, 8), (9, 0.4, 9)]
+    bestvalue, result = dynamic_programming(number, capacity, weight_cost, volum)
     print(bestvalue)
     print(result)
