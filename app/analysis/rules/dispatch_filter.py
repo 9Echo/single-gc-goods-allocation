@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 import copy
 
-from app.analysis.rules import product_type_rule, weight_rule, package_solution
+from app.analysis.rules import weight_rule, package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
 from model_config import ModelConfig
 
