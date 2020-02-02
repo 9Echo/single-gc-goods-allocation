@@ -26,8 +26,10 @@ def compose(filtered_items: list, left_items: list):
     # 依次将子发货单装入发货单中
     total_weight = 0
     new_max_weight = 0
+    if ModelConfig.INCOMING_WEIGHT:
+        new_max_weight = ModelConfig.INCOMING_WEIGHT
     # 热镀组别和螺旋，MAX_WEIGHT加1000
-    if filtered_items and filtered_items[0].product_type in ModelConfig.RD_LX_GROUP:
+    elif filtered_items and filtered_items[0].product_type in ModelConfig.RD_LX_GROUP:
         new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
     for item in filtered_items:
         total_weight += item.weight

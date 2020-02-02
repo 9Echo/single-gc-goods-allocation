@@ -2,6 +2,7 @@ class ModelConfig:
     """模型参数配置
     """
     # 开单参数配置
+    INCOMING_WEIGHT = 0
     # 车载最大重量
     MAX_WEIGHT = 33000
     # 热镀、螺旋最大载重

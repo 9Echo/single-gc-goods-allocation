@@ -5,10 +5,12 @@ from app.main.dao.order_dao import order_dao
 from app.main.entity.order import Order
 from app.main.entity.order_item import OrderItem
 from app.utils.uuid_util import UUIDUtil
+from model_config import ModelConfig
 
 
 def generate_order(order_data):
     """根据json数据生成对应的订单"""
+    ModelConfig.INCOMING_WEIGHT = order_data["incoming_weight"]
     order = Order()
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
