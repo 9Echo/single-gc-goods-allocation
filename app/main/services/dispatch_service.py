@@ -133,7 +133,8 @@ def dispatch_load_task(sheets: list, task_id):
                 new_max_weight = round(
                     ModelConfig.MAX_WEIGHT +
                     (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * ModelConfig.RD_LX_UP_WEIGHT)
-                new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
+                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT \
+                    if new_max_weight > ModelConfig.RD_LX_MAX_WEIGHT else new_max_weight
             # 如果总重量小于最大载重
             if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
                 total_volume += sheet.volume
