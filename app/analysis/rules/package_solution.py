@@ -34,7 +34,7 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def dynamic_programming(number, capacity, weight_cost):
+def dynamic_programming(number, capacity, volum, weight_cost):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than

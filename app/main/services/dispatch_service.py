@@ -11,12 +11,13 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.utils import weight_calculator
-from app.utils.aop_util import get_item_a
+from app.utils.aop_util import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
 import pandas as pd
 
 
+@set_weight
 @get_item_a
 def dispatch(order):
     """根据订单执行分货
@@ -130,7 +131,8 @@ def dispatch_load_task(sheets: list, task_id):
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
-                    ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
+                    ModelConfig.MAX_WEIGHT +
+                    (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * ModelConfig.RD_LX_UP_WEIGHT)
                 new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
             # 如果总重量小于最大载重
             if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):

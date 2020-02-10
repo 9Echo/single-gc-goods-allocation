@@ -4,11 +4,23 @@ class ModelConfig:
     # 开单参数配置
     INCOMING_WEIGHT = 0
     # 车载最大重量
-    MAX_WEIGHT = 33000
+    MAX_WEIGHT = 0
     # 热镀、螺旋最大载重
-    RD_LX_MAX_WEIGHT = 34000
+    RD_LX_MAX_WEIGHT = 0
+    # 热镀、螺旋上浮重量
+    RD_LX_UP_WEIGHT = 0
     # 背包上限
-    PACKAGE_MAX_WEIGHT = 33500
+    PACKAGE_MAX_WEIGHT = 0
+    # 标准车载最大重量
+    STANDARD_MAX_WEIGHT = 33000
+    # 标准热镀、螺旋最大载重
+    STANDARD_RD_LX_MAX_WEIGHT = 34000
+    # 标准热镀、螺旋上浮重量
+    STANDARD_RD_LX_UP_WEIGHT = 1000
+    # 标准背包上限
+    STANDARD_PACKAGE_MAX_WEIGHT = 33500
+    # 背包重量下浮
+    PACKAGE_LOWER_WEIGHT = 2500
     # 体积上限系数
     MAX_VOLUME = 1.18
     # 计算重量、根数基础数据加载

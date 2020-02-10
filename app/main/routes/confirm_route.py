@@ -13,7 +13,7 @@ from app.utils.result import Result
 
 class ConfirmRoute(Resource):
     """
-       确认发货通知单，扣减库存
+       确认发货通知单
        """
     @staticmethod
     def post():
