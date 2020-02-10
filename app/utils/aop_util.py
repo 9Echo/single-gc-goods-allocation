@@ -31,7 +31,7 @@ def set_weight(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        weight = get_item_a_dict_list(args[0].weight)
+        weight = args[0].weight
         if weight:
             # 将最大载重、热镀、螺旋最大载重、背包最大载重统一赋值为用户自定义
             ModelConfig.MAX_WEIGHT, ModelConfig.RD_LX_MAX_WEIGHT, ModelConfig.PACKAGE_MAX_WEIGHT \
