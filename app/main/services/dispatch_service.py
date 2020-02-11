@@ -91,6 +91,7 @@ def dispatch(order):
     new_sheets = sort_by_weight(sheets)
     # 6、将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(new_sheets,)).start()
+    # return_dict[procnum] = new_sheets
     return new_sheets
 
 
@@ -227,14 +228,14 @@ def split_sheet(sheet, limit_weight, total_volume):
             if total_volume > ModelConfig.MAX_VOLUME:
                 item, new_item = weight_rule.split_item(item, (
                         ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
-            if new_item:
-                # 原单子追加明细
-                sheet_items.append(item)
-                # 新单子减少明细
-                new_sheet_items.remove(item)
-                # 新单子加入新切分出来的明细
-                new_sheet_items.insert(0, new_item)
-            break
+                if new_item:
+                    # 原单子追加明细
+                    sheet_items.append(item)
+                    # 新单子减少明细
+                    new_sheet_items.remove(item)
+                    # 新单子加入新切分出来的明细
+                    new_sheet_items.insert(0, new_item)
+                break
             # 原单子追加明细
             sheet_items.append(item)
             # 新单子减少明细
