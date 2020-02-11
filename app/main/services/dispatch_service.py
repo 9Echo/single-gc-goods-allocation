@@ -217,13 +217,13 @@ def split_sheet(sheet, limit_weight, total_volume):
             # 如果在不超重的情况下超体积，进行比例切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 item, new_item = weight_rule.split_item(item, (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
-            if new_item:
-                # 原单子追加明细
-                sheet_items.append(item)
-                # 新单子减少明细
-                new_sheet_items.remove(item)
-                # 新单子加入新切分出来的明细
-                new_sheet_items.insert(0, new_item)
+                if new_item:
+                    # 原单子追加明细
+                    sheet_items.append(item)
+                    # 新单子减少明细
+                    new_sheet_items.remove(item)
+                    # 新单子加入新切分出来的明细
+                    new_sheet_items.insert(0, new_item)
             break
             # 原单子追加明细
             sheet_items.append(item)
