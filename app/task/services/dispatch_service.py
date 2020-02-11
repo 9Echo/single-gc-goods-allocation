@@ -6,10 +6,10 @@ import copy
 import math
 from threading import Thread
 
-from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
+from app.task.analysis.rules import dispatch_filter
 from app.utils import weight_calculator
 from app.utils.aop_util import get_item_a
 from app.utils.uuid_util import UUIDUtil
