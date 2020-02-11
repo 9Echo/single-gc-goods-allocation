@@ -7,7 +7,7 @@ import json
 from flask import request, current_app
 from flask_restful import Resource
 
-from app.main.services import order_service, dispatch_service
+from app.task.services import order_service, dispatch_service
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
