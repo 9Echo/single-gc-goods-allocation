@@ -76,6 +76,6 @@ if __name__ == '__main__':
     number = 6
     capacity = 35
     weight_cost = [(16, 0.4, 16), (9, 0.4, 9), (3, 0.2, 3), (1, 0.2, 1), (8, 0.2, 8), (9, 0.4, 9)]
-    bestvalue, result = dynamic_programming(number, capacity, weight_cost, volum)
+    bestvalue, result = dynamic_programming(number, capacity, volum,weight_cost)
     print(bestvalue)
     print(result)
