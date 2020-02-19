@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 import functools
 from collections.abc import Hashable
 
@@ -34,7 +34,7 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def dynamic_programming(number, capacity, volum, weight_cost):
+def dynamic_programming(number, capacity, volume, weight_cost):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than
@@ -61,21 +61,21 @@ def dynamic_programming(number, capacity, volum, weight_cost):
             return max(bestvalue(i - 1, v, j), bestvalue(i - 1, v - vol, j - weight) + cost)
 
     j = capacity
-    v = volum
+    v = volume
     result = [0] * number
     for i in range(len(weight_cost), 0, -1):
         if bestvalue(i, v, j) != bestvalue(i - 1, v, j):
             result[i - 1] = 1
             j -= weight_cost[i - 1][0]
             v -= weight_cost[i - 1][1]
-    return bestvalue(len(weight_cost), volum, capacity), result
+    return bestvalue(len(weight_cost), volume, capacity), result
 
 
 if __name__ == '__main__':
-    volum = 1.18
+    volume = 1.18
     number = 6
     capacity = 35
     weight_cost = [(16, 0.4, 16), (9, 0.4, 9), (3, 0.2, 3), (1, 0.2, 1), (8, 0.2, 8), (9, 0.4, 9)]
-    bestvalue, result = dynamic_programming(number, capacity, weight_cost, volum)
+    bestvalue, result = dynamic_programming(number, capacity, volume, weight_cost)
     print(bestvalue)
     print(result)
