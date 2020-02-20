@@ -69,7 +69,7 @@ def con(args):
 def fun(args):
     max_quantity, one_weight, order_j, max_weight, max_volume, car_count, product_type_count = args
 
-    # 目标函数，差的平方和最小
+    # 目标函数，残差平方和最小
     def my_method(x):
         y = 0
         for i in range(car_count):

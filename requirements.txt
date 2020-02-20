@@ -1,3 +1,5 @@
+scipy
+pulp
 Flask
 Flask-RESTful
 flask_SQLAlchemy

@@ -12,9 +12,9 @@ import numpy as np
 """
 volume = [10000, 34, 22, 22, 34]
 one_weight = [1.067, 0.751, 1.488, 0.641, 0.815]
-order_j = [40, 40, 20, 30, 20]
-max_weight = 34
-max_volume = 1
+order_j = [50, 40, 40, 40, 30]
+max_weight = 33
+max_volume = 1.18
 
 
 def fun(args):
@@ -47,20 +47,20 @@ def con(args):
     cons = (
         # 每个规格的总件数等于所有车次加起来一共的总件数
         {'type': 'eq',
-         'fun': lambda x: x[0] + x[5 + 0] + x[5 + 5 + 0] + x[5 + 5 + 5 + 0] + x[5 + 5 + 5 + 5 + 0] + x[
-             5 + 5 + 5 + 5 + 5 + 0] - order_j[0]}, \
+         'fun': lambda x: order_j[0] - (x[0] + x[5 + 0] + x[5 + 5 + 0] + x[5 + 5 + 5 + 0] + x[5 + 5 + 5 + 5 + 0] + x[
+             5 + 5 + 5 + 5 + 5 + 0])}, \
         {'type': 'eq',
-         'fun': lambda x: x[1] + x[5 + 1] + x[5 + 5 + 1] + x[5 + 5 + 5 + 1] + x[5 + 5 + 5 + 5 + 1] + x[
-             5 + 5 + 5 + 5 + 5 + 1] - order_j[1]}, \
+         'fun': lambda x: order_j[1] - (x[1] + x[5 + 1] + x[5 + 5 + 1] + x[5 + 5 + 5 + 1] + x[5 + 5 + 5 + 5 + 1] + x[
+             5 + 5 + 5 + 5 + 5 + 1])}, \
         {'type': 'eq',
-         'fun': lambda x: x[2] + x[5 + 2] + x[5 + 5 + 2] + x[5 + 5 + 5 + 2] + x[5 + 5 + 5 + 5 + 2] + x[
-             5 + 5 + 5 + 5 + 5 + 2] - order_j[2]}, \
+         'fun': lambda x: order_j[2] - (x[2] + x[5 + 2] + x[5 + 5 + 2] + x[5 + 5 + 5 + 2] + x[5 + 5 + 5 + 5 + 2] + x[
+             5 + 5 + 5 + 5 + 5 + 2])}, \
         {'type': 'eq',
-         'fun': lambda x: x[3] + x[5 + 3] + x[5 + 5 + 3] + x[5 + 5 + 5 + 3] + x[5 + 5 + 5 + 5 + 3] + x[
-             5 + 5 + 5 + 5 + 5 + 3] - order_j[3]}, \
+         'fun': lambda x: order_j[3] - (x[3] + x[5 + 3] + x[5 + 5 + 3] + x[5 + 5 + 5 + 3] + x[5 + 5 + 5 + 5 + 3] + x[
+             5 + 5 + 5 + 5 + 5 + 3])}, \
         {'type': 'eq',
-         'fun': lambda x: x[4] + x[5 + 4] + x[5 + 5 + 4] + x[5 + 5 + 5 + 4] + x[5 + 5 + 5 + 5 + 4] + x[
-             5 + 5 + 5 + 5 + 5 + 4] - order_j[4]}, \
+         'fun': lambda x: order_j[4] - (x[4] + x[5 + 4] + x[5 + 5 + 4] + x[5 + 5 + 5 + 4] + x[5 + 5 + 5 + 5 + 4] + x[
+             5 + 5 + 5 + 5 + 5 + 4])}, \
         # 每辆车的载重小于最大载重
         {'type': 'ineq',
          'fun': lambda x: max_weight - (
@@ -116,7 +116,7 @@ def con(args):
                  1 / volume[2]) +
                  x[0 + 5 * 5 + 3] * (1 / volume[3]) + x[0 + 5 * 5 + 4] * (1 / volume[4]))}, \
         # 约束矩阵所有点为整数
-        # {'type': 'eq', 'fun': lambda x: (x % 1).sum() - 0}
+        # {'type': 'eq', 'fun': lambda x: x % 1}
     )
     # for i in range(0, 30):
     #     cons += ({'type': 'eq', 'fun': lambda x: x[i] % 1},)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     args = (volume, one_weight, order_j, max_weight, max_volume)  # x1min, x1max, x2min, x2max
     cons = con(args)
     # 设置初始猜测值   6*5
-    x0 = np.zeros((30), dtype=np.int32)
+    x0 = np.zeros(30)
     # x0 = np.asarray((0, 0, 0))
     bnds = ()
     for i in range(0, 30):
@@ -140,4 +140,15 @@ if __name__ == "__main__":
     print(res.fun)
     print(res.success)
     # print(res.x)
-    print(res.x.reshape(6, 5))
+    result = res.x.reshape(6, 5)
+    print(result)
+    print(result.sum(axis=0))
+    result = np.around(result)
+    print(result)
+    for i in range(6):
+        print('第' + str(i + 1) + '车载重              体积占比')
+        print(result[i, 0] * one_weight[0] + result[i, 1] * one_weight[1]
+              + result[i, 2] * one_weight[2] + result[i, 3] * one_weight[3] + result[i, 4] * one_weight[4],
+              result[i, 0] * 1/volume[0] + result[i, 1] * 1/volume[1]
+              + result[i, 2] * 1/volume[2] + result[i, 3] * 1/volume[3] + result[i, 4] * 1/volume[4])
+    print(result.sum(axis=0))
