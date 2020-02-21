@@ -1,6 +1,6 @@
 from pulp import *
 import numpy as np
-
+from app.utils import collection_util
 prob = LpProblem('优化问题', LpMaximize)
 volume = [10000, 34, 22, 22, 34]
 one_weight = [1.067, 0.751, 1.488, 0.641, 0.815]
@@ -13,14 +13,14 @@ max_volume = 1.18
 x0 = np.ones((6, 5))
 row = len(x0)
 col = len(x0[0])
-x = [[pulp.LpVariable(f'x{i}{j}', lowBound=0, cat=pulp.LpInteger) for j in range(col)] for i in range(row)]
+x = [pulp.LpVariable(f'x{i}', lowBound=0, cat=pulp.LpInteger)for i in range(30)]
 # 需要优化的表达式
 # prob += 600 * x1 + 800 * x2 + 500 * x3 + 400 * x4 + 300 * x5
 
-prob += (max_weight - pulp.lpDot(one_weight, x[0])) + (max_weight - pulp.lpDot(one_weight, x[1])) + (
-        max_weight - pulp.lpDot(one_weight, x[2])) + (max_weight - pulp.lpDot(one_weight, x[3])) + (
-                max_weight - pulp.lpDot(one_weight, x[4])) + (
-                max_weight - pulp.lpDot(one_weight, x[5]))
+prob += (max_weight - collection_util.dot(one_weight, x[0]))**2 + (max_weight - collection_util.dot(one_weight, x[1]))**2 + (
+        max_weight - collection_util.dot(one_weight, x[2]))**2 + (max_weight - collection_util.dot(one_weight, x[3]))**2 + (
+                max_weight - collection_util.dot(one_weight, x[4]))**2 + (
+                max_weight - collection_util.dot(one_weight, x[5]))**2
 # 约束条件
 for i in range(len(order_j)):
     temp = 0
@@ -30,8 +30,6 @@ for i in range(len(order_j)):
 for i in range(6):
     prob += pulp.lpDot(x[i], one_weight) <= max_weight
     prob += pulp.lpDot(x[i], volume) <= max_volume
-
-
 
 # lp文件保存该优化问题的信息
 # prob.writeLP("优化问题.lp")
@@ -48,3 +46,5 @@ for v in prob.variables():
 
 # 输出最优值，如果没有找到最优值，则输出None
 print("min", value(prob.objective))
+
+

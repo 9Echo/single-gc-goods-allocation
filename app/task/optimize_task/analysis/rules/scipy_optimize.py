@@ -3,12 +3,12 @@
 # @Author  : shaoluyu
 import math
 
-from scipy.optimize import minimize, Bounds
+from scipy.optimize import minimize, fmin_slsqp
 
 from app.utils import collection_util
 import numpy as np
 
-volume = [1/10000, 1/34, 1/22, 1/22, 1/34]
+volume = [1 / 10000, 1 / 34, 1 / 22, 1 / 22, 1 / 34]
 one_weight = [1.067, 0.751, 1.488, 0.641, 0.815]
 order_j = [50, 40, 40, 40, 30]
 max_weight = 32.5
@@ -16,16 +16,17 @@ max_volume = 1.18
 
 
 def my_minimize(one_volume, one_weight, order_j, max_weight, max_volume, car_count, product_type_count):
-    # 初始化矩阵
-    x = np.zeros((car_count, product_type_count))
+
     args = (one_volume, one_weight, order_j, max_weight, max_volume, car_count, product_type_count)
     # 添加约束
     cons = con(args)
-    # bnds = ()
-    # for i in range(car_count * product_type_count):
-    #     bnds += ((0, None),)
+    # 初始化矩阵
+    x = np.zeros(car_count * product_type_count)
+    bnds = ()
+    for i in range(car_count * product_type_count):
+        bnds += ((0, None),)
     # 非线性规划求最优解
-    return minimize(fun(args), x, method='SLSQP', bounds=Bounds(lb=0, ub=50, keep_feasible=True), constraints=cons)
+    return minimize(fun(args), x, method='SLSQP', bounds=bnds, constraints=cons)
 
 
 def con(args):
@@ -36,13 +37,13 @@ def con(args):
     # 添加件数被分配完的约束
     for i in range(product_type_count):
         cons += ({'type': 'eq',
-                  'fun': lambda x: sum([x[j][i] for j in range(car_count)]) - order_j[i]},)
+                  'fun': lambda x: order_j[i] - sum([x[j * product_type_count + i] for j in range(car_count)])},)
     # 添加车次总重量不超过最大载重、车次总体积占比不超过最大体积占比的约束
     for i in range(car_count):
         cons += ({'type': 'ineq', 'fun': lambda x: max_weight - sum(
-            [x[i][j] * one_weight[j] for j in range(product_type_count)])},)
+            [x[i * product_type_count + j] * one_weight[j] for j in range(product_type_count)])},)
         cons += ({'type': 'ineq', 'fun': lambda x: max_volume - sum(
-            [x[i][j] * (one_volume[j]) for j in range(product_type_count)])},)
+            [x[i * product_type_count + j] * (one_volume[j]) for j in range(product_type_count)])},)
 
     return cons
 
@@ -54,7 +55,8 @@ def fun(args):
     def my_method(x):
         y = 0
         for i in range(car_count):
-            y += (max_weight - collection_util.dot(x[i], one_weight)) ** 2
+            y += (max_weight - collection_util.dot(x[i * len(product_type_count):(i + 1) * len(product_type_count)],
+                                                   one_weight)) ** 2
         return y
 
     return my_method

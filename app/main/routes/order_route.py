@@ -11,6 +11,7 @@ from flask_restful import Resource
 
 from app.main.services import order_service, dispatch_service as dispatch_service_0
 from app.task.weight_first_task.services import dispatch_service as dispatch_service_1
+from app.task.optimize_task.sercices import dispatch_service as dispatch_service_2
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
@@ -37,7 +38,8 @@ class OrderRoute(Resource):
                 # print(return_dict.values())
                 sheets_0 = dispatch_service_0.dispatch(order)
                 sheets_1 = dispatch_service_1.dispatch(order)
-                return Result.success_response(sheets_0 + sheets_1)
+                sheets_2 = dispatch_service_2.dispatch(order)
+                return Result.success_response(sheets_2)
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)
