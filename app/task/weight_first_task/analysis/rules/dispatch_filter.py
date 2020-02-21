@@ -4,7 +4,7 @@
 
 
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.task.process_task.analysis.rules import product_type_rule, weight_rule
+from app.task.weight_first_task.analysis.rules import product_type_rule, weight_rule
 
 
 def filter(delivery_items: list):

@@ -8,7 +8,7 @@ from threading import Thread
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
-from app.task.process_task.analysis.rules import dispatch_filter, product_type_rule, weight_rule
+from app.task.weight_first_task.analysis.rules import dispatch_filter, product_type_rule, weight_rule
 from app.utils import weight_calculator
 from app.utils.aop_util import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil

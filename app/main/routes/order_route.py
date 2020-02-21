@@ -10,7 +10,7 @@ from flask import request, current_app
 from flask_restful import Resource
 
 from app.main.services import order_service, dispatch_service as dispatch_service_0
-from app.task.process_task.services import dispatch_service as dispatch_service_1
+from app.task.weight_first_task.services import dispatch_service as dispatch_service_1
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
