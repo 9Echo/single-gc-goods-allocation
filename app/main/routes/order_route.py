@@ -11,7 +11,7 @@ from flask_restful import Resource
 
 from app.main.services import order_service, dispatch_service as dispatch_service_0
 from app.task.weight_first_task.services import dispatch_service as dispatch_service_1
-from app.task.optimize_task.sercices import dispatch_service as dispatch_service_2
+from app.task.pulp_task.services import dispatch_service as dispatch_service_2
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 

@@ -7,8 +7,9 @@ import math
 from app.analysis.rules import product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.task.optimize_task.analysis.rules import scipy_optimize
+from app.task.pulp_task.analysis.rules import scipy_optimize
 from app.utils import weight_calculator
+from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
 from tests import test_package
 
@@ -28,6 +29,7 @@ def dispatch(order):
         di.f_whs = item.f_whs
         di.f_loc = item.f_loc
         di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
+        # 修改成了一件的体积占比
         di.volume = 1 / di.max_quantity if di.max_quantity else 0
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
         di.one_quantity_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 1, 0)
@@ -41,82 +43,79 @@ def dispatch(order):
             return [sheet]
         # 如果该明细有件数上限并且单规格件数超出，进行切单
         delivery_items.append(di)
-    # # 定义常量值
-    # one_volume = []
-    # one_weight = []
-    # order_j = []
-    # max_weight = 32.5
-    # max_volume = ModelConfig.MAX_VOLUME
-    # total_weight = 0
-    # # 计算总重量、最大件数、单件重量、件数信息
-    # for i in delivery_items:
-    #     # 总重量
-    #     total_weight += i.weight
-    #     one_volume.append(1 / i.max_quantity if i.max_quantity else 1 / 10000)
-    #     one_weight.append(weight_calculator.calculate_weight(i.product_type, i.item_id, 1, 0) / 1000)
-    #     order_j.append(i.quantity)
-    # # 车次等于总重量除以最大载重量
-    # car_count = math.ceil(total_weight / 1000 / max_weight)
-    # # 品种规格数量
-    # product_type_count = len(delivery_items)
-    # # 矩阵元素个数等于品种数*车次数
-    # # count = car_count * product_type_count
-    # scipy_optimize.my_minimize(one_volume, one_weight, order_j, max_weight, max_volume, (car_count, product_type_count))
+
     # 提货单子项信息字典
     obj_dict = {}
     # 每件对应的子项索引
-    item_id_list = []
+    obj_index_list = []
     # 每件对应的重量
     weight_list = []
     # 每件对应的体积占比
     volume_list = []
     # 散根单件重量查询字典
     free_pcs_weight_dict = {}
-    # 构建信息字典
+    # 构建信息字典,k  下标  v   子项对象
     for i in range(len(delivery_items)):
         obj_dict[i] = delivery_items[i]
     # 构建索引、重量、体积序列
     for k, v in obj_dict.items():
         for i in range(v.quantity):
-            item_id_list.append(k)
-            weight_list.append(v.weight)
+            obj_index_list.append(k)
+            weight_list.append(v.one_quantity_weight)
             volume_list.append(v.volume)
         for i in range(v.free_pcs):
-            item_id_list.append(k)
-            weight_list.append(v.weight)
-            volume_list.append(v.volume)
-            free_pcs_weight_dict[v.item_id] = v.one_free_pcs_weight
-    # 构建价值序列
+            obj_index_list.append(k)
+            weight_list.append(v.one_free_pcs_weight)
+            volume_list.append(0)
+            free_pcs_weight_dict['{},{},{}'.format(v.item_id, v.material, v.f_loc)] = v.one_free_pcs_weight
+    # 构建目标序列
     value_list = copy.deepcopy(weight_list)
+    load_task_id = 0
+    batch_no = UUIDUtil.create_id("ba")
+    # 结果集
+    sheets = []
+
     while weight_list:
+        load_task_id += 1
         # plup求解，得到选中的下标序列
         result_index_list = test_package.package(weight_list, volume_list, value_list)
-        # 结果集
-        sheets = []
-        sheet = DeliverySheet()
         # 下标减少量
         temp = 0
         for i in result_index_list:
+            sheet = DeliverySheet()
             i -= temp
             # item = DeliveryItem()
-            item = copy.deepcopy(obj_dict.get(item_id_list[i]))
+            item = copy.deepcopy(obj_dict.get(obj_index_list[i]))
             item.weight = weight_list[i]
             item.volume = volume_list[i]
 
-            if free_pcs_weight_dict.get(item.item_id) and weight_list[i] == free_pcs_weight_dict.get(item.item_id):
+            if free_pcs_weight_dict.get('{},{},{}'.format(item.item_id, item.material, item.f_loc)) \
+                    and weight_list[i] \
+                    == free_pcs_weight_dict.get('{},{},{}'.format(item.item_id, item.material, item.f_loc)):
                 item.quantity = 0
                 item.free_pcs = 1
-                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 1, 0)
+                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 0, 1)
             else:
                 item.quantity = 1
                 item.free_pcs = 0
-                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 0, 1)
+                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 1, 0)
             sheet.items.append(item)
+            # 3、补充发货单的属性
+            sheet.batch_no = batch_no
+            sheet.customer_id = order.customer_id
+            sheet.salesman_id = order.salesman_id
+            sheet.weight = item.weight
+            sheet.total_pcs = item.total_pcs
+            sheet.volume = item.volume
+            sheet.load_task_id = load_task_id
             sheets.append(sheet)
             weight_list.pop(i)
             volume_list.pop(i)
             value_list.pop(i)
+            obj_index_list.pop(i)
             temp += 1
+    # 归类合并
+    combine_sheets(sheets)
     return sheets
 
 
@@ -150,8 +149,8 @@ def combine_sheets(sheets):
                 sheets.remove(current)
             # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
             item_id_dict = {}
-            # 如果发现重量为0的明细，移除
             for citem in copy.copy(source.items):
+                # 如果发现重量为0的明细，移除
                 if citem.weight == 0:
                     source.items.remove(citem)
                 if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
@@ -165,11 +164,11 @@ def combine_sheets(sheets):
                     sitem.volume += citem.volume
                     source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
-        # current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
-        # doc_type = '提货单'
-        # no = 0
-        # for sheet in current_sheets:
-        #     no += 1
-        #     sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
-        #     for j in sheet.items:
-        #         j.delivery_no = sheet.delivery_no
+        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
+        doc_type = '提货单'
+        no = 0
+        for sheet in current_sheets:
+            no += 1
+            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            for j in sheet.items:
+                j.delivery_no = sheet.delivery_no
