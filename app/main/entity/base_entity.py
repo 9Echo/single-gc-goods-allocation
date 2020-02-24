@@ -6,10 +6,14 @@ import datetime
 
 class BaseEntity:
     """实体类的基类"""
+    ignore_attr = ['one_quantity_weight', 'one_free_pcs_weight']
 
     def as_dict(self):
         """将对象转为dict返回"""
-        return {attr: self.get_attr_str(attr) for attr in self.__dict__.keys()}
+        result_dict = {attr: self.get_attr_str(attr) for attr in self.__dict__.keys()}
+        for i in BaseEntity.ignore_attr:
+            result_dict.pop(i, 404)
+        return result_dict
 
     def get_attr_str(self, attr):
         """读取类成员变量，将其统一转为string"""
