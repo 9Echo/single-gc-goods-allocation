@@ -29,6 +29,11 @@ class Result:
             data = [item.as_dict() for item in obj]
         elif isinstance(obj, BaseEntity):
             data = obj.as_dict()
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                if isinstance(v, list):
+                    obj[k] = [item.as_dict() for item in v]
+            data = obj
         else:
             data = obj
         result.data = data
