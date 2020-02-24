@@ -9,9 +9,9 @@ from multiprocessing import Manager
 from flask import request, current_app
 from flask_restful import Resource
 
-from app.main.services import order_service, dispatch_service as dispatch_service_0
-from app.task.weight_first_task.services import dispatch_service as dispatch_service_1
-from app.task.pulp_task.services import dispatch_service as dispatch_service_2
+from app.main.services import order_service, dispatch_service as dispatch_service_spec
+from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
+from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
@@ -36,9 +36,9 @@ class OrderRoute(Resource):
                 # p.close()  # 关闭进程池，关闭后po不再接收新的请求
                 # p.join()  # 等待pool中所有子进程执行完成，必须放在close语句之后
                 # print(return_dict.values())
-                sheets_0 = dispatch_service_0.dispatch(order)
-                sheets_1 = dispatch_service_1.dispatch(order)
-                sheets_2 = dispatch_service_2.dispatch(order)
+                sheets_1 = dispatch_service_spec.dispatch(order)
+                sheets_2 = dispatch_service_weight.dispatch(order)
+                sheets_3 = dispatch_service_optimize.dispatch(order)
                 return Result.success_response(sheets_2)
         except MyException as me:
             current_app.logger.error(me.message)

@@ -7,7 +7,7 @@ import math
 from app.analysis.rules import product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.task.pulp_task.analysis.rules import scipy_optimize
+from app.task.pulp_task.analysis.rules import scipy_optimize, pulp_solve
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
@@ -78,7 +78,7 @@ def dispatch(order):
     while weight_list:
         load_task_id += 1
         # plup求解，得到选中的下标序列
-        result_index_list = test_package.package(weight_list, volume_list, value_list)
+        result_index_list = pulp_solve.pulp_pack(weight_list, volume_list, value_list)
         # 下标减少量
         temp = 0
         for i in result_index_list:
