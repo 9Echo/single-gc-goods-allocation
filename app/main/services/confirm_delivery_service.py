@@ -37,7 +37,7 @@ def confirm(company_id, batch_no, delivery_item_list):
         raise MyException('批次号为空！', ResponseCode.Error)
     result_data = get_delivery_list(batch_no)
     # 如果没获取到原数据，结束操作
-    if not getattr(result_data, 'data', None):
+    if not result_data:
         return
     # 原明细数据
     old_item_list = result_data.data

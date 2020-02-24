@@ -50,7 +50,7 @@ def get_delivery_list(batch_no):
                 items.extend([DeliveryItem(j) for j in i.get('items')])
             return Result.success(data=items)
         else:
-            return Result.error("数据不存在")
+            return None
     except Exception as e:
         current_app.logger.info("get_delivery_list error")
         current_app.logger.exception(e)
