@@ -5,10 +5,10 @@
 import copy
 import math
 from threading import Thread
-from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
+from app.task.optimize_task.analysis.rules import dispatch_filter, product_type_rule, weight_rule
 from app.utils import weight_calculator
 from app.utils.aop_util import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil
@@ -70,7 +70,7 @@ def dispatch(order):
 
         delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
-    sheets, task_id = dispatch_filter.filter(delivery_items)
+    sheets = dispatch_filter.filter(delivery_items)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
     for sheet in sheets:
@@ -84,7 +84,7 @@ def dispatch(order):
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
     # 4、为发货单分配车次
-    dispatch_load_task(sheets, task_id)
+    dispatch_load_task(sheets)
     # 5、车次提货单合并
     combine_sheets(sheets)
     new_sheets = sort_by_weight(sheets)
@@ -94,16 +94,14 @@ def dispatch(order):
     return new_sheets
 
 
-def dispatch_load_task(sheets: list, task_id):
+def dispatch_load_task(sheets: list):
     """将发货单根据重量组合到对应的车次上"""
 
     doc_type = '提货单'
     left_sheets = []
+    task_id = 0
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
-        # 如果已经生成车次的sheet，则跳过不处理
-        if sheet.load_task_id:
-            continue
         max_weight = 0
         if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
             max_weight = ModelConfig.RD_LX_MAX_WEIGHT
@@ -225,7 +223,6 @@ def split_sheet(sheet, limit_weight, total_volume):
         if total_weight <= limit_weight:
             # 如果在不超重的情况下超体积，进行比例切单
             if total_volume > ModelConfig.MAX_VOLUME:
-
                 item, new_item = weight_rule.split_item(item, (
                         ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * item.weight)
                 if new_item:
@@ -312,7 +309,7 @@ def combine_sheets(sheets):
             for citem in copy.copy(source.items):
                 if citem.weight == 0:
                     source.items.remove(citem)
-                if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
+                elif not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
                     item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
                 else:
                     sitem = item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)]

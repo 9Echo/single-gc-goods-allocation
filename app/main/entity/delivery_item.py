@@ -24,6 +24,8 @@ class DeliveryItem(BaseEntity):
         self.quantity = None  # 件数
         self.free_pcs = None  # 散根数
         self.total_pcs = None # 总根数
+        self.one_quantity_weight = None  # 单件重量
+        self.one_free_pcs_weight = None # 单根重量
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if delivery_item:

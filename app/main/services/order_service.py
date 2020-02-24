@@ -10,13 +10,14 @@ from model_config import ModelConfig
 
 def generate_order(order_data):
     """根据json数据生成对应的订单"""
-    ModelConfig.INCOMING_WEIGHT = order_data["incoming_weight"]
+    # ModelConfig.INCOMING_WEIGHT = order_data["incoming_weight"]
     order = Order()
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
     order.company_id = order_data["company_id"]
     order.customer_id = order_data['customer_id']
     order.salesman_id = order_data['salesman_id']
+    order.weight = order_data['weight']
     for item in order_data['items']:
         oi = OrderItem()
         oi.order_no = order.order_no

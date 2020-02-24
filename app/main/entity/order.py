@@ -11,15 +11,13 @@ class Order(BaseEntity):
 
     def __init__(self, order=None):
         self.rowid = None  # 主键id
-        self.order_no = None # 订单号
+        self.order_no = None  # 订单号
         self.items = []  # 订单子项
-        self.company_id = None # 公司id
+        self.company_id = None  # 公司id
         self.customer_id = None  # 客户id
         self.salesman_id = None  # 销售员id
+        self.weight = None  # 载重自定义
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if order:
             self.set_attr(order)
-
-
-

@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 import copy
 
-from app.analysis.rules import product_type_rule, weight_rule, package_solution
+from app.analysis.rules import weight_rule, package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
 from model_config import ModelConfig
 
@@ -20,18 +20,18 @@ def filter(delivery_items: list):
     left_items = delivery_items
     new_max_weight = 0
     # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
-    if ModelConfig.INCOMING_WEIGHT:
-        for i in copy.copy(delivery_items):
-            if i.weight < ModelConfig.INCOMING_WEIGHT:
-                item_list.append(i)
-                left_items.remove(i)
-    else:
-        for i in copy.copy(delivery_items):
-            if i.product_type in ModelConfig.RD_LX_GROUP:
-                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
-            if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
-                item_list.append(i)
-                left_items.remove(i)
+    # if ModelConfig.INCOMING_WEIGHT:
+    #     for i in copy.copy(delivery_items):
+    #         if i.weight < ModelConfig.INCOMING_WEIGHT:
+    #             item_list.append(i)
+    #             left_items.remove(i)
+    # else:
+    for i in copy.copy(delivery_items):
+        if i.product_type in ModelConfig.RD_LX_GROUP:
+            new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+        if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
+            item_list.append(i)
+            left_items.remove(i)
     if left_items:
         left_items.sort(key=lambda i: i.weight, reverse=True)
     # 如果有超重的子单，进行compose
@@ -49,23 +49,26 @@ def filter(delivery_items: list):
         is_full = False
         weight_cost = []
         for item in item_list:
-            weight_cost.append((int(item.weight), int(item.weight)))
+            weight_cost.append((int(item.weight), float(item.volume), int(item.weight)))
         # 将所有子单进行背包选举
         final_weight, result_list = \
-            package_solution.dynamic_programming(len(item_list), (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT), weight_cost)
+            package_solution.dynamic_programming(len(item_list),
+                                                 (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT),
+                                                 ModelConfig.MAX_VOLUME, weight_cost)
         if final_weight == 0:
             break
         # temp_item_list = copy.copy(item_list)
         # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
-        if ((new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT) - 2500) < final_weight < (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT):
+        if ((new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT) - ModelConfig.PACKAGE_LOWER_WEIGHT) < \
+                final_weight < (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT):
             is_full = True
         # 记录体积之和
-        volume = 0
+        # volume = 0
         # 临时明细存放
         temp_item_list = []
         # 临时提货单存放
         temp_sheet_list = []
-        for i in range(0, len(result_list)):
+        for i in range(len(result_list)):
             if result_list[i] == 1:
                 sheet = DeliverySheet()
                 # 取出明细列表对应下标的明细
@@ -73,12 +76,12 @@ def filter(delivery_items: list):
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
                 # 累加明细体积占比
-                volume += item_list[i].volume
+                # volume += item_list[i].volume
                 # 分别加入临时提货单和明细
                 temp_item_list.append(item_list[i])
                 temp_sheet_list.append(sheet)
         # 体积占比满足限制赋车次号
-        if is_full and volume <= ModelConfig.MAX_VOLUME:
+        if is_full:
             task_id += 1
             # 批量赋车次号
             for i in temp_sheet_list:
