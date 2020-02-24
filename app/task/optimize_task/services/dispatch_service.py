@@ -16,8 +16,6 @@ from model_config import ModelConfig
 import pandas as pd
 
 
-@set_weight
-@get_item_a
 def dispatch(order):
     """根据订单执行分货
     """
