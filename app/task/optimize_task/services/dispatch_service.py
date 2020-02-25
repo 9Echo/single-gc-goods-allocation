@@ -10,7 +10,6 @@ from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.task.optimize_task.analysis.rules import dispatch_filter, product_type_rule, weight_rule
 from app.utils import weight_calculator
-from app.utils.aop_util import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
 import pandas as pd
@@ -20,7 +19,8 @@ def dispatch(order):
     """根据订单执行分货
     """
     # 1、将订单项转为发货通知单子单
-    delivery_items = []
+    max_delivery_items = []
+    min_delivery_items = []
     for item in order.items:
         di = DeliveryItem()
         di.product_type = item.product_type
@@ -41,6 +41,10 @@ def dispatch(order):
             sheet.weight = '0'
             sheet.items = [di]
             return [sheet]
+        # 搜集小管
+        if di.max_quantity == 0:
+            min_delivery_items.append(di)
+            continue
         # 如果该明细有件数上限并且单规格件数超出，进行切单
         if di.max_quantity and di.quantity > di.max_quantity:
             # copy次数
@@ -59,16 +63,16 @@ def dispatch(order):
                 copy_di.weight = new_weight
                 copy_di.total_pcs = new_total_pcs
                 # 将新明细放入明细列表
-                delivery_items.append(copy_di)
+                max_delivery_items.append(copy_di)
             # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
             di.quantity = surplus
             di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
             di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
 
-        delivery_items.append(di)
+        max_delivery_items.append(di)
     # 2、使用模型过滤器生成发货通知单
-    sheets = dispatch_filter.filter(delivery_items)
+    sheets = dispatch_filter.filter(max_delivery_items)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
     for sheet in sheets:
