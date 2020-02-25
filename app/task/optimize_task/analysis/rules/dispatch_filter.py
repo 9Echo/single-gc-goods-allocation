@@ -5,11 +5,11 @@ import copy
 
 from app.analysis.rules import package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.task.optimize_task.analysis.rules import product_type_rule, weight_rule
+from app.task.optimize_task.analysis.rules import weight_rule
 from model_config import ModelConfig
 
 
-def filter(delivery_items: list):
+def filter(delivery_items: list, task_id=0):
     """
     根据过滤规则将传入的发货子单划分到合适的发货单中
     """
@@ -38,7 +38,6 @@ def filter(delivery_items: list):
             break
         item_list.extend(filtered_items)
 
-    task_id = 0
     while item_list:
         # 是否满载标记
         is_full = False

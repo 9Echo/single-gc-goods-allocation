@@ -21,6 +21,9 @@ def dispatch(order):
     # 1、将订单项转为发货通知单子单
     max_delivery_items = []
     min_delivery_items = []
+    sheets = []
+    task_id = 0
+    batch_no = UUIDUtil.create_id("ba")
     for item in order.items:
         di = DeliveryItem()
         di.product_type = item.product_type
@@ -71,23 +74,26 @@ def dispatch(order):
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
 
         max_delivery_items.append(di)
+    if max_delivery_items:
         # 2、使用模型过滤器生成发货通知单
-    sheets, task_id = dispatch_filter.filter(max_delivery_items)
-    # 3、补充发货单的属性
-    batch_no = UUIDUtil.create_id("ba")
-    for sheet in sheets:
-        sheet.batch_no = batch_no
-        sheet.customer_id = order.customer_id
-        sheet.salesman_id = order.salesman_id
-        sheet.weight = 0
-        sheet.total_pcs = 0
-        for di in sheet.items:
-            di.delivery_item_no = UUIDUtil.create_id("di")
-            sheet.weight += di.weight
-            sheet.total_pcs += di.total_pcs
-    # 4、为发货单分配车次
-    dispatch_load_task(sheets, task_id)
-    # 5、车次提货单合并
+        sheets, task_id = dispatch_filter.filter(max_delivery_items)
+        # 3、补充发货单的属性
+        for sheet in sheets:
+            sheet.batch_no = batch_no
+            sheet.customer_id = order.customer_id
+            sheet.salesman_id = order.salesman_id
+            sheet.weight = 0
+            sheet.total_pcs = 0
+            for di in sheet.items:
+                di.delivery_item_no = UUIDUtil.create_id("di")
+                sheet.weight += di.weight
+                sheet.total_pcs += di.total_pcs
+        # 为发货单分配车次
+        task_id = dispatch_load_task(sheets, task_id)
+    if min_delivery_items:
+        # 小管装填大管车次
+        load_task_fill(sheets, min_delivery_items, task_id, order, batch_no)
+    # 车次提货单合并
     combine_sheets(sheets)
     sheets.sort(key=lambda i: i.load_task_id)
     # 6、将推荐发货通知单暂存redis
@@ -200,6 +206,7 @@ def dispatch_load_task(sheets: list, task_id):
                             # 原始单子列表加入新拆分出来的单子
                             sheets.append(new_sheet)
                         break
+    return task_id
 
 
 def split_sheet(sheet, limit_weight):
@@ -322,6 +329,106 @@ def sort_by_weight(sheets):
                 sheet.load_task_id = task_id
                 sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
                 for item in sheet.items: item.delivery_no = sheet.delivery_no
-            new_sheets.append(sheet)
-            sheets.remove(sheet)
+                new_sheets.append(sheet)
+                sheets.remove(sheet)
     return new_sheets
+
+
+def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
+    """
+    小管装填大管车次，将小管按照件数从小到大排序
+    若小管不够，分完结束
+    若小管装填完所有车次后有剩余，进行背包和遍历
+    :param batch_no: 分货批次号
+    :param order: 订单
+    :param sheets:大管的提货单列表
+    :param min_delivery_item:小管的子项列表
+    :param task_id:当前分配车次号
+    :return: None
+    """
+    if not sheets:
+        # 2、使用模型过滤器生成发货通知单
+        sheets, task_id = dispatch_filter.filter(min_delivery_item)
+        # 3、补充发货单的属性
+        for sheet in sheets:
+            sheet.batch_no = batch_no
+            sheet.customer_id = order.customer_id
+            sheet.salesman_id = order.salesman_id
+            sheet.weight = 0
+            sheet.total_pcs = 0
+            for di in sheet.items:
+                di.delivery_item_no = UUIDUtil.create_id("di")
+                sheet.weight += di.weight
+                sheet.total_pcs += di.total_pcs
+        # 为发货单分配车次
+        dispatch_load_task(sheets, task_id)
+    else:
+        min_delivery_item.sort(key=lambda i: i.quantity)
+        sheets_dict = [sheet.as_dict() for sheet in sheets]
+        df = pd.DataFrame(sheets_dict)
+        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
+        for k, v in series.items():
+            max_weight = 0
+            current_weight = v
+            # 判断该车次是否下差过大
+            current_sheets = list(filter(lambda i: i.load_task_id == k, sheets))
+            if current_sheets and current_sheets[0].items:
+                if current_sheets[0].items[0].product_type in ModelConfig.RD_LX_GROUP:
+                    max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+            if v >= (max_weight or ModelConfig.MAX_WEIGHT):
+                continue
+            for i in copy.copy(min_delivery_item):
+                # 如果该子项可完整放入
+                if i.weight <= (max_weight or ModelConfig.MAX_WEIGHT) - current_weight:
+                    # 当前重量累加
+                    current_weight += i.weight
+                    # 生成新提货单，归到该车次下
+                    new_sheet = DeliverySheet()
+                    new_sheet.load_task_id = k
+                    new_sheet.volume = i.volume
+                    new_sheet.batch_no = batch_no
+                    new_sheet.customer_id = order.customer_id
+                    new_sheet.salesman_id = order.salesman_id
+                    new_sheet.weight = i.weight
+                    new_sheet.total_pcs = i.total_pcs
+                    new_sheet.items.append(i)
+                    sheets.append(new_sheet)
+                    # 移除掉被分配的子项
+                    min_delivery_item.remove(i)
+                else:
+                    i, new_item = \
+                        weight_rule.split_item(i, i.weight - ((max_weight or ModelConfig.MAX_WEIGHT) - current_weight))
+                    # 生成新提货单，归到该车次下
+                    new_sheet = DeliverySheet()
+                    new_sheet.load_task_id = k
+                    new_sheet.volume = i.volume
+                    new_sheet.batch_no = batch_no
+                    new_sheet.customer_id = order.customer_id
+                    new_sheet.salesman_id = order.salesman_id
+                    new_sheet.weight = i.weight
+                    new_sheet.total_pcs = i.total_pcs
+                    new_sheet.items.append(i)
+                    # 移除掉被分配的子项
+                    min_delivery_item.remove(i)
+                    # 将剩余的子项放入子项列表
+                    min_delivery_item.insert(0, new_item)
+                    sheets.append(new_sheet)
+                    break
+        # 装填完如果小管还有剩余，进行单独分货
+        if min_delivery_item:
+            # 2、使用模型过滤器生成发货通知单
+            min_sheets, task_id = dispatch_filter.filter(min_delivery_item, task_id)
+            # 3、补充发货单的属性
+            for sheet in min_sheets:
+                sheet.batch_no = batch_no
+                sheet.customer_id = order.customer_id
+                sheet.salesman_id = order.salesman_id
+                sheet.weight = 0
+                sheet.total_pcs = 0
+                for di in sheet.items:
+                    di.delivery_item_no = UUIDUtil.create_id("di")
+                    sheet.weight += di.weight
+                    sheet.total_pcs += di.total_pcs
+            # 为发货单分配车次
+            dispatch_load_task(min_sheets, task_id)
+            sheets.extend(min_sheets)
