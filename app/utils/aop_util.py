@@ -1,5 +1,7 @@
 import functools
 
+from app.utils.code import ResponseCode
+from app.utils.my_exception import MyException
 from app.utils.weight_calculator import get_item_a_dict_list
 from model_config import ModelConfig
 
@@ -33,6 +35,8 @@ def set_weight(func):
     def wrapper(*args, **kw):
         weight = args[0].weight
         if weight:
+            if int(weight) < 20000:
+                raise MyException('输入的重量过小，请重新输入！', ResponseCode.Error)
             # 将最大载重、热镀、螺旋最大载重、背包最大载重统一赋值为用户自定义
             ModelConfig.MAX_WEIGHT, ModelConfig.RD_LX_MAX_WEIGHT, ModelConfig.PACKAGE_MAX_WEIGHT \
                 = weight, weight, weight
