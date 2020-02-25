@@ -22,7 +22,7 @@ class ModelConfig:
     # 背包重量下浮
     PACKAGE_LOWER_WEIGHT = 2500
     # 体积上限系数
-    MAX_VOLUME = 1
+    MAX_VOLUME = 1.18
     # 计算重量、根数基础数据加载
     ITEM_A_DICT = {}
     # 分车次限制重量
