@@ -348,9 +348,9 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
     """
     if not sheets:
         # 2、使用模型过滤器生成发货通知单
-        sheets, task_id = dispatch_filter.filter(min_delivery_item)
+        min_sheets, task_id = dispatch_filter.filter(min_delivery_item)
         # 3、补充发货单的属性
-        for sheet in sheets:
+        for sheet in min_sheets:
             sheet.batch_no = batch_no
             sheet.customer_id = order.customer_id
             sheet.salesman_id = order.salesman_id
@@ -361,7 +361,8 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
                 sheet.weight += di.weight
                 sheet.total_pcs += di.total_pcs
         # 为发货单分配车次
-        dispatch_load_task(sheets, task_id)
+        dispatch_load_task(min_sheets, task_id)
+        sheets.extend(min_sheets)
     else:
         min_delivery_item.sort(key=lambda i: i.quantity)
         sheets_dict = [sheet.as_dict() for sheet in sheets]
