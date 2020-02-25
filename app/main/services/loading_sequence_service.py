@@ -53,7 +53,7 @@ def loading():
                               item['quantity'],
                               item['free_pcs'],
                               item['total_pcs'],
-                              od_id,
+                              float(od_id),
                               shape])
         # 将每个订单的所有子单按照已录信息的外径从小到大排序
         item_list.sort(key=lambda x: x[6], reverse=True)
