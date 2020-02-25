@@ -71,39 +71,40 @@ def dispatch(order):
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
 
         max_delivery_items.append(di)
-    # 2、使用模型过滤器生成发货通知单
-    sheets = dispatch_filter.filter(max_delivery_items)
-    # 3、补充发货单的属性
-    batch_no = UUIDUtil.create_id("ba")
-    for sheet in sheets:
-        sheet.batch_no = batch_no
-        sheet.customer_id = order.customer_id
-        sheet.salesman_id = order.salesman_id
-        sheet.weight = 0
-        sheet.total_pcs = 0
-        for di in sheet.items:
-            di.delivery_item_no = UUIDUtil.create_id("di")
-            sheet.weight += di.weight
-            sheet.total_pcs += di.total_pcs
-    # 4、为发货单分配车次
-    dispatch_load_task(sheets)
-    # 5、车次提货单合并
-    combine_sheets(sheets)
-    new_sheets = sort_by_weight(sheets)
-    # 6、将推荐发货通知单暂存redis
-    Thread(target=redis_service.set_delivery_list, args=(new_sheets,)).start()
-    # return_dict[procnum] = new_sheets
-    return new_sheets
+        # 2、使用模型过滤器生成发货通知单
+        sheets, task_id = dispatch_filter.filter(max_delivery_items)
+        # 3、补充发货单的属性
+        batch_no = UUIDUtil.create_id("ba")
+        for sheet in sheets:
+            sheet.batch_no = batch_no
+            sheet.customer_id = order.customer_id
+            sheet.salesman_id = order.salesman_id
+            sheet.weight = 0
+            sheet.total_pcs = 0
+            for di in sheet.items:
+                di.delivery_item_no = UUIDUtil.create_id("di")
+                sheet.weight += di.weight
+                sheet.total_pcs += di.total_pcs
+        # 4、为发货单分配车次
+        dispatch_load_task(sheets, task_id)
+        # 5、车次提货单合并
+        combine_sheets(sheets)
+        sheets.sort(key=lambda i: i.load_task_id)
+        # 6、将推荐发货通知单暂存redis
+        Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
+        return sheets
 
 
-def dispatch_load_task(sheets: list):
+def dispatch_load_task(sheets: list, task_id):
     """将发货单根据重量组合到对应的车次上"""
 
     doc_type = '提货单'
     left_sheets = []
-    task_id = 0
     # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
+        # 如果已经生成车次的sheet，则跳过不处理
+        if sheet.load_task_id:
+            continue
         max_weight = 0
         if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
             max_weight = ModelConfig.RD_LX_MAX_WEIGHT
@@ -131,10 +132,8 @@ def dispatch_load_task(sheets: list):
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
-                    ModelConfig.MAX_WEIGHT +
-                    (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * ModelConfig.RD_LX_UP_WEIGHT)
-                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT \
-                    if new_max_weight > ModelConfig.RD_LX_MAX_WEIGHT else new_max_weight
+                    ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
+                new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
             # 如果总重量小于最大载重
             if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
                 total_volume += sheet.volume
@@ -234,7 +233,7 @@ def split_sheet(sheet, limit_weight, total_volume):
                     new_sheet_items.remove(item)
                     # 新单子加入新切分出来的明细
                     new_sheet_items.insert(0, new_item)
-                break
+            break
             # 原单子追加明细
             sheet_items.append(item)
             # 新单子减少明细
@@ -245,7 +244,8 @@ def split_sheet(sheet, limit_weight, total_volume):
             temp_weight = 0
             # 如果超重并且体积超出，按照体积占比上限切单
             if total_volume > ModelConfig.MAX_VOLUME:
-                temp_weight = (1 - (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume) * item.weight
+                temp_weight = (1 - (
+                        ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume) * item.weight
                 # 如果按照体积切单的重量比按照重量切的少，则按照重量切单，保证体积和重量条件同时都满足
                 temp_weight = 0 if temp_weight < (total_weight - limit_weight) else temp_weight
                 # item, new_item = weight_rule.split_item(item, (ModelConfig.MAX_VOLUME - total_volume + item.volume) / item.volume * (total_weight - limit_weight))
@@ -311,7 +311,7 @@ def combine_sheets(sheets):
             for citem in copy.copy(source.items):
                 if citem.weight == 0:
                     source.items.remove(citem)
-                elif not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
+                if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
                     item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
                 else:
                     sitem = item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)]
@@ -322,14 +322,14 @@ def combine_sheets(sheets):
                     sitem.volume += citem.volume
                     source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
-        # current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
-        # doc_type = '提货单'
-        # no = 0
-        # for sheet in current_sheets:
-        #     no += 1
-        #     sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
-        #     for j in sheet.items:
-        #         j.delivery_no = sheet.delivery_no
+        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
+        doc_type = '提货单'
+        no = 0
+        for sheet in current_sheets:
+            no += 1
+            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            for j in sheet.items:
+                j.delivery_no = sheet.delivery_no
 
 
 def print_sheets(sheets):
