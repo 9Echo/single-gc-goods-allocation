@@ -111,7 +111,7 @@
                 },
                 {
                     "rowid": null,
-                    "delivery_no": "提货单3-2",
+                    "delivery_no": "提货单3-1",
                     "delivery_item_no": "di_f16fa1d43b3211eaab53",
                     "product_type": "热镀",
                     "company_id": null,
@@ -130,7 +130,7 @@
                     "update_time": null
                 },{
                     "rowid": null,
-                    "delivery_no": "提货单1-2",
+                    "delivery_no": "提货单3-1",
                     "delivery_item_no": "di_f16fa1d23b3211eabb0a",
                     "product_type": "焊管",
                     "company_id": null,
