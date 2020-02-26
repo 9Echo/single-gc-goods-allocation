@@ -3,10 +3,12 @@
 # @Author  : shaoluyu
 import copy
 import math
+from threading import Thread
 
 from app.analysis.rules import product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.services import redis_service
 from app.task.pulp_task.analysis.rules import scipy_optimize, pulp_solve
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
@@ -116,6 +118,8 @@ def dispatch(order):
             temp += 1
     # 归类合并
     combine_sheets(sheets)
+    # 将推荐发货通知单暂存redis
+    Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
 
 
