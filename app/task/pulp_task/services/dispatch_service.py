@@ -3,10 +3,12 @@
 # @Author  : shaoluyu
 import copy
 import math
+from threading import Thread
 
 from app.analysis.rules import product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.services import redis_service
 from app.task.pulp_task.analysis.rules import scipy_optimize, pulp_solve
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
@@ -107,6 +109,7 @@ def dispatch(order):
             sheet.weight = item.weight
             sheet.total_pcs = item.total_pcs
             sheet.volume = item.volume
+            sheet.type = 'weight_first'
             sheet.load_task_id = load_task_id
             sheets.append(sheet)
             weight_list.pop(i)
@@ -116,6 +119,8 @@ def dispatch(order):
             temp += 1
     # 归类合并
     combine_sheets(sheets)
+    # 将推荐发货通知单暂存redis
+    Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
 
 
