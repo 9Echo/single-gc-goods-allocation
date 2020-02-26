@@ -19,6 +19,7 @@ class DeliverySheet(BaseEntity):
         self.salesman_id = None # 业务员id
         self.total_pcs = None # 总根数
         self.weight = None # 重量
+        self.type = None # 类型
         self.volume = None  # 所占体积
         self.items = []  # 发货通知单子单
         self.create_time = None  # 创建时间

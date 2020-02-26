@@ -109,6 +109,7 @@ def dispatch(order):
             sheet.weight = item.weight
             sheet.total_pcs = item.total_pcs
             sheet.volume = item.volume
+            sheet.type = 'weight_first'
             sheet.load_task_id = load_task_id
             sheets.append(sheet)
             weight_list.pop(i)
