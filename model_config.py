@@ -66,7 +66,7 @@ class ModelConfig:
         '0C8': 6,
     }
     # 对应焊管的高和宽
-    hanguan_pack_size = {
+    HANGUAN_PACK_SIZE = {
         '21': '360*370',
         '26': '385*400',
         '33': '430*455',
@@ -80,7 +80,7 @@ class ModelConfig:
         '165': '800*835',
         '219': '655*670'
     }
-    redu_pack_size = {
+    REDU_PACK_SIZE = {
         '21': '320*335',
         '26': '335*360',
         '33': '350*370',

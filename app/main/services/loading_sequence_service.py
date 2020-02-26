@@ -23,8 +23,8 @@ def loading():
     # 下面将每个发货单上的货整理成一个列表添加到load_list中
     # 遍历每一个订单
     for sheet in sheets:
-
-        item_list = []
+        if sheet["load_task_id"] not in load_dict:
+            load_dict[sheet["load_task_id"]] = []
         # 通过sheet生成一个发货单对象
         de_sheet = DeliverySheet(sheet)
         # 遍历发货单中的每一个子单，整理子单信息添加到load_list中
@@ -34,11 +34,11 @@ def loading():
             # 为焊管 则查成件的高和宽
             if item["product_type"] == "焊管":
                 # 通过外径查询焊管成捆后的高和宽：size ，example：360*370
-                size = ModelConfig.hanguan_pack_size[od_id]
+                size = ModelConfig.HANGUAN_PACK_SIZE[od_id]
             # 此处暂且只考虑  焊管和热镀
             else:
                 # 通过外径查询热镀成捆后的高和宽：size ，example：360*370
-                size = ModelConfig.redu_pack_size[od_id]
+                size = ModelConfig.REDU_PACK_SIZE[od_id]
             # 判断所画图形的形状
             if item["product_type"] in ["焊管", "热镀"]:
                 shape = "六边形"
@@ -47,18 +47,19 @@ def loading():
             elif item["product_type"] == "螺旋焊管":
                 shape = "圆形"
             # 将子单信息按【品名，件尺寸，规格，件数，散根数，总根数, 外径，形状】的格式添加到load_list中
-            item_list.append([item['product_type'],
-                              size,
-                              item['item_id'],
-                              item['quantity'],
-                              item['free_pcs'],
-                              item['total_pcs'],
-                              float(od_id),
-                              shape])
-        # 将每个订单的所有子单按照已录信息的外径从小到大排序
-        item_list.sort(key=lambda x: x[6], reverse=True)
+            load_dict[sheet["load_task_id"]].append([item['product_type'],
+                                                     size,
+                                                     item['item_id'],
+                                                     item['quantity'],
+                                                     item['free_pcs'],
+                                                     item['total_pcs'],
+                                                     float(od_id),
+                                                     shape])
+    # 将每个订单的所有子单按照已录信息的外径从小到大排序
+    for key in load_dict:
+        load_dict[key].sort(key=lambda x: x[6])
         # 将该发货单中所装货物添加到load_list中
-        load_list.append(item_list)
+        load_list.append(load_dict[key])
 
     # 车型 车长， 车宽， 侧栏高
     car = [12000, 2400, 1500]
