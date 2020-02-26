@@ -128,25 +128,6 @@
                     "total_pcs": 70,
                     "create_time": null,
                     "update_time": null
-                },{
-                    "rowid": null,
-                    "delivery_no": "提货单1-2",
-                    "delivery_item_no": "di_f16fa1d23b3211eabb0a",
-                    "product_type": "焊管",
-                    "company_id": null,
-                    "spec": "016033*2.3*6000",
-                    "item_id": "016033*2.3*6000",
-                    "f_whs": "sth",
-                    "max_quantity": 34,
-                    "volume": 0.23529411764705882,
-                    "f_loc": "sth",
-                    "material": "sth",
-                    "weight": 7373,
-                    "quantity": 6,
-                    "free_pcs": 0,
-                    "total_pcs": 296,
-                    "create_time": null,
-                    "update_time": null
                 }
             ],
             "create_time": null,
