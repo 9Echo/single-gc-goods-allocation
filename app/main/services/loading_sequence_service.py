@@ -10,12 +10,10 @@ import math
 """
 
 
-def loading():
-    # 读取所有数据
-    with open("result.json", "rt", encoding='utf-8') as f:
-        temp = json.loads(f.read())
+def loading(temps, car_info):
+
     # 得到所需的数据
-    sheets = temp["data"]
+    sheets = temps["data"]
     # 存放每一个发货单所装货物的列表
     load_list = []
     # 将货物按照load_task_id进行分类
@@ -31,12 +29,20 @@ def loading():
         for item in de_sheet.items:
             # 分割 物资代码 得到外径：od_id
             od_id = item['item_id'].split("*")[0][3:].lstrip("0")
+            # 管长
+            pipe_length = item["item_id"].split("*")[-1]
             # 为焊管 则查成件的高和宽
             if item["product_type"] == "焊管":
                 # 通过外径查询焊管成捆后的高和宽：size ，example：360*370
                 size = ModelConfig.HANGUAN_PACK_SIZE[od_id]
-            # 此处暂且只考虑  焊管和热镀
-            else:
+            # 为方矩管
+            elif item["product_type"] == "方矩管":
+                # 方矩管的外径取长的一个，所以去第二个位置的数据
+                od_id = item["item_id"].split("*")[1].lstrip("0")
+                temp_size = item["item_id"][3:10].lstrip("0")
+                size = ModelConfig.FANGJU_PACK_SIZE[temp_size]
+            # 为热镀
+            elif item["product_type"] == "热镀":
                 # 通过外径查询热镀成捆后的高和宽：size ，example：360*370
                 size = ModelConfig.REDU_PACK_SIZE[od_id]
             # 判断所画图形的形状
@@ -54,15 +60,13 @@ def loading():
                                                      item['free_pcs'],
                                                      item['total_pcs'],
                                                      float(od_id),
+                                                     pipe_length,
                                                      shape])
     # 将每个订单的所有子单按照已录信息的外径从小到大排序
     for key in load_dict:
         load_dict[key].sort(key=lambda x: x[6])
         # 将该发货单中所装货物添加到load_list中
         load_list.append(load_dict[key])
-
-    # 车型 车长， 车宽， 侧栏高
-    car = [12000, 2400, 1500]
     # 装车清单
     box = []
     # items为一个发货单
@@ -223,6 +227,8 @@ def new_floor(box_list, item_width, item_height, item, n):
 
 
 if __name__ == '__main__':
-    result = loading()
+    with open("result.json", "rt", encoding='utf-8') as f:
+        temp = json.loads(f.read())
+    result = loading(temp, [12000, 2400, 1500])
     for i in result:
         print(i)
