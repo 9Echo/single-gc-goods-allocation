@@ -394,6 +394,7 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
                     new_sheet.salesman_id = order.salesman_id
                     new_sheet.weight = i.weight
                     new_sheet.total_pcs = i.total_pcs
+                    new_sheet.type = 'recommend_first'
                     new_sheet.items.append(i)
                     sheets.append(new_sheet)
                     # 移除掉被分配的子项
@@ -409,6 +410,7 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
                     new_sheet.customer_id = order.customer_id
                     new_sheet.salesman_id = order.salesman_id
                     new_sheet.weight = i.weight
+                    new_sheet.type = 'recommend_first'
                     new_sheet.total_pcs = i.total_pcs
                     new_sheet.items.append(i)
                     # 移除掉被分配的子项

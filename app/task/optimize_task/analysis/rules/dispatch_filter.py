@@ -69,6 +69,7 @@ def filter(delivery_items: list, task_id=0):
                 sheet.items = [item_list[i]]
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
+                sheet.type = 'recommend_first'
                 # 累加明细体积占比
                 # volume += item_list[i].volume
                 # 分别加入临时提货单和明细

@@ -39,8 +39,8 @@ class OrderRoute(Resource):
                 sheets_1 = dispatch_service_spec.dispatch(order)
                 sheets_2 = dispatch_service_weight.dispatch(order)
                 sheets_3 = dispatch_service_optimize.dispatch(order)
-                result_dict = {'spec_first': sheets_1, 'weight_first': sheets_2, 'recommend_first': sheets_3}
-                return Result.success_response(result_dict)
+                # result_dict = {'spec_first': sheets_1, 'weight_first': sheets_2, 'recommend_first': sheets_3}
+                return Result.success_response(sheets_1 + sheets_2 + sheets_3)
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)

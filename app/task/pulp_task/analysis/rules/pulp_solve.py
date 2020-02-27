@@ -3,8 +3,8 @@ from pulp import *
 from model_config import ModelConfig
 
 
-def pulp_pack(weight_list, volume_list, value_list):
-    capacity = ModelConfig.MAX_WEIGHT
+def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
+    capacity = new_max_weight or ModelConfig.MAX_WEIGHT
     r = range(len(weight_list))
     prob = LpProblem(sense=LpMaximize)
     x = [LpVariable('x%d' % i, cat=LpBinary) for i in r]  # 変数
