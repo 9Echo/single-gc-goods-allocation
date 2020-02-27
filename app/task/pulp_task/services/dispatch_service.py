@@ -19,9 +19,15 @@ from tests import test_package
 def dispatch(order):
     """根据订单执行分货
     """
+    product_type = None
     delivery_items = []
+    new_max_weight = 0
     for item in order.items:
         di = DeliveryItem()
+        if not product_type:
+            product_type = item.product_type
+            if product_type in ModelConfig.RD_LX_GROUP:
+                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
         di.product_type = item.product_type
         di.spec = item.spec
         di.quantity = item.quantity
@@ -80,7 +86,7 @@ def dispatch(order):
     while weight_list:
         load_task_id += 1
         # plup求解，得到选中的下标序列
-        result_index_list = pulp_solve.pulp_pack(weight_list, volume_list, value_list)
+        result_index_list = pulp_solve.pulp_pack(weight_list, volume_list, value_list, new_max_weight)
         # 下标减少量
         temp = 0
         for i in result_index_list:
