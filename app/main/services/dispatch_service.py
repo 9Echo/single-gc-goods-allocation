@@ -91,11 +91,11 @@ def dispatch(order):
     dispatch_load_task(sheets, task_id)
     # 5、车次提货单合并
     combine_sheets(sheets)
-    new_sheets = sort_by_weight(sheets)
+    # new_sheets = sort_by_weight(sheets)
     # 6、将推荐发货通知单暂存redis
-    Thread(target=redis_service.set_delivery_list, args=(new_sheets,)).start()
+    Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     # return_dict[procnum] = new_sheets
-    return new_sheets, product_weight
+    return sheets, product_weight
 
 
 def dispatch_load_task(sheets: list, task_id):
@@ -318,6 +318,11 @@ def print_sheets(sheets):
 
 
 def sort_by_weight(sheets):
+    """
+    车次按重量排序
+    :param sheets:
+    :return:
+    """
     sheets_dict = [sheet.as_dict() for sheet in sheets]
     new_sheets = []
     if sheets_dict:
