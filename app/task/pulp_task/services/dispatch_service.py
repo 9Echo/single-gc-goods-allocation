@@ -44,8 +44,8 @@ def dispatch(order):
 
         product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
 
-        di.one_quantity_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 1, 0)
-        di.one_free_pcs_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 0, 1)
+        di.one_quantity_weight = weight_calculator.get_one_weight(di.item_id, 1, 0)
+        di.one_free_pcs_weight = weight_calculator.get_one_weight(di.item_id, 0, 1)
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         # 如果遇到计算不出来的明细，返回0停止计算
         if di.weight == 0:
@@ -185,5 +185,6 @@ def combine_sheets(sheets):
         for sheet in current_sheets:
             no += 1
             sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            sheet.weight = round(sheet.weight)
             for j in sheet.items:
                 j.delivery_no = sheet.delivery_no

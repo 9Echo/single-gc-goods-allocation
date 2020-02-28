@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/25
 # @Author  : biyushuang
-import time
-from app.main.entity.delivery_item import DeliveryItem
 from app.main.dao.weight_calculator_dao import weight_calculator_dao
 from model_config import ModelConfig
 
@@ -57,3 +55,24 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
             weight = round(weight_one * (int(pack_num) * GS_PER + int(free_num)))
     return weight
 
+
+def get_one_weight(itemid, pack_num=0, free_num=0):
+    """
+    # 外径、壁厚、长度、系数、根 / 件数
+    # i["JM_D"], i["JM_P"], i["VER_L"], i["GS_XS"], i["GS_PER"]
+    输入数据：品名:cname、规格:itemid、件数:pack_num、散根数:free_num
+    :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:0
+    """
+    data = ModelConfig.ITEM_A_DICT.get(itemid)
+    weight = 0
+    if data:
+        # 根重
+        if data["GBGZL"] and float(data["GBGZL"]) > 0:
+            weight_one = float(data["GBGZL"])
+            # else:
+            #     weight_one = get_weight_of_each_root(i)
+            # if pack_num == 0:
+            #     weight = round(weight_one) * int(free_num)
+            GS_PER = data["GS_PER"] or 0
+            weight = weight_one * (int(pack_num) * GS_PER + int(free_num))
+    return weight
