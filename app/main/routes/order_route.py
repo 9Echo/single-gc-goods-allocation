@@ -29,7 +29,6 @@ class OrderRoute(Resource):
             if request.get_data():
                 json_data = json.loads(request.get_data().decode("utf-8"))
                 order = order_service.generate_order(json_data['data'])
-                # order["items"]
                 # manager = Manager()
                 # return_dict = manager.dict()
                 # p = multiprocessing.Pool(2)
@@ -38,6 +37,7 @@ class OrderRoute(Resource):
                 # p.close()  # 关闭进程池，关闭后po不再接收新的请求
                 # p.join()  # 等待pool中所有子进程执行完成，必须放在close语句之后
                 # print(return_dict.values())
+
                 sheets_1, product_weight1 = dispatch_service_spec.dispatch(order)
                 sheets_2, product_weight2 = dispatch_service_weight.dispatch(order)
                 sheets_3, product_weight3 = dispatch_service_optimize.dispatch(order)
@@ -45,9 +45,9 @@ class OrderRoute(Resource):
                 product_info_after1, car_info1 = test_dispatch_service.get_product_info_after(sheets_1)
                 product_info_after2, car_info2 = test_dispatch_service.get_product_info_after(sheets_2)
                 product_info_after3, car_info3 = test_dispatch_service.get_product_info_after(sheets_3)
-                error1 = test_dispatch_service.judge_info(product_info_before, product_info_after1, car_info1, product_weight1)
-                error2 = test_dispatch_service.judge_info(product_info_before, product_info_after2, car_info2, product_weight2)
-                error3 = test_dispatch_service.judge_info(product_info_before, product_info_after3, car_info3, product_weight3)
+                error1 = test_dispatch_service.judge_info(product_info_before, product_info_after1, car_info1, product_weight1, order.truck_weight)
+                error2 = test_dispatch_service.judge_info(product_info_before, product_info_after2, car_info2, product_weight2, order.truck_weight)
+                error3 = test_dispatch_service.judge_info(product_info_before, product_info_after3, car_info3, product_weight3, order.truck_weight)
                 print(error1)
                 print(error2)
                 print(error3)
