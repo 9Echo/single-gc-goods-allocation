@@ -24,6 +24,7 @@ def dispatch(order):
     sheets = []
     task_id = 0
     batch_no = UUIDUtil.create_id("ba")
+    product_weight = {}
     for item in order.items:
         di = DeliveryItem()
         di.product_type = item.product_type
@@ -37,13 +38,16 @@ def dispatch(order):
         di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
         di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+
+        product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
+
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         # 如果遇到计算不出来的明细，返回0停止计算
         if di.weight == 0:
             sheet = DeliverySheet()
             sheet.weight = '0'
             sheet.items = [di]
-            return [sheet]
+            return [sheet], product_weight
         # 搜集小管
         if di.volume == 0:
             min_delivery_items.append(di)
@@ -98,7 +102,7 @@ def dispatch(order):
     sheets.sort(key=lambda i: i.load_task_id)
     # 6、将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
-    return sheets
+    return sheets, product_weight
 
 
 def dispatch_load_task(sheets: list, task_id):
