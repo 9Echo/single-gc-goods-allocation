@@ -14,8 +14,7 @@ from tests.main.services import dispatch_result_test
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
-
-class OrderRoute(Resource):
+class OrderRouteTest(Resource):
 
     # def get(self):
     #     return Result.success_response(order_dao.get_all())
@@ -27,19 +26,26 @@ class OrderRoute(Resource):
             if request.get_data():
                 json_data = json.loads(request.get_data().decode("utf-8"))
                 order = order_service.generate_order(json_data['data'])
-                # manager = Manager()
-                # return_dict = manager.dict()
-                # p = multiprocessing.Pool(2)
-                # p.apply_async(dispatch_service_0.dispatch, (0, return_dict, order))
-                # p.apply_async(dispatch_service_1.dispatch, (1, return_dict, order))
-                # p.close()  # 关闭进程池，关闭后po不再接收新的请求
-                # p.join()  # 等待pool中所有子进程执行完成，必须放在close语句之后
-                # print(return_dict.values())
+
                 sheets_1 = dispatch_service_spec.dispatch(order)
                 sheets_2 = dispatch_service_weight.dispatch(order)
                 sheets_3 = dispatch_service_optimize.dispatch(order)
-                # result_dict = {'spec_first': sheets_1, 'weight_first': sheets_2, 'recommend_first': sheets_3}
-                return Result.success_response(sheets_1+sheets_2+sheets_3)
+                spec_results_dict= dispatch_result_test.collect_difference("spec_sheets", sheets_1)
+                weight_results_dict= dispatch_result_test.collect_difference("weight_sheets", sheets_2)
+                optimize_results_dict= dispatch_result_test.collect_difference("optimize_sheets", sheets_3)
+                print("品种优先:")
+                for item in spec_results_dict.keys():
+                    print(spec_results_dict[item])
+                print("\n")
+                print("重量优先:")
+                for item in weight_results_dict.keys():
+                    print(weight_results_dict[item])
+                print("\n")
+                print("综合优先:")
+                for item in optimize_results_dict.keys():
+                    print(optimize_results_dict[item])
+                print("\n")
+                return Result.success_response(sheets_1)
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)

@@ -12,7 +12,7 @@ from app.main.routes import compose_route
 from app.main.routes.compose_route import ComposeRoute
 from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.order_route import OrderRoute
-from app.main.routes.order_route import OrderRouteTest
+from tests.main.routes.order_route_test import OrderRouteTest
 from app.utils.result import Result
 
 blueprint = Blueprint('main', __name__)
