@@ -33,7 +33,7 @@ class OrderRouteTest(Resource):
                 spec_results_dict= dispatch_result_test.collect_difference("spec_sheets", sheets_1)
                 weight_results_dict= dispatch_result_test.collect_difference("weight_sheets", sheets_2)
                 optimize_results_dict= dispatch_result_test.collect_difference("optimize_sheets", sheets_3)
-                print("品种优先:")
+                print("规格优先:")
                 for item in spec_results_dict.keys():
                     print(spec_results_dict[item])
                 print("\n")
