@@ -144,7 +144,7 @@ def dispatch_load_task(sheets: list, task_id):
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
                     ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
-                new_max_weight = 34000 if new_max_weight > 34000 else new_max_weight
+                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT if new_max_weight > ModelConfig.RD_LX_MAX_WEIGHT else new_max_weight
 
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:

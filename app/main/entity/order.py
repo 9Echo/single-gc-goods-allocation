@@ -16,7 +16,7 @@ class Order(BaseEntity):
         self.company_id = None  # 公司id
         self.customer_id = None  # 客户id
         self.salesman_id = None  # 销售员id
-        self.weight = None  # 载重自定义
+        self.truck_weight = None  # 载重自定义
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
         if order:
