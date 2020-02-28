@@ -301,14 +301,14 @@ def combine_sheets(sheets):
                     sitem.volume += citem.volume
                     source.items.remove(citem)
         # 对当前车次做完合并后，重新对单号赋值
-        # current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
-        # doc_type = '提货单'
-        # no = 0
-        # for sheet in current_sheets:
-        #     no += 1
-        #     sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
-        #     for j in sheet.items:
-        #         j.delivery_no = sheet.delivery_no
+        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
+        doc_type = '提货单'
+        no = 0
+        for sheet in current_sheets:
+            no += 1
+            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
+            for j in sheet.items:
+                j.delivery_no = sheet.delivery_no
 
 
 def print_sheets(sheets):
