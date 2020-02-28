@@ -41,7 +41,7 @@ class OrderRoute(Resource):
                 sheets_2 = dispatch_service_weight.dispatch(order)
                 sheets_3 = dispatch_service_optimize.dispatch(order)
                 # result_dict = {'spec_first': sheets_1, 'weight_first': sheets_2, 'recommend_first': sheets_3}
-                return Result.success_response(sheets_1)
+                return Result.success_response(sheets_1+sheets_2+sheets_3)
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)
@@ -66,6 +66,18 @@ class OrderRouteTest(Resource):
                 spec_results_dict=dispatch_result_test.collect_difference("spec_sheets",sheets_1)
                 weight_results_dict=dispatch_result_test.collect_difference("weight_sheets",sheets_2)
                 optimize_results_dict=dispatch_result_test.collect_difference("optimize_sheets",sheets_3)
+                print("品种优先:")
+                for item in spec_results_dict.keys():
+                    print(spec_results_dict[item])
+                print("\n")
+                print("重量优先:")
+                for item in weight_results_dict.keys():
+                    print(weight_results_dict[item])
+                print("\n")
+                print("综合优先:")
+                for item in optimize_results_dict.keys():
+                    print(optimize_results_dict[item])
+                print("\n")
                 return Result.success_response(sheets_1)
         except MyException as me:
             current_app.logger.error(me.message)
