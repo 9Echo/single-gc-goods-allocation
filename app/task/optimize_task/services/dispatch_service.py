@@ -297,6 +297,7 @@ def combine_sheets(sheets):
             for citem in copy.copy(source.items):
                 if citem.weight == 0:
                     source.items.remove(citem)
+                    continue
                 if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
                     item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
                 else:
