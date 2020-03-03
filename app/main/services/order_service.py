@@ -18,7 +18,7 @@ def generate_order(order_data):
     order.company_id = order_data["company_id"]
     order.customer_id = order_data['customer_id']
     order.salesman_id = order_data['salesman_id']
-    order.truck_weight = int(order_data.get('truck_weight', 0))
+    order.truck_weight = float(order_data.get('truck_weight', 0))
     current_app.logger.info('truck_weight = {} '.format(order.truck_weight))
     for item in order_data['items']:
         oi = OrderItem()
