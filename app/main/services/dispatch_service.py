@@ -89,8 +89,7 @@ def dispatch_load_task(sheets: list, task_id):
 
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
-                limit_weight_volume = (
-                                              ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
+                limit_weight_volume = (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
                 limit_weight_weight = (new_max_weight or ModelConfig.MAX_WEIGHT) - (total_weight - sheet.weight)
                 limit_weight = limit_weight_weight if limit_weight_volume > limit_weight_weight else limit_weight_volume
                 sheet, new_sheet = split_sheet(sheet, limit_weight)
