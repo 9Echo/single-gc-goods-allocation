@@ -22,7 +22,7 @@ def dispatch(order):
     product_type = None
     delivery_items = []
     new_max_weight = 0
-    product_weight = {}
+    # product_weight = {}
     for item in order.items:
         di = DeliveryItem()
         if not product_type:
@@ -42,7 +42,7 @@ def dispatch(order):
         di.volume = 1 / di.max_quantity if di.max_quantity else 0
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
 
-        product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
+        # product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
 
         di.one_quantity_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 1, 0)
         di.one_free_pcs_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 0, 1)
@@ -54,7 +54,7 @@ def dispatch(order):
             sheet = DeliverySheet()
             sheet.weight = '0'
             sheet.items = [di]
-            return [sheet], product_weight
+            return sheet
         # 如果该明细有件数上限并且单规格件数超出，进行切单
         delivery_items.append(di)
 
@@ -133,7 +133,7 @@ def dispatch(order):
     combine_sheets(sheets)
     # 将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
-    return sheets, product_weight
+    return sheets
 
 
 def combine_sheets(sheets):

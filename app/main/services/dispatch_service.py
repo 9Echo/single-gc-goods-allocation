@@ -23,7 +23,7 @@ def dispatch(order):
     """
     # 1、将订单项转为发货通知单子单
     delivery_items = []
-    product_weight = {}
+    # product_weight = {}
     for item in order.items:
         di = DeliveryItem()
         di.product_type = item.product_type
@@ -38,7 +38,7 @@ def dispatch(order):
         di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
         di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
 
-        product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
+        # product_weight[(item.product_type, item.item_id)] = product_weight.get((item.product_type, item.item_id), 0) + di.weight
 
         di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
         # 如果遇到计算不出来的明细，返回0停止计算
@@ -46,7 +46,7 @@ def dispatch(order):
             sheet = DeliverySheet()
             sheet.weight = '0'
             sheet.items = [di]
-            return [sheet], product_weight
+            return sheet
         # 如果该明细有件数上限并且单规格件数超出，进行切单
         if di.max_quantity and di.quantity > di.max_quantity:
             # copy次数
@@ -95,7 +95,7 @@ def dispatch(order):
     # 6、将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     # return_dict[procnum] = new_sheets
-    return sheets, product_weight
+    return sheets
 
 
 def dispatch_load_task(sheets: list, task_id):
