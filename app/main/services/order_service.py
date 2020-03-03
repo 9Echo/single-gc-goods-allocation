@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/19 16:14
 # @Author  : Zihao.Liu
+from threading import Thread
+
 from app.main.dao.order_dao import order_dao
 from app.main.entity.order import Order
 from app.main.entity.order_item import OrderItem
@@ -33,5 +35,5 @@ def generate_order(order_data):
         oi.f_loc = item['f_loc']
         order.items.append(oi)
     # 生成的订单入库
-    order_dao.insert(order)
+    Thread(target=order_dao.insert, args=(order,))
     return order
