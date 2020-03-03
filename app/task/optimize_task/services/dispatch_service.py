@@ -407,22 +407,23 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
                 else:
                     i, new_item = \
                         weight_rule.split_item(i, i.weight - ((max_weight or ModelConfig.MAX_WEIGHT) - current_weight))
-                    # 生成新提货单，归到该车次下
-                    new_sheet = DeliverySheet()
-                    new_sheet.load_task_id = k
-                    new_sheet.volume = i.volume
-                    new_sheet.batch_no = batch_no
-                    new_sheet.customer_id = order.customer_id
-                    new_sheet.salesman_id = order.salesman_id
-                    new_sheet.weight = i.weight
-                    new_sheet.type = 'recommend_first'
-                    new_sheet.total_pcs = i.total_pcs
-                    new_sheet.items.append(i)
-                    # 移除掉被分配的子项
-                    min_delivery_item.remove(i)
-                    # 将剩余的子项放入子项列表
-                    min_delivery_item.insert(0, new_item)
-                    sheets.append(new_sheet)
+                    if new_item:
+                        # 生成新提货单，归到该车次下
+                        new_sheet = DeliverySheet()
+                        new_sheet.load_task_id = k
+                        new_sheet.volume = i.volume
+                        new_sheet.batch_no = batch_no
+                        new_sheet.customer_id = order.customer_id
+                        new_sheet.salesman_id = order.salesman_id
+                        new_sheet.weight = i.weight
+                        new_sheet.type = 'recommend_first'
+                        new_sheet.total_pcs = i.total_pcs
+                        new_sheet.items.append(i)
+                        # 移除掉被分配的子项
+                        min_delivery_item.remove(i)
+                        # 将剩余的子项放入子项列表
+                        min_delivery_item.insert(0, new_item)
+                        sheets.append(new_sheet)
                     break
         # 装填完如果小管还有剩余，进行单独分货
         if min_delivery_item:
