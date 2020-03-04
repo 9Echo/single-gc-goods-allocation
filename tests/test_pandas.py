@@ -1,3 +1,5 @@
+from math import isnan
+
 import pandas as pd
 
 
@@ -16,24 +18,27 @@ def test_df():
     # df = pd.DataFrame(data, index=['rank1', 'rank2', 'rank3', 'rank4'])
     # print('list dict to df2:\n', df)
 
-    data = [{'a': 1, 'b': 2}, {'a': 5, 'b': 10},{'a': 1, 'b': 10},{'a': 5, 'b': 10},{'a': 5, 'b': 10}]
+    data = [{'a': 1, 'b': 2}, {'a': 5, 'b': None}, {'a': 1, 'b': 10}, {'a': 5, 'b': 10}, {'a': 5, 'b': 10}]
     df = pd.DataFrame(data)
+    for index, row in df.iterrows():
+        print(index, row['b'])
+        print(isnan(row['b']))
     print('dict list to df:\n', df)
-    group = df.groupby(by = ['a'])['b'].sum().sort_values(ascending=False)
+    group = df.groupby(by=['a'])
     print(group)
-    for k,v in group.items():
+    # for k, v in group.items():
+    #     print(k)
+    #     print(v)
+    # print(type(group))
+    # print(data)
+    print(group.groups)
+    print(type(group.groups))
+    for k, v in group.groups.items():
         print(k)
         print(v)
-    print(type(group))
-    print(data)
-    # print(group.groups)   dict
-    # print(type(group.groups)) dict
-    # for k, v in group.groups.items():
-    #     print(k)
-    #     print(v.sum())
-        # print(type(v))
-        # for i in list(v):
-        #     print(i)
+        print(type(v))
+        for i in list(v):
+            print(i)
 
     # doc_type = '提货单'
     # delivery_no = 0

@@ -4,7 +4,7 @@
 from flask import request, current_app, jsonify
 from flask_restful import Resource
 
-from app.main.services.compose_service import generate_delivery, compose
+from app.main.services.compose_service import compose
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 
@@ -21,8 +21,7 @@ class ComposeRoute(Resource):
                 # 获取输入参数（发货通知单列表）
                 delivery_list_data = request.get_json(force=True).get('items')  # 入参是json
                 if delivery_list_data:
-                    delivery_list = generate_delivery(delivery_list_data)
-                    result_delivery_list = compose(delivery_list)
+                    result_delivery_list = compose(delivery_list_data)
                     return Result.success_response(result_delivery_list)
                 else:
                     return Result.error_response('数据为空！')
