@@ -2,8 +2,6 @@
 # Description: 确认发货通知单
 # Created: shaoluyu 2019/12/12
 from app.analysis.rules import compose_filter
-from app.main.dao.compose_dao import compose_dao
-from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 
 
@@ -17,7 +15,7 @@ from app.main.entity.delivery_sheet import DeliverySheet
 #         delivery_model_list.append(delivery_model)
 #
 #     return delivery_model_list
-from app.utils.aop_util import set_weight
+from app.utils.aop.aop_before import set_weight
 
 
 @set_weight

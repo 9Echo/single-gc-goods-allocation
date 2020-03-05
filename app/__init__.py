@@ -5,10 +5,9 @@
 
 import atexit
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 import platform
-
+from app.utils.aop import *
 from config import config, Config
 from app.utils.core import JSONEncoder
 from app.utils.actuator import Actuator
