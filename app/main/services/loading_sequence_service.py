@@ -3,6 +3,7 @@ from model_config import ModelConfig
 import json
 import math
 import turtle as t
+import requests
 
 
 """
@@ -20,6 +21,7 @@ def loading(temps, car_info):
     # 车侧板高
     car_height = car_info[2]
     # 得到所需的数据
+    # sheets = [temps]
     sheets = temps["data"]
     # 存放每一个发货单所装货物的列表
     load_list = []
@@ -41,7 +43,7 @@ def loading(temps, car_info):
             # 为焊管 则查成件的高和宽
             if item["product_type"] == "焊管":
                 # 通过外径查询焊管成捆后的高和宽：size ，example：360*370
-                size = ModelConfig.HANGUAN_PACK_SIZE[od_id]
+                size = calculate_size(item["item_id"])
             # 为方矩管
             elif item["product_type"] == "方矩管":
                 # 方矩管的外径取长的一个，所以去第二个位置的数据
@@ -51,7 +53,7 @@ def loading(temps, car_info):
             # 为热镀
             elif item["product_type"] == "热镀":
                 # 通过外径查询热镀成捆后的高和宽：size ，example：360*370
-                size = ModelConfig.REDU_PACK_SIZE[od_id]
+                size = calculate_size(item["item_id"])
             elif item["product_type"] == "螺旋焊管":
                 size = od_id + "*" + od_id
             # 判断所画图形的形状
@@ -584,11 +586,65 @@ def draw_product(car_dict, turtle, io):
     # turtle.done()
 
 
+def calculate_size(item_id):
+    """
+    计算品种的尺寸size
+    :param item_id: 物资代码
+    :return:
+    """
+    od_id = float(item_id.split("*")[0][3:6].lstrip("0"))
+    # 该货物每件的根数
+    root_quantity = ModelConfig.ITEM_A_DICT.get(item_id)["GS_PER"]
+    # 一边上的根数
+    root_side = 0.5 + math.sqrt(12 * root_quantity - 3) / 6
+    # 计算一件的宽度
+    width = str((root_side - 1) * od_id * 2 + 100)
+    # 计算一件的高度
+    height = str((root_side - 1) * od_id * math.sqrt(3) + 100)
+
+    return height + "*" + width
+
+
 if __name__ == '__main__':
-    with open("result.json", "rt", encoding='utf-8') as f:
-        temp = json.loads(f.read())
-    result = loading(temp, [12000, 2400, 1500])
-    print(result[2][0])
+    # with open("result.json", "rt", encoding='utf-8') as f:
+    #     temp = json.loads(f.read())
+    # result = loading(temp, [12000, 2400, 1500])
+    # print(result[0][0])
+    result = requests.post("http://0.0.0.0:9239/order", headers={"Content-Type": "application/json"}, data={
+    "data": {
+        "customer_id": "scymymygxgs",
+        "salesman_id": "4",
+        "company_id": "00",
+        "weight":0,
+        "items": [{
+            "product_type": "方矩管",
+            "spec": "02A165*4.25*6000",
+            "item_id": "058040*040*2.75*6000",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "30",
+            "free_pcs": "0"
+        },{  "product_type": "热镀",
+            "spec": "016075.5*2.3*6000",
+            "item_id": "020020.5*1.6*6000",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "30",
+            "free_pcs": "0"
+        },{  "product_type": "螺旋焊管",
+            "spec": "016075.5*2.3*6000",
+            "item_id": "0C0219*8.0*12000",
+            "f_whs": "sth",
+            "f_loc": "sth",
+            "material": "sth",
+            "quantity": "20",
+            "free_pcs": "0"
+        }]
+    }
+
+})
     # for i in result:
     #     print(i)
-    draw_product(result[2][0], t, "out")
+    draw_product(result[0][0], t, "out")

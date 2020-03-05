@@ -14,6 +14,8 @@ from tests.main.services import dispatch_result_test
 from app.utils.my_exception import MyException
 from app.utils.result import Result
 from tests import test_dispatch_service
+from app.main.services.loading_sequence_service import loading, draw_product
+import turtle as t
 
 
 class OrderRoute(Resource):
