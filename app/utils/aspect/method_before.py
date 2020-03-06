@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+# Description: 捕捉异常
+# Created: shaoluyu 2019/03/05
 import functools
-
 from app.utils.code import ResponseCode
 from app.utils.my_exception import MyException
 from app.utils.weight_calculator import get_item_a_dict_list

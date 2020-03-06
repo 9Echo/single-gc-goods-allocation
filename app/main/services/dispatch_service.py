@@ -10,7 +10,7 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.utils import weight_calculator
-from app.utils.aop.aop_before import get_item_a, set_weight
+from app.utils.aspect.method_before import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
 import pandas as pd

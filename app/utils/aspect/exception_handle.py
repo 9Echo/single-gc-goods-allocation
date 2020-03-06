@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-# Description: 捕捉异常
-# Created: shaoluyu 2019/03/05
-from flask import current_app
 from pymysql import MySQLError
-
+from flask import current_app
 from app.main import blueprint
 from app.utils.result import Result
-
 
 @blueprint.app_errorhandler(MySQLError)
 def handle_mysql_exception(e):

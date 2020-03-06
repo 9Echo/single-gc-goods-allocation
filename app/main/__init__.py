@@ -3,11 +3,9 @@
 # Created: shaoluyu 2019/10/29
 # Modified: shaoluyu 2019/10/29; shaoluyu 2019/06/20
 
-from flask import Blueprint, current_app
+from flask import Blueprint
 from flask import jsonify
 from flask_restful import Api
-from pymysql import MySQLError
-
 from app.main.routes import compose_route
 from app.main.routes.compose_route import ComposeRoute
 from app.main.routes.confirm_route import ConfirmRoute

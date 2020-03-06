@@ -15,7 +15,7 @@ from app.main.entity.delivery_sheet import DeliverySheet
 #         delivery_model_list.append(delivery_model)
 #
 #     return delivery_model_list
-from app.utils.aop.aop_before import set_weight
+from app.utils.aspect.method_before import set_weight
 
 
 @set_weight
