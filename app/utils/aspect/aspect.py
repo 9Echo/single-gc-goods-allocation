@@ -23,5 +23,5 @@ class Aspect(object):
             cls.flask_app.logger.info('before_request')
             cls.flask_app.logger.info('method is ' + request.method)
             cls.flask_app.logger.info('url is ' + request.url)
-            cls.flask_app.logger.info('body is ' + str(request.json))
+            cls.flask_app.logger.info('body is ' + str(request.json).replace('\'', '"'))
             cls.flask_app.logger.info('ip is ' + request.remote_addr)
