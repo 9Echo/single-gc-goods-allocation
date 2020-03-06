@@ -3,6 +3,7 @@ from flask import current_app
 from app.main import blueprint
 from app.utils.result import Result
 
+
 @blueprint.app_errorhandler(MySQLError)
 def handle_mysql_exception(e):
     """封装数据库错误信息"""
