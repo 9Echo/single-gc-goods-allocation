@@ -7,7 +7,7 @@ import atexit
 from flask import Flask
 from flask_apscheduler import APScheduler
 import platform
-from app.utils.aspect import aspect, exception_handle
+from app.utils.aspect import *
 from config import config, Config
 from app.utils.core import JSONEncoder
 from app.utils.actuator import Actuator
@@ -67,9 +67,6 @@ def create_app(config_name):
 
     # 初始化应用监控
     Actuator.init_app(app)
-
-    # 初始化切面
-    aspect.Aspect.init(app)
 
     return app
 

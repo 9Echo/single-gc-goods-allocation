@@ -1,36 +1,24 @@
 # -*- coding: utf-8 -*-
 # Description: 切面
 # Created: shaoluyu 2019/03/05
-from flask import request, g
-from app.main.routes.order_route import OrderRoute
+from flask import request
 from datetime import datetime
+from app.main import blueprint
+from flask import current_app
 
 
-class Aspect(object):
-    """切面类
+@blueprint.before_request
+def before_request():
+    current_app.logger.info('before_request')
+    current_app.logger.info('method is ' + request.method)
+    current_app.logger.info('url is ' + request.url)
+    current_app.logger.info('body is ' + str(request.json).replace('\'', '"'))
+    current_app.logger.info('ip is ' + request.remote_addr)
 
-        提供日志输出、请求校验等
-        """
-    flask_app = None
 
-    @classmethod
-    def init(cls, app):
-        cls.flask_app = app
-        Aspect.aspect_log()
-
-    @classmethod
-    def aspect_log(cls):
-        @cls.flask_app.before_request
-        def before_request():
-            cls.flask_app.logger.info('before_request')
-            cls.flask_app.logger.info('method is ' + request.method)
-            cls.flask_app.logger.info('url is ' + request.url)
-            cls.flask_app.logger.info('body is ' + str(request.json).replace('\'', '"'))
-            cls.flask_app.logger.info('ip is ' + request.remote_addr)
-
-        @cls.flask_app.after_request
-        def after_request(response):
-            cls.flask_app.logger.info("after_request")
-            cls.flask_app.logger.info("body is " + str(response.json).replace("\'", '"'))
-            cls.flask_app.logger.info("time is " + str(datetime.now())[:19])
-            return response
+@blueprint.after_request
+def after_request(response):
+    current_app.logger.info("after_request")
+    current_app.logger.info("body is " + str(response.json).replace("\'", '"'))
+    current_app.logger.info("time is " + str(datetime.now())[:19])
+    return response

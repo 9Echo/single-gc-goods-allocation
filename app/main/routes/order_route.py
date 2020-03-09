@@ -4,18 +4,14 @@
 # Modified: shaoluyu 2019/11/13
 import json
 
-from flask import request, current_app, make_response, g
+from flask import request, current_app
 from flask_restful import Resource
 
 from app.main.services import order_service, dispatch_service as dispatch_service_spec
 from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
 from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
-from tests.main.services import dispatch_result_test
 from app.utils.my_exception import MyException
 from app.utils.result import Result
-from tests import test_dispatch_service
-from app.main.services.loading_sequence_service import loading, draw_product
-import turtle as t
 
 
 class OrderRoute(Resource):
@@ -37,8 +33,8 @@ class OrderRoute(Resource):
                 sheets_2 = dispatch_service_weight.dispatch(order)
                 # 综合
                 sheets_3 = dispatch_service_optimize.dispatch(order)
-                g.response = Result.success_response(sheets_1 + sheets_2 + sheets_3)
-                return g.response
+                return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)
