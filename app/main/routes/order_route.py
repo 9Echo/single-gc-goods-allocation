@@ -4,7 +4,7 @@
 # Modified: shaoluyu 2019/11/13
 import json
 
-from flask import request, current_app
+from flask import request, current_app, make_response, g
 from flask_restful import Resource
 
 from app.main.services import order_service, dispatch_service as dispatch_service_spec
@@ -19,7 +19,6 @@ import turtle as t
 
 
 class OrderRoute(Resource):
-
     # def get(self):
     #     return Result.success_response(order_dao.get_all())
 
@@ -38,7 +37,8 @@ class OrderRoute(Resource):
                 sheets_2 = dispatch_service_weight.dispatch(order)
                 # 综合
                 sheets_3 = dispatch_service_optimize.dispatch(order)
-                return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+                g.response = Result.success_response(sheets_1 + sheets_2 + sheets_3)
+                return g.response
         except MyException as me:
             current_app.logger.error(me.message)
             current_app.logger.exception(me)
