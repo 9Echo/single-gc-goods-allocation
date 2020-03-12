@@ -56,3 +56,4 @@ def get_delivery_list(batch_no):
         current_app.logger.exception(e)
     finally:
         redis_conn.close()
+

@@ -8,7 +8,6 @@ from app.main.entity.order import Order
 from app.main.entity.order_item import OrderItem
 from app.utils.uuid_util import UUIDUtil
 from flask import current_app
-from model_config import ModelConfig
 
 
 def generate_order(order_data):
