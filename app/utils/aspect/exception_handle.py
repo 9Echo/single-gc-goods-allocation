@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Description: 异常捕捉
+# Created: shaoluyu 2019/03/05
 from pymysql import MySQLError
 from flask import current_app
 from app.main import blueprint

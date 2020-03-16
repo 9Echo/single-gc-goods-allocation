@@ -58,9 +58,9 @@ class DevelopmentConfig(Config):
     """
     # Mysql配置，可选（不使用时可删除）
     MYSQL_HOST = '47.99.118.183'
-    MYSQL_PORT = 3306
+    MYSQL_PORT = 3307
     MYSQL_USER = 'v3dev_user'
-    MYSQL_PASSWD = 'V3dev!56'
+    MYSQL_PASSWD = 'JTcztee829#bv'
     MYSQL_DB = 'db_trans_plan'
     MYSQL_CHARSET = 'utf8'
 
@@ -70,8 +70,8 @@ class DevelopmentConfig(Config):
 
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '47.99.118.183'
-    REDIS_PORT = '6379'
-    REDIS_PASSWD = 'wobugaoxing'
+    REDIS_PORT = '6389'
+    REDIS_PASSWD = 'JCdev@56zh'
     REDIS_MAX_CONNECTIONS = 2
 
     # APScheduler定时任务配置，可选（不使用时可删除）

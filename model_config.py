@@ -1,14 +1,6 @@
 class ModelConfig:
     """模型参数配置
     """
-    # 车载最大重量
-    MAX_WEIGHT = 0
-    # 热镀、螺旋最大载重
-    RD_LX_MAX_WEIGHT = 0
-    # 热镀、螺旋上浮重量
-    RD_LX_UP_WEIGHT = 0
-    # 背包上限
-    PACKAGE_MAX_WEIGHT = 0
     # 标准车载最大重量
     STANDARD_MAX_WEIGHT = 33000
     # 标准热镀、螺旋最大载重
@@ -21,8 +13,6 @@ class ModelConfig:
     PACKAGE_LOWER_WEIGHT = 2500
     # 体积上限系数
     MAX_VOLUME = 1.18
-    # 计算重量、根数基础数据加载
-    ITEM_A_DICT = {}
     # 分车次限制重量
     TRUCK_SPLIT_RANGE = 1000
     # 下差严重品类，后续改成通过物资代码前三位识别

@@ -1,6 +1,6 @@
 from app.main.entity.delivery_sheet import DeliverySheet
 from model_config import ModelConfig
-import json
+from flask import g
 import math
 import turtle as t
 import requests
@@ -594,7 +594,7 @@ def calculate_size(item_id):
     """
     od_id = float(item_id.split("*")[0][3:6].lstrip("0"))
     # 该货物每件的根数
-    root_quantity = ModelConfig.ITEM_A_DICT.get(item_id)["GS_PER"]
+    root_quantity = g.ITEM_A_DICT.get(item_id)["GS_PER"]
     # 一边上的根数
     root_side = 0.5 + math.sqrt(12 * root_quantity - 3) / 6
     # 计算一件的宽度

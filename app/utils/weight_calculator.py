@@ -3,6 +3,7 @@
 # @Author  : biyushuang
 from app.main.dao.weight_calculator_dao import weight_calculator_dao
 from model_config import ModelConfig
+from flask import g
 
 
 def get_item_a_dict_list(item_list):
@@ -17,7 +18,7 @@ def calculate_pcs(cname, itemid, pack_num=0, free_num=0):
     """
     :return: t_calculator_item中有此品种规格的记录，则返回:总根数，反之返回:0
     """
-    data = ModelConfig.ITEM_A_DICT.get(itemid)
+    data = g.ITEM_A_DICT.get(itemid)
     total_pcs = 0
     if data:
         # 根重
@@ -41,7 +42,7 @@ def calculate_weight(cname, itemid, pack_num=0, free_num=0):
     输入数据：品名:cname、规格:itemid、件数:pack_num、散根数:free_num
     :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:0
     """
-    data = ModelConfig.ITEM_A_DICT.get(itemid)
+    data = g.ITEM_A_DICT.get(itemid)
     weight = 0
     if data:
         # 根重
@@ -63,7 +64,7 @@ def get_one_weight(itemid, pack_num=0, free_num=0):
     输入数据：品名:cname、规格:itemid、件数:pack_num、散根数:free_num
     :return: t_calculator_item中有此品种规格的记录，则返回:理重weight，反之返回:0
     """
-    data = ModelConfig.ITEM_A_DICT.get(itemid)
+    data = g.ITEM_A_DICT.get(itemid)
     weight = 0
     if data:
         # 根重

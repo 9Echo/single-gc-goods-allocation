@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 import copy
 import math
-
+from flask import g
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
@@ -30,16 +30,16 @@ def compose(filtered_items: list, left_items: list):
     #     new_max_weight = ModelConfig.INCOMING_WEIGHT
     # # 热镀组别和螺旋，MAX_WEIGHT加1000
     if filtered_items and filtered_items[0].product_type in ModelConfig.RD_LX_GROUP:
-        new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+        new_max_weight = g.RD_LX_MAX_WEIGHT
     for item in filtered_items:
         total_weight += item.weight
-        if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
+        if total_weight <= (new_max_weight or g.MAX_WEIGHT):
             # 总重量不超过最大重量时，把当前子发货单放入发货单中
             candidate_items.append(item)
             left_items.remove(item)
         else:
             # 当总重量超过发货单最大重量时，对最后一个放入的子发货单进行分单
-            item, new_item = split_item(item, total_weight - (new_max_weight or ModelConfig.MAX_WEIGHT))
+            item, new_item = split_item(item, total_weight - (new_max_weight or g.MAX_WEIGHT))
             if new_item:
                 candidate_items.append(item)
                 left_items.remove(item)

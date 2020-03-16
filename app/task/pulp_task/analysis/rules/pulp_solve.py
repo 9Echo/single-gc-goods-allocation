@@ -1,10 +1,10 @@
 from pulp import *
-
+from flask import g
 from model_config import ModelConfig
 
 
 def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
-    capacity = new_max_weight or ModelConfig.MAX_WEIGHT
+    capacity = new_max_weight or g.MAX_WEIGHT
     r = range(len(weight_list))
     prob = LpProblem(sense=LpMaximize)
     x = [LpVariable('x%d' % i, cat=LpBinary) for i in r]  # 変数

@@ -4,6 +4,7 @@
 # Modified: shaoluyu 2019/11/13
 import copy
 import math
+import pandas as pd
 from threading import Thread
 from app.analysis.rules import dispatch_filter, weight_rule, product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
@@ -13,7 +14,7 @@ from app.utils import weight_calculator
 from app.utils.aspect.method_before import get_item_a, set_weight
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
-import pandas as pd
+from flask import g
 
 
 @set_weight
@@ -58,8 +59,8 @@ def dispatch_load_task(sheets: list, task_id):
             continue
         max_weight = 0
         if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
-            max_weight = ModelConfig.RD_LX_MAX_WEIGHT
-        if sheet.weight == 0 or sheet.weight >= (max_weight or ModelConfig.MAX_WEIGHT):
+            max_weight = g.RD_LX_MAX_WEIGHT
+        if sheet.weight == 0 or sheet.weight >= (max_weight or g.MAX_WEIGHT):
             task_id += 1
             sheet.load_task_id = task_id
         else:
@@ -84,13 +85,14 @@ def dispatch_load_task(sheets: list, task_id):
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
-                    ModelConfig.MAX_WEIGHT + (rd_lx_total_weight / ModelConfig.RD_LX_MAX_WEIGHT) * 1000)
-                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT if new_max_weight > ModelConfig.RD_LX_MAX_WEIGHT else new_max_weight
+                    g.MAX_WEIGHT + (rd_lx_total_weight / g.RD_LX_MAX_WEIGHT) * 1000)
+                new_max_weight = g.RD_LX_MAX_WEIGHT if new_max_weight > g.RD_LX_MAX_WEIGHT else new_max_weight
 
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
-                limit_weight_volume = (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
-                limit_weight_weight = (new_max_weight or ModelConfig.MAX_WEIGHT) - (total_weight - sheet.weight)
+                limit_weight_volume = (
+                                                  ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
+                limit_weight_weight = (new_max_weight or g.MAX_WEIGHT) - (total_weight - sheet.weight)
                 limit_weight = limit_weight_weight if limit_weight_volume > limit_weight_weight else limit_weight_volume
                 sheet, new_sheet = split_sheet(sheet, limit_weight)
                 if new_sheet:
@@ -112,7 +114,7 @@ def dispatch_load_task(sheets: list, task_id):
             # 体积不超，处理重量
             else:
                 # 如果总重量小于最大载重
-                if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
+                if total_weight <= (new_max_weight or g.MAX_WEIGHT):
                     # 不超重时将当前发货单装到车上
                     sheet.load_task_id = task_id
                     # 给当前提货单赋单号
@@ -123,7 +125,7 @@ def dispatch_load_task(sheets: list, task_id):
                         item.delivery_no = sheet.delivery_no
                     # 将拼车成功的单子移除
                     left_sheets.remove(sheet)
-                    if (new_max_weight or ModelConfig.MAX_WEIGHT) - total_weight < ModelConfig.TRUCK_SPLIT_RANGE:
+                    if (new_max_weight or g.MAX_WEIGHT) - total_weight < ModelConfig.TRUCK_SPLIT_RANGE:
                         # 接近每车临界值时停止本次装车
                         break
                 # 如果超重
@@ -135,7 +137,7 @@ def dispatch_load_task(sheets: list, task_id):
                     # 如果大于1吨
                     else:
                         # 对满足条件的发货单进行分单
-                        limit_weight = (new_max_weight or ModelConfig.MAX_WEIGHT) - (total_weight - sheet.weight)
+                        limit_weight = (new_max_weight or g.MAX_WEIGHT) - (total_weight - sheet.weight)
                         sheet, new_sheet = split_sheet(sheet, limit_weight)
                         if new_sheet:
                             # 分单成功时旧单放入当前车上，新单放入等待列表
@@ -363,4 +365,3 @@ def replenish_property(sheets, order):
             di.delivery_item_no = UUIDUtil.create_id("di")
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
-

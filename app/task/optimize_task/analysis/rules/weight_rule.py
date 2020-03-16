@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 import copy
 import math
-
+from flask import g
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
@@ -26,20 +26,17 @@ def compose(filtered_items: list, left_items: list):
     # 依次将子发货单装入发货单中
     total_weight = 0
     new_max_weight = 0
-    # if ModelConfig.INCOMING_WEIGHT:
-    #     new_max_weight = ModelConfig.INCOMING_WEIGHT
-    # # 热镀组别和螺旋，MAX_WEIGHT加1000
     if filtered_items and filtered_items[0].product_type in ModelConfig.RD_LX_GROUP:
-        new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+        new_max_weight = g.RD_LX_MAX_WEIGHT
     for item in filtered_items:
         total_weight += item.weight
-        if total_weight <= (new_max_weight or ModelConfig.MAX_WEIGHT):
+        if total_weight <= (new_max_weight or g.MAX_WEIGHT):
             # 总重量不超过最大重量时，把当前子发货单放入发货单中
             candidate_items.append(item)
             left_items.remove(item)
         else:
             # 当总重量超过发货单最大重量时，对最后一个放入的子发货单进行分单
-            item, new_item = split_item(item, total_weight - (new_max_weight or ModelConfig.MAX_WEIGHT))
+            item, new_item = split_item(item, total_weight - (new_max_weight or g.MAX_WEIGHT))
             if new_item:
                 candidate_items.append(item)
                 left_items.remove(item)
@@ -81,27 +78,4 @@ def split_item(item, delta_weight):
         return item, None
 
 
-# if __name__ == '__main__':
-#     item1 = DeliveryItem()
-#     item1.product_type = "热镀"
-#     item1.item_id = "02A165*4.25*6000"
-#     item1.quantity = 30
-#     item1.free_pcs = 5
-#     item1.weight = weight_calculator.calculate_weight(item1.product_type, item1.item_id, item1.quantity, item1.free_pcs)
-#     item2 = DeliveryItem()
-#     item2.product_type = "热度"
-#     item2.item_id = "021025*1.9*5950"
-#     item2.quantity = 30
-#     item2.free_pcs = 6
-#     item2.weight = weight_calculator.calculate_weight(item2.product_type, item2.item_id, item2.quantity, item2.free_pcs)
-#     print(item1.weight)
-#     print(item2.weight)
-#     items = [item1, item2]
-#     sheets = dispatch_filter.filter(items)
-#     for sheet in sheets:
-#         sheet.weight = 0
-#         for di in sheet.items:
-#             sheet.weight += di.weight
-#         print(sheet.as_dict())
-#         print(sheet.weight)
 

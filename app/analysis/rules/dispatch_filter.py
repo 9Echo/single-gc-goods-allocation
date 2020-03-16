@@ -2,7 +2,7 @@
 # @Time    : 2019/11/15 14:03
 # @Author  : Zihao.Liu
 import copy
-
+from flask import g
 from app.analysis.rules import weight_rule, package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
 from model_config import ModelConfig
@@ -19,17 +19,10 @@ def filter(delivery_items: list):
     # 剩余的发货子单
     left_items = delivery_items
     new_max_weight = 0
-    # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
-    # if ModelConfig.INCOMING_WEIGHT:
-    #     for i in copy.copy(delivery_items):
-    #         if i.weight < ModelConfig.INCOMING_WEIGHT:
-    #             item_list.append(i)
-    #             left_items.remove(i)
-    # else:
     for i in copy.copy(delivery_items):
         if i.product_type in ModelConfig.RD_LX_GROUP:
-            new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
-        if i.weight < (new_max_weight or ModelConfig.MAX_WEIGHT):
+            new_max_weight = g.RD_LX_MAX_WEIGHT
+        if i.weight < (new_max_weight or g.MAX_WEIGHT):
             item_list.append(i)
             left_items.remove(i)
     if left_items:
@@ -53,14 +46,14 @@ def filter(delivery_items: list):
         # 将所有子单进行背包选举
         final_weight, result_list = \
             package_solution.dynamic_programming(len(item_list),
-                                                 (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT),
+                                                 (new_max_weight or g.PACKAGE_MAX_WEIGHT),
                                                  ModelConfig.MAX_VOLUME, weight_cost)
         if final_weight == 0:
             break
         # temp_item_list = copy.copy(item_list)
         # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
-        if ((new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT) - ModelConfig.PACKAGE_LOWER_WEIGHT) < \
-                final_weight < (new_max_weight or ModelConfig.PACKAGE_MAX_WEIGHT):
+        if ((new_max_weight or g.PACKAGE_MAX_WEIGHT) - ModelConfig.PACKAGE_LOWER_WEIGHT) < \
+                final_weight < (new_max_weight or g.PACKAGE_MAX_WEIGHT):
             is_full = True
         # 记录体积之和
         # volume = 0

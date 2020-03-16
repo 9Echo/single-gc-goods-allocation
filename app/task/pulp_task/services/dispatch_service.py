@@ -2,18 +2,16 @@
 # @Time    : 2020/02/01
 # @Author  : shaoluyu
 import copy
-import math
 from threading import Thread
-
+from flask import g
 from app.analysis.rules import product_type_rule
 from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
-from app.task.pulp_task.analysis.rules import scipy_optimize, pulp_solve
+from app.task.pulp_task.analysis.rules import pulp_solve
 from app.utils import weight_calculator
 from app.utils.uuid_util import UUIDUtil
 from model_config import ModelConfig
-from tests import test_package
 
 
 def dispatch(order):
@@ -27,7 +25,7 @@ def dispatch(order):
         if not product_type:
             product_type = item.product_type
             if product_type in ModelConfig.RD_LX_GROUP:
-                new_max_weight = ModelConfig.RD_LX_MAX_WEIGHT
+                new_max_weight = g.RD_LX_MAX_WEIGHT
         di.product_type = item.product_type
         di.spec = item.spec
         di.quantity = item.quantity

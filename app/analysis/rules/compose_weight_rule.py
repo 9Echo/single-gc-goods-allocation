@@ -3,7 +3,7 @@
 # @Author  : shaoluyu
 from app.analysis.rules import package_solution
 from model_config import ModelConfig
-
+from flask import g
 
 def filter(delivery_dict_list: list, weight, volume):
     """重量过滤规则：
@@ -15,7 +15,7 @@ def filter(delivery_dict_list: list, weight, volume):
     for item in delivery_dict_list:
         weight_cost.append((float(item.get('weight')), float(item.get('volume')), float(item.get('weight'))))
     final_weight, result_list = \
-        package_solution.dynamic_programming(len(delivery_dict_list), ModelConfig.MAX_WEIGHT - weight,
+        package_solution.dynamic_programming(len(delivery_dict_list), g.MAX_WEIGHT - weight,
                                              ModelConfig.MAX_VOLUME - volume, weight_cost)
     print(result_list)
     for i in range(0, len(result_list)):

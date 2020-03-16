@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-# Description: 捕捉异常
+# Description: 装饰器
 # Created: shaoluyu 2019/03/05
 import functools
 from app.utils.code import ResponseCode
 from app.utils.my_exception import MyException
 from app.utils.weight_calculator import get_item_a_dict_list
 from model_config import ModelConfig
+from flask import g
 
 
 def get_item_a(func):
@@ -17,10 +18,11 @@ def get_item_a(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        ModelConfig.ITEM_A_DICT.clear()
+        item_a_dict = {}
         data = get_item_a_dict_list(args[0].items)
         for i in data:
-            ModelConfig.ITEM_A_DICT.setdefault(i['ITEMID'], {'GBGZL': i['GBGZL'], 'GS_PER': i['GS_PER']})
+            item_a_dict.setdefault(i['ITEMID'], {'GBGZL': i['GBGZL'], 'GS_PER': i['GS_PER']})
+        g.ITEM_A_DICT = item_a_dict
         return func(*args, **kw)
 
     return wrapper
@@ -35,23 +37,23 @@ def set_weight(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        if getattr(args[0], 'truck_weight', None):
-            weight = args[0].truck_weight * 1000
+        if args[0].truck_weight:
+            weight = float(args[0].truck_weight) * 1000
             if weight < 20000:
                 raise MyException('输入的重量过小，请重新输入！', ResponseCode.Error)
             if weight >= 100000:
                 raise MyException('输入的重量过大，请重新输入！', ResponseCode.Error)
             # 将最大载重、热镀、螺旋最大载重、背包最大载重统一赋值为用户自定义
-            ModelConfig.MAX_WEIGHT, ModelConfig.RD_LX_MAX_WEIGHT, ModelConfig.PACKAGE_MAX_WEIGHT \
+            g.MAX_WEIGHT, g.RD_LX_MAX_WEIGHT, g.PACKAGE_MAX_WEIGHT \
                 = weight, weight, weight
             # 热镀螺旋上浮设置为0
-            ModelConfig.RD_LX_UP_WEIGHT = 0
+            g.RD_LX_UP_WEIGHT = 0
         else:
             # 设置默认值
-            ModelConfig.MAX_WEIGHT = ModelConfig.STANDARD_MAX_WEIGHT
-            ModelConfig.RD_LX_MAX_WEIGHT = ModelConfig.STANDARD_RD_LX_MAX_WEIGHT
-            ModelConfig.RD_LX_UP_WEIGHT = ModelConfig.STANDARD_RD_LX_UP_WEIGHT
-            ModelConfig.PACKAGE_MAX_WEIGHT = ModelConfig.STANDARD_PACKAGE_MAX_WEIGHT
+            g.MAX_WEIGHT = ModelConfig.STANDARD_MAX_WEIGHT
+            g.RD_LX_MAX_WEIGHT = ModelConfig.STANDARD_RD_LX_MAX_WEIGHT
+            g.RD_LX_UP_WEIGHT = ModelConfig.STANDARD_RD_LX_UP_WEIGHT
+            g.PACKAGE_MAX_WEIGHT = ModelConfig.STANDARD_PACKAGE_MAX_WEIGHT
 
         return func(*args, **kw)
 
