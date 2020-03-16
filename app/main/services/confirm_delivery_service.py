@@ -15,9 +15,6 @@ def generate_delivery(delivery_data):
     根据json数据生成对应的发货通知单
     """
     delivery_item_list = []
-    # for delivery in delivery_data:
-    #     delivery_model = DeliverySheet(delivery)
-    #     delivery_model.items = []
 
     for item in delivery_data.get('items'):
         delivery_item_model = DeliveryItem(item)
@@ -98,19 +95,4 @@ def merge(insert_list, delete_list, new_update_list, old_update_list, company_id
     log_list = log_delete_list + log_insert_list + log_update_list
     return log_list
 
-#
-# if __name__ == '__main__':
-#     basedir = os.path.realpath(os.path.dirname(__file__))
-#     json_path = os.path.join(basedir, "..", "..", "analysis", "analysis", "delivery.json")
-#     with open(json_path, 'r',encoding='UTF-8') as f:
-#         delivery_data = json.loads(f.read())
-#     # 创建发货通知单实例，初化属性
-#     delivery_list = []
-#     # for data in delivery_data['data']:
-#     #     delivery_list.append(generate_delivery(data))
-#     delivery_list=generate_delivery(delivery_data['data'])
-#     print('start_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-#     confirm(delivery_list)
-#     print('end_time: ', time.strftime('%Y.%m.%d %H:%M:%S', time.localtime(time.time())))
-#     # ds = delivery_sheet_dao.get_one("ds_70247e800ce711ea9e81")
-#     # print(Result.success_response(ds)._get_data_for_json())
+

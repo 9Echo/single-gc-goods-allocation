@@ -28,3 +28,10 @@ class DeliverySheet(BaseEntity):
         self.update_time = None  # 更新时间
         if delivery_sheet:
             self.set_attr(delivery_sheet)
+
+    def as_dict(self):
+        ignore_attr = ['car_mark', 'city']
+        result_dict = super(DeliverySheet, self).as_dict()
+        for i in ignore_attr:
+            result_dict.pop(i, 404)
+        return result_dict

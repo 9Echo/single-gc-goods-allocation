@@ -34,3 +34,11 @@ class DeliveryItem(BaseEntity):
         self.update_time = None  # 更新时间
         if delivery_item:
             self.set_attr(delivery_item)
+
+    def as_dict(self):
+        ignore_attr = ['one_quantity_weight', 'one_free_pcs_weight', 'order_num', 'end_point', 'address',
+                       'can_send_time']
+        result_dict = super(DeliveryItem, self).as_dict()
+        for i in ignore_attr:
+            result_dict.pop(i, 404)
+        return result_dict
