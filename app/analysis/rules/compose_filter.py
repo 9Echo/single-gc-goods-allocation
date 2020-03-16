@@ -34,7 +34,7 @@ def filter(delivery_list_data: list):
         if i.get('customer_id'):
             customer_id_list.append(i.get('customer_id'))
         weight += float(i.get('weight'))
-        volume += int(i.get('quantity')) / g.ITEM_ID_DICT.get(i.get('item_id')[:3], 10000)
+        volume += int(i.get('quantity')) / ModelConfig.ITEM_ID_DICT.get(i.get('item_id')[:3], 10000)
     if not delivery_no_list:
         raise MyException('提货单号为空！', ResponseCode.Error)
     if not customer_id_list:
@@ -51,7 +51,7 @@ def filter(delivery_list_data: list):
             total_volume = 0
             for i in v.to_dict(orient='records'):
                 total_weight += i.get('weight', 0)
-                total_volume += i.get('quantity', 0) / g.ITEM_ID_DICT.get(i.get('product_id')[:3], 10000)
+                total_volume += i.get('quantity', 0) / ModelConfig.ITEM_ID_DICT.get(i.get('product_id')[:3], 10000)
             delivery_dict_list.append({
                 'delivery_no': k,
                 'weight': total_weight,

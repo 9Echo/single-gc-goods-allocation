@@ -5,6 +5,7 @@ from app.analysis.rules import package_solution
 from model_config import ModelConfig
 from flask import g
 
+
 def filter(delivery_dict_list: list, weight, volume):
     """重量过滤规则：
     总重量不超过35吨

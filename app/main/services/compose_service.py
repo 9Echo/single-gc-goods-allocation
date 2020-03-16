@@ -4,7 +4,6 @@
 from app.analysis.rules import compose_filter
 from app.main.entity.delivery_sheet import DeliverySheet
 
-
 # def generate_delivery(delivery_list_data):
 #     """
 #     根据json数据生成对应的发货通知单
