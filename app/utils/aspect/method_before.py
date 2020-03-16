@@ -37,7 +37,7 @@ def set_weight(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        if args[0].truck_weight:
+        if getattr(args[0], 'truck_weight', None) and args[0].truck_weight:
             weight = float(args[0].truck_weight) * 1000
             if weight < 20000:
                 raise MyException('输入的重量过小，请重新输入！', ResponseCode.Error)
