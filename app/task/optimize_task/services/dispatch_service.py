@@ -20,75 +20,20 @@ def dispatch(order):
     """根据订单执行分货
     """
     # 1、将订单项转为发货通知单子单
-    max_delivery_items = []
-    min_delivery_items = []
     sheets = []
     task_id = 0
     batch_no = UUIDUtil.create_id("ba")
-    for item in order.items:
-        di = DeliveryItem()
-        di.product_type = item.product_type
-        di.spec = item.spec
-        di.quantity = item.quantity
-        di.free_pcs = item.free_pcs
-        di.item_id = item.item_id
-        di.material = item.material
-        di.f_whs = item.f_whs
-        di.f_loc = item.f_loc
-        di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
-        di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
-        di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        # 如果遇到计算不出来的明细，返回0停止计算
-        if di.weight == 0:
-            sheet = DeliverySheet()
-            sheet.weight = '0'
-            sheet.items = [di]
-            return [sheet]
-        # 搜集小管
-        if di.volume == 0:
-            min_delivery_items.append(di)
-            continue
-        # 如果该明细有件数上限并且单规格件数超出，进行切单
-        if di.max_quantity and di.quantity > di.max_quantity:
-            # copy次数
-            count = math.floor(di.quantity / di.max_quantity)
-            # 最后一个件数余量
-            surplus = di.quantity % di.max_quantity
-            # 标准件数的重量和总根数
-            new_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.max_quantity, 0)
-            new_total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.max_quantity, 0)
-            # 创建出count个拷贝的新明细，散根数为0，件数为标准件数，总根数为标准总根数，体积占比近似为1
-            for i in range(0, count):
-                copy_di = copy.deepcopy(di)
-                copy_di.free_pcs = 0
-                copy_di.quantity = di.max_quantity
-                copy_di.volume = 1
-                copy_di.weight = new_weight
-                copy_di.total_pcs = new_total_pcs
-                # 将新明细放入明细列表
-                max_delivery_items.append(copy_di)
-            # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
-            di.quantity = surplus
-            di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
-            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
-            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
-
-        max_delivery_items.append(di)
+    max_delivery_items, min_delivery_items, is_success = create_sheet_item(order)
+    if not is_success:
+        sheet = DeliverySheet()
+        sheet.weight = '0'
+        sheet.items = max_delivery_items
+        return sheet
     if max_delivery_items:
         # 2、使用模型过滤器生成发货通知单
         sheets, task_id = dispatch_filter.filter(max_delivery_items)
         # 3、补充发货单的属性
-        for sheet in sheets:
-            sheet.batch_no = batch_no
-            sheet.customer_id = order.customer_id
-            sheet.salesman_id = order.salesman_id
-            sheet.weight = 0
-            sheet.total_pcs = 0
-            for di in sheet.items:
-                di.delivery_item_no = UUIDUtil.create_id("di")
-                sheet.weight += di.weight
-                sheet.total_pcs += di.total_pcs
+        replenish_property(sheets, order, batch_no)
         # 为发货单分配车次
         task_id = dispatch_load_task(sheets, task_id)
     if min_delivery_items:
@@ -146,7 +91,7 @@ def dispatch_load_task(sheets: list, task_id):
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 limit_weight_volume = (
-                                                  ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
+                                              ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
                 limit_weight_weight = (new_max_weight or g.MAX_WEIGHT) - (total_weight - sheet.weight)
                 limit_weight = limit_weight_weight if limit_weight_volume > limit_weight_weight else limit_weight_volume
                 sheet, new_sheet = split_sheet(sheet, limit_weight)
@@ -355,16 +300,7 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
         # 2、使用模型过滤器生成发货通知单
         min_sheets, task_id = dispatch_filter.filter(min_delivery_item)
         # 3、补充发货单的属性
-        for sheet in min_sheets:
-            sheet.batch_no = batch_no
-            sheet.customer_id = order.customer_id
-            sheet.salesman_id = order.salesman_id
-            sheet.weight = 0
-            sheet.total_pcs = 0
-            for di in sheet.items:
-                di.delivery_item_no = UUIDUtil.create_id("di")
-                sheet.weight += di.weight
-                sheet.total_pcs += di.total_pcs
+        replenish_property(sheets, order, batch_no)
         # 为发货单分配车次
         dispatch_load_task(min_sheets, task_id)
         sheets.extend(min_sheets)
@@ -441,3 +377,77 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
             # 为发货单分配车次
             dispatch_load_task(min_sheets, task_id)
             sheets.extend(min_sheets)
+
+
+def create_sheet_item(order):
+    max_delivery_items = []
+    min_delivery_items = []
+
+    for item in order.items:
+        di = DeliveryItem()
+        di.product_type = item.product_type
+        di.spec = item.spec
+        di.quantity = item.quantity
+        di.free_pcs = item.free_pcs
+        di.item_id = item.item_id
+        di.material = item.material
+        di.f_whs = item.f_whs
+        di.f_loc = item.f_loc
+        di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
+        di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
+        di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+        di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+        # 如果遇到计算不出来的明细，返回0停止计算
+        if di.weight == 0:
+            return [di], [], False
+        # 搜集小管
+        if di.volume == 0:
+            min_delivery_items.append(di)
+            continue
+        # 如果该明细有件数上限并且单规格件数超出，进行切单
+        if di.max_quantity and di.quantity > di.max_quantity:
+            # copy次数
+            count = math.floor(di.quantity / di.max_quantity)
+            # 最后一个件数余量
+            surplus = di.quantity % di.max_quantity
+            # 标准件数的重量和总根数
+            new_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.max_quantity, 0)
+            new_total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.max_quantity, 0)
+            # 创建出count个拷贝的新明细，散根数为0，件数为标准件数，总根数为标准总根数，体积占比近似为1
+            for i in range(0, count):
+                copy_di = copy.deepcopy(di)
+                copy_di.free_pcs = 0
+                copy_di.quantity = di.max_quantity
+                copy_di.volume = 1
+                copy_di.weight = new_weight
+                copy_di.total_pcs = new_total_pcs
+                # 将新明细放入明细列表
+                max_delivery_items.append(copy_di)
+            # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
+            di.quantity = surplus
+            di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
+            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+
+        max_delivery_items.append(di)
+    return max_delivery_items, min_delivery_items, True
+
+
+def replenish_property(sheets, order, batch_no):
+    """
+
+    :param batch_no:
+    :param order:
+    :param sheets:
+    :return:
+    """
+    for sheet in sheets:
+        sheet.batch_no = batch_no
+        sheet.customer_id = order.customer_id
+        sheet.salesman_id = order.salesman_id
+        sheet.weight = 0
+        sheet.total_pcs = 0
+        for di in sheet.items:
+            di.delivery_item_no = UUIDUtil.create_id("di")
+            sheet.weight += di.weight
+            sheet.total_pcs += di.total_pcs
