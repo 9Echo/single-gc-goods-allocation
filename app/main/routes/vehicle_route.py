@@ -17,17 +17,12 @@ class VehicleRoute(Resource):
     def post():
         """输入车辆信息，返回开单结果
         """
-        try:
-            if request.get_data():
-                json_data = json.loads(request.get_data().decode("utf-8"))
-                # 数据初始化
-                vehicle = vehicle_service.generate_vehicle(json_data.get('data'))
-                # 车辆配货
-                delivery_sheet = steel_dispatch_service.dispatch(vehicle)
-                # 输出
-                return Result.success_response(delivery_sheet)
+        if request.get_data():
+            json_data = json.loads(request.get_data().decode("utf-8"))
+            # 数据初始化
+            vehicle = vehicle_service.generate_vehicle(json_data.get('data'))
+            # 车辆配货
+            delivery_sheet = steel_dispatch_service.dispatch(vehicle)
+            # 输出
+            return Result.success_response(delivery_sheet)
 
-        except MyException as me:
-            current_app.logger.error(me.message)
-            current_app.logger.exception(me)
-            return Result.error_response(me.message)
