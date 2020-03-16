@@ -4,6 +4,7 @@
 from pymysql import MySQLError
 from flask import current_app
 from app.main import blueprint
+from app.utils.my_exception import MyException
 from app.utils.result import Result
 
 
@@ -40,3 +41,11 @@ def handle_type_exception(e):
     """系统错误"""
     current_app.logger.exception(e)
     return Result.error_response("系统错误")
+
+
+@blueprint.app_errorhandler(MyException)
+def handle_type_exception(me):
+    """系统错误"""
+    current_app.logger.error(me.message)
+    current_app.logger.exception(me)
+    return Result.error_response(me.message)

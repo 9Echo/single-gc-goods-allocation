@@ -22,20 +22,16 @@ class OrderRoute(Resource):
     def post():
         """输入订单，返回开单结果
         """
-        try:
-            if request.get_data():
-                json_data = json.loads(request.get_data().decode("utf-8"))
-                # 数据初始化
-                order = order_service.generate_order(json_data['data'])
-                # 规格优先
-                sheets_1 = dispatch_service_spec.dispatch(order)
-                # 重量优先
-                sheets_2 = dispatch_service_weight.dispatch(order)
-                # 综合
-                sheets_3 = dispatch_service_optimize.dispatch(order)
-                return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+        if request.get_data():
+            json_data = json.loads(request.get_data().decode("utf-8"))
+            # 数据初始化
+            order = order_service.generate_order(json_data['data'])
+            # 规格优先
+            sheets_1 = dispatch_service_spec.dispatch(order)
+            # 重量优先
+            sheets_2 = dispatch_service_weight.dispatch(order)
+            # 综合
+            sheets_3 = dispatch_service_optimize.dispatch(order)
+            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
 
-        except MyException as me:
-            current_app.logger.error(me.message)
-            current_app.logger.exception(me)
-            return Result.error_response(me.message)
+
