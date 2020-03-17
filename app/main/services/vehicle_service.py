@@ -3,7 +3,6 @@
 # Created: shaoluyu 2020/03/12
 
 
-
 def generate_vehicle(vehicle_data):
     """
     车辆信息初始化

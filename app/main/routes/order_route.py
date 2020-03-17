@@ -12,6 +12,8 @@ from app.task.optimize_task.services import dispatch_service as dispatch_service
 from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
 from app.utils.my_exception import MyException
 from app.utils.result import Result
+from app.main.services.loading_sequence_service import loading, draw_product
+import turtle as t
 
 
 class OrderRoute(Resource):
@@ -32,6 +34,9 @@ class OrderRoute(Resource):
             sheets_2 = dispatch_service_weight.dispatch(order)
             # 综合
             sheets_3 = dispatch_service_optimize.dispatch(order)
+            # a = loading(Result.success_response(sheets_1),  [12000, 2400, 1500] )
+            # draw_product(a[0][0], t, "in")
+            # print(a)
             return Result.success_response(sheets_1 + sheets_2 + sheets_3)
 
 
