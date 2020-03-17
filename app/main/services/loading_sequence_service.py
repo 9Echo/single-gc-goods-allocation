@@ -4,6 +4,7 @@ from flask import g
 import math
 import turtle as t
 import requests
+import json
 
 
 """
@@ -608,9 +609,10 @@ def calculate_size(item_id):
 if __name__ == '__main__':
     # with open("result.json", "rt", encoding='utf-8') as f:
     #     temp = json.loads(f.read())
-    # result = loading(temp, [12000, 2400, 1500])
-    # print(result[0][0])
-    result = requests.post("http://0.0.0.0:9239/order", headers={"Content-Type": "application/json"}, data={
+    #     print(temp)
+    #     result = loading(temp, [12000, 2400, 1500])
+    #     print(result[0][0])
+    result = requests.post("http://localhost:9238/order", headers={"Content-Type": "application/json"}, data={
     "data": {
         "customer_id": "scymymygxgs",
         "salesman_id": "4",
@@ -647,4 +649,7 @@ if __name__ == '__main__':
 })
     # for i in result:
     #     print(i)
-    draw_product(result[0][0], t, "out")
+    # draw_product(result[0][0], t, "out")
+    a = result.json()
+    box_list = loading(result.json(), [12000, 2400, 1500])
+    print(box_list[0][0])
