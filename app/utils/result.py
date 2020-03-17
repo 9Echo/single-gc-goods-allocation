@@ -75,6 +75,7 @@ class Result:
         result = Result.entity(obj)
         return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
                         mimetype='application/json')
+        # return {"code": result.code, "msg": result.msg, "data": result.data}
 
     @staticmethod
     def error_response(msg):
