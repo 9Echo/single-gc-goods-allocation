@@ -8,7 +8,7 @@ class ModelConfig:
     # 标准热镀、螺旋上浮重量
     STANDARD_RD_LX_UP_WEIGHT = 1000
     # 标准背包上限
-    STANDARD_PACKAGE_MAX_WEIGHT = 33000
+    STANDARD_PACKAGE_MAX_WEIGHT = 33500
     # 背包重量下浮
     PACKAGE_LOWER_WEIGHT = 2500
     # 体积上限系数
