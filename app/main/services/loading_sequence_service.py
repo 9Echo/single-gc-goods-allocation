@@ -611,7 +611,7 @@ def calculate_size(item_id):
 
 def get_row_and_col(total_count: int):
     """
-    根据一件的总支数，得到打包支数矩阵的行和列
+    方矩管根据一件的总支数，得到打包支数矩阵的行和列
     :param total_count:总支数
     :return: 行,列
     """
