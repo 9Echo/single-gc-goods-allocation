@@ -6,7 +6,6 @@ import turtle as t
 import requests
 import json
 
-
 """
 车型：13米，车宽2.4米，车厢高1.5米
 1.确定摆放顺序，（将大、小管分类）
@@ -130,7 +129,7 @@ def put_goods(box_list, item, car_length, part):
     # 判断box_list是否为空
     if n != 0:
         # 遍历每一层
-        for i in range(1, n+1):
+        for i in range(1, n + 1):
             # 得到这一层里面的剩余宽度
             l_width_in = float(box_list[i]["l_width_in"])
             # 得到这一层外面的剩余宽度
@@ -174,9 +173,10 @@ def overspread(item_height, item_width, height, l_width, item, box_list, l_width
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < l_width or item_width < l_width:
             # 该层剩余空间可放该item的件数 和 每件的宽度,  比较横着放和竖着放，选取放入数量多的那一种
-            can_put_quantity, width, height_new = (math.floor(l_width / item_width), item_width, item_height) if math.floor(
+            can_put_quantity, width, height_new = (
+            math.floor(l_width / item_width), item_width, item_height) if math.floor(
                 l_width / item_width) > math.floor(l_width / item_height) else (
-            math.floor(l_width / item_height), item_height, item_width)
+                math.floor(l_width / item_height), item_height, item_width)
             # 复制一个货物信息，用来添加到该层所装的货物信息中
             put_item = item.copy()
             # 将散根数和总根数都置0
@@ -234,11 +234,13 @@ def overspread(item_height, item_width, height, l_width, item, box_list, l_width
                 box_list[p][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        l_width = box_list[p]["l_width_in"] if box_list[p]["l_width_in"] < box_list[p]["l_width_out"] else box_list[p]["l_width_out"]
+        l_width = box_list[p]["l_width_in"] if box_list[p]["l_width_in"] < box_list[p]["l_width_out"] else box_list[p][
+            "l_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < l_width or item_width < l_width:
             # 该层可放的件数
-            can_put_quantity, width, height_new = (l_width // float(item_width), item_width, item_height) if float(item_width) < float(item_height) else (l_width // float(item_height), item_height, item_width)
+            can_put_quantity, width, height_new = (l_width // float(item_width), item_width, item_height) if float(
+                item_width) < float(item_height) else (l_width // float(item_height), item_height, item_width)
             put_item = item.copy()
             # 将散根数和总根数都置0
             put_item[4] = 0
@@ -279,7 +281,8 @@ def new_floor(box_list, item_width, item_height, item, n, part):
     :return:
     """
     # 构建新一层
-    box_list[n] = {"l_width_in": 2400, "l_width_out": 2400, "height_in": 0, "height_out": 0, "goods_in": [], "goods_out": []}
+    box_list[n] = {"l_width_in": 2400, "l_width_out": 2400, "height_in": 0, "height_out": 0, "goods_in": [],
+                   "goods_out": []}
     # 得到该层可摆放的件数
     next_floor_can_put_quantity = math.floor(box_list[n]["l_width_in"] / item_width) * 2
     # 拷贝货物信息
@@ -368,10 +371,10 @@ def draw_hexagon(side, turtle, product_type, item_id, T):
             turtle.left(60)
     turtle.seth(0)
     turtle.pu()
-    turtle.fd(side/3)
+    turtle.fd(side / 3)
     turtle.write(product_type)
-    turtle.write(" "*10 + item_id)
-    turtle.bk(side/3)
+    turtle.write(" " * 10 + item_id)
+    turtle.bk(side / 3)
     turtle.seth(0)
 
 
@@ -416,12 +419,12 @@ def draw_rectangle(side, turtle, product_type, item_id, T):
     """
     turtle.seth(-90)
     if T == "T":
-        turtle.fd(side/2)
+        turtle.fd(side / 2)
         for i in range(3):
             turtle.left(90)
             turtle.fd(side)
         turtle.left(90)
-        turtle.fd(side/2)
+        turtle.fd(side / 2)
     else:
         for i in range(2):
             turtle.fd(side / 8)
@@ -469,7 +472,7 @@ def distance(dis, turtle):
     turtle.bk(10)
     turtle.seth(0)
     turtle.fd(dis2 / 5)
-    turtle.write(dis*2)
+    turtle.write(dis * 2)
     turtle.fd(dis2 * 4 / 5)
     turtle.seth(120)
     turtle.fd(10)
@@ -555,7 +558,7 @@ def draw_product(car_dict, turtle, io):
                 draw_height = now_height
                 turtle.pu()
                 turtle.seth(90)
-                turtle.fd(diff/4)
+                turtle.fd(diff / 4)
                 turtle.seth(0)
                 turtle.pd()
             if shape == "六边形":
@@ -563,7 +566,7 @@ def draw_product(car_dict, turtle, io):
                 for k in range(quantity):
                     draw_hexagon(side, turtle, j[0], j[2], j[9])
                     turtle.pu()
-                    turtle.fd(2*side)
+                    turtle.fd(2 * side)
                     turtle.pd()
             elif shape == "圆形":
                 r = float(width) / 4
@@ -579,7 +582,7 @@ def draw_product(car_dict, turtle, io):
                     turtle.pu()
                     turtle.fd(side)
                     turtle.pd()
-        distance(floor_left_width/2, turtle)
+        distance(floor_left_width / 2, turtle)
         height_now += floor_height
     t.done()
     # ts = t.getscreen()
@@ -604,6 +607,28 @@ def calculate_size(item_id):
     height = str((root_side - 1) * od_id * math.sqrt(3) + 100)
 
     return height + "*" + width
+
+
+def get_row_and_col(total_count: int):
+    """
+    根据一件的总支数，得到打包支数矩阵的行和列
+    :param total_count:总支数
+    :return: 行,列
+    """
+    integral_part = int(math.sqrt(total_count))
+    if total_count % integral_part == 0:
+        return integral_part, int(total_count / integral_part)
+    else:
+        flag = 0
+        low = integral_part ** 2
+        high = (integral_part + 1) ** 2
+        if (total_count - low) >= (high - total_count):
+            flag = integral_part + 1
+        else:
+            flag = integral_part
+        for i in range(flag - 1, 0, -1):
+            if total_count % i == 0:
+                return i, int(total_count / i)
 
 
 if __name__ == '__main__':
