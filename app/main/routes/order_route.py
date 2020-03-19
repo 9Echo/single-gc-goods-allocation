@@ -34,9 +34,9 @@ class OrderRoute(Resource):
             sheets_2 = dispatch_service_weight.dispatch(order)
             # 综合
             sheets_3 = dispatch_service_optimize.dispatch(order)
-            # a = loading(Result.success_response(sheets_1),  [12000, 2400, 1500] )
+            a = loading(sheets_1,  [12000, 2400, 1500] )
             # draw_product(a[0][0], t, "in")
-            # print(a)
-            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+            print(a)
+            return Result.success_response(sheets_1)
 
 
