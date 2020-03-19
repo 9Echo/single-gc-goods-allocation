@@ -10,6 +10,7 @@ from app.main.routes import compose_route
 from app.main.routes.compose_route import ComposeRoute
 from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.order_route import OrderRoute
+from app.main.routes.loading_route import LoadingRoute
 from tests.main.routes.order_route_test import OrderRouteTest
 
 blueprint = Blueprint('main', __name__)
@@ -24,6 +25,8 @@ api.add_resource(OrderRouteTest, '/orderTest')
 api.add_resource(ConfirmRoute, '/confirm')
 # 拼单推荐
 api.add_resource(ComposeRoute, '/compose')
+# 配载图请求
+api.add_resource(LoadingRoute, '/loading')
 
 
 @blueprint.route('/demo', methods=['GET'])

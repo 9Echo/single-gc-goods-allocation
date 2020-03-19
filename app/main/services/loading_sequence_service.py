@@ -45,7 +45,8 @@ def load_goods(car_length,load_list):
         # 存放所装的货物
         box_list = {}
         # item为发货单中的每一种货物
-        for item in items:
+        for i in range(len(items)-1):
+            item=items[i]
             # 货物长
             product_length = float(item[7])
             # 表示该货物在车长面能够放几段
@@ -57,9 +58,10 @@ def load_goods(car_length,load_list):
         total_height_in, total_height_out = caculate_total_hight(box_list)
         # 将每个一辆车上的货物清单和车内外车高都添加到box中
         loading_trucks.append(
-            {"loading_floors": box_list, "total_height_in": total_height_in, "total_height_out": total_height_out})
+            {"load_task_id":items[-1],"loading_floors": box_list, "total_height_in": total_height_in, "total_height_out": total_height_out})
 
     return loading_trucks
+
 def put_goods(box_list, item, car_length, part):
     """
     根据传入的item摆放货物
@@ -654,6 +656,8 @@ def sheets_to_load_list(sheets):
     # 将每个订单的所有子单按照已录信息的外径从小到大排序
     for key in load_dict:
         load_dict[key].sort(key=lambda x: x[6])
+        #添加load_task_id
+        load_dict[key].append(key)
         # 将该发货单中所装货物添加到load_list中
         load_list.append(load_dict[key])
     return load_list
@@ -689,7 +693,7 @@ def truck_list_to_object(loading_trucks):
                 loading_item.od_id = item[6]
                 loading_item.pipe_length = item[7]
                 loading_item.is_entity = item[9]
-                goods_out.append(LoadingItem(item))
+                goods_out.append(loading_item)
 
             loading_floor = LoadingFloor(truck["loading_floors"][key])
             loading_floor.floor = key
