@@ -37,7 +37,7 @@ def loading(sheets, car_info):
 def load_goods(car_length,load_list):
     """
         根据传入的list装配货物
-        :param load_list: 车辆的装载情况字典 {"1":{l_width_in:??,l_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
+        :param load_list: 车辆的装载情况字典 {"1":{left_width_in:??,left_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
         :param car_length: 车长
         :return:loading_trucks(字典)"""
     loading_trucks = []
@@ -65,7 +65,7 @@ def load_goods(car_length,load_list):
 def put_goods(box_list, item, car_length, part):
     """
     根据传入的item摆放货物
-    :param box_list: 车辆的装载情况字典 {"1":{l_width_in:??,l_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
+    :param box_list: 车辆的装载情况字典 {"1":{left_width_in:??,left_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
     :param item: 货物  [品名，尺寸，物资代码，件数，散根，总根数，外径，成件的截面形状]
     :param car_length: 车长
     :param part: 在车长维度上放几段货物
@@ -82,19 +82,19 @@ def put_goods(box_list, item, car_length, part):
         # 遍历每一层
         for i in range(1, n + 1):
             # 得到这一层里面的剩余宽度
-            l_width_in = float(box_list[i]["l_width_in"])
+            left_width_in = float(box_list[i]["left_width_in"])
             # 得到这一层外面的剩余宽度
-            l_width_out = float(box_list[i]["l_width_out"])
+            left_width_out = float(box_list[i]["left_width_out"])
             # 得到这一层里面的高度
             height_in = float(box_list[i]["height_in"])
             # 得到这一层外面的高度
             height_out = float(box_list[i]["height_out"])
             if part == 2:
                 # 判断空间是否足够放下该item
-                overspread(item_height, item_width, height_in, l_width_in, item, box_list, "l_width_in", i, part)
-                overspread(item_height, item_width, height_out, l_width_out, item, box_list, "l_width_out", i, part)
+                overspread(item_height, item_width, height_in, left_width_in, item, box_list, "left_width_in", i, part)
+                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i, part)
             else:
-                overspread(item_height, item_width, height_out, l_width_out, item, box_list, "l_width_out", i, part)
+                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i, part)
         # 已有层都已经摆放过后 ， 继续向新一层摆放
         while item[3]:
             n += 1
@@ -115,7 +115,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
     :param left_width: 该层剩余宽度
     :param item: 待放货物 type: list
     :param box_list: 车层清单 type: dict
-    :param left_width_io: l_width_in/l_width_out , 用来区别内外两层
+    :param left_width_io: left_width_in/left_width_out , 用来区别内外两层
     :param p: 车层
     :param part: 在车长维度上放几段货物
     :return:
@@ -147,7 +147,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
             # 更新该层的剩余宽度，此处对单层进行分析，所以摆放数量不必除以二
             box_list[p][left_width_io] = float(left_width) - float(width) * float(can_put_quantity)
             # 区分内外层添加所装货物
-            if left_width_io == "l_width_in":
+            if left_width_io == "left_width_in":
                 goods_io = "goods_in"
                 height_io = "height_in"
             else:
@@ -185,13 +185,13 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[p][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        l_width = box_list[p]["l_width_in"] if box_list[p]["l_width_in"] < box_list[p]["l_width_out"] else box_list[p][
-            "l_width_out"]
+        left_width = box_list[p]["left_width_in"] if box_list[p]["left_width_in"] < box_list[p]["left_width_out"] else box_list[p][
+            "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
-        if item_height < l_width or item_width < l_width:
+        if item_height < left_width or item_width < left_width:
             # 该层可放的件数
-            can_put_quantity, width, height_new = (l_width // float(item_width), item_width, item_height) if float(
-                item_width) < float(item_height) else (l_width // float(item_height), item_height, item_width)
+            can_put_quantity, width, height_new = (left_width // float(item_width), item_width, item_height) if float(
+                item_width) < float(item_height) else (left_width // float(item_height), item_height, item_width)
             put_item = item.copy()
             # 将散根数和总根数都置0
             put_item[4] = 0
@@ -207,8 +207,8 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 can_put_quantity = item[3]
                 put_item[3] = item[3]
                 item[3] = 0
-            box_list[p]["l_width_in"] -= float(width) * float(can_put_quantity)
-            box_list[p]["l_width_out"] -= float(width) * float(can_put_quantity)
+            box_list[p]["left_width_in"] -= float(width) * float(can_put_quantity)
+            box_list[p]["left_width_out"] -= float(width) * float(can_put_quantity)
             # 添加该层的货物
             box_list[p]["goods_in"].append(put_item)
             box_list[p]["goods_out"].append(put_item)
@@ -232,10 +232,10 @@ def new_floor(box_list, item_width, item_height, item, n, part):
     :return:
     """
     # 构建新一层
-    box_list[n] = {"l_width_in": 2400, "l_width_out": 2400, "height_in": 0, "height_out": 0, "goods_in": [],
+    box_list[n] = {"left_width_in": 2400, "left_width_out": 2400, "height_in": 0, "height_out": 0, "goods_in": [],
                    "goods_out": []}
     # 得到该层可摆放的件数
-    next_floor_can_put_quantity = math.floor(box_list[n]["l_width_in"] / item_width) * 2
+    next_floor_can_put_quantity = math.floor(box_list[n]["left_width_in"] / item_width) * 2
     # 拷贝货物信息
     next_floor_put_item1 = item.copy()
     next_floor_put_item2 = item.copy()
@@ -260,13 +260,13 @@ def new_floor(box_list, item_width, item_height, item, n, part):
             next_floor_put_item1[3] = q
             next_floor_put_item1[4] = 0
             next_floor_put_item1[5] = 0
-            box_list[n]["l_width_out"] -= q * item_width
+            box_list[n]["left_width_out"] -= q * item_width
             box_list[n]["height_out"] = item_height
             box_list[n]["goods_out"].append(next_floor_put_item1)
         next_floor_put_item2[3] = m
         next_floor_put_item2[4] = 0
         next_floor_put_item2[5] = 0
-        box_list[n]["l_width_in"] -= m * item_width
+        box_list[n]["left_width_in"] -= m * item_width
         box_list[n]["height_in"] = item_height
         box_list[n]["goods_in"].append(next_floor_put_item2)
         if m != q:
@@ -288,10 +288,10 @@ def new_floor(box_list, item_width, item_height, item, n, part):
         next_floor_put_item1[3] = next_floor_can_put_quantity
         next_floor_put_item1[4] = 0
         next_floor_put_item1[5] = 0
-        box_list[n]["l_width_out"] -= next_floor_can_put_quantity * item_width
+        box_list[n]["left_width_out"] -= next_floor_can_put_quantity * item_width
         box_list[n]["height_out"] = item_height
         box_list[n]["goods_out"].append(next_floor_put_item1)
-        box_list[n]["l_width_in"] -= next_floor_can_put_quantity * item_width
+        box_list[n]["left_width_in"] -= next_floor_can_put_quantity * item_width
         box_list[n]["height_in"] = item_height
         box_list[n]["goods_in"].append(next_floor_put_item1)
 
@@ -475,7 +475,7 @@ def draw_product(car_dict, turtle, io):
         # 层高
         floor_height = info["height_" + io]
         # 层宽
-        floor_left_width = info["l_width_" + io]
+        floor_left_width = info["left_width_" + io]
         # 该层的货物
         floor_goods = info["goods_" + io]
         # 记录图中画的高度
@@ -542,21 +542,28 @@ def draw_product(car_dict, turtle, io):
     # turtle.done()
 
 
-def calculate_size(item_id):
+def calculate_size(item_id,product_type):
     """
     计算品种的尺寸size
     :param item_id: 物资代码
     :return:
     """
-    od_id = float(item_id.split("*")[0][3:6].lstrip("0"))
     # 该货物每件的根数
     root_quantity = g.ITEM_A_DICT.get(item_id)["GS_PER"]
-    # 一边上的根数
-    root_side = 0.5 + math.sqrt(12 * root_quantity - 3) / 6
-    # 计算一件的宽度
-    width = str((root_side - 1) * od_id * 2 + 100)
-    # 计算一件的高度
-    height = str((root_side - 1) * od_id * math.sqrt(3) + 100)
+    if product_type=="方矩管":
+        row,col=get_row_and_col(root_quantity)
+        size=item_id[3:10]
+        width=str(int(size.split("*")[0].lstrip("0"))*row)
+        height=str(int(size.split("*")[1].lstrip("0"))*col)
+
+    else:
+        od_id = float(item_id.split("*")[0][3:6].lstrip("0"))
+        # 一边上的根数
+        root_side = 0.5 + math.sqrt(12 * root_quantity - 3) / 6
+        # 计算一件的宽度
+        width = str((root_side - 1) * od_id * 2 + 100)
+        # 计算一件的高度
+        height = str((root_side - 1) * od_id * math.sqrt(3) + 100)
 
     return height + "*" + width
 
@@ -621,17 +628,18 @@ def sheets_to_load_list(sheets):
             # 为焊管 则查成件的高和宽
             if item.product_type == "焊管":
                 # 通过外径查询焊管成捆后的高和宽：size ，example：360*370
-                size = calculate_size(item.item_id)
+                size = calculate_size(item.item_id,item.product_type)
             # 为方矩管
             elif item.product_type == "方矩管":
                 # 方矩管的外径取长的一个，所以去第二个位置的数据
-                od_id = item.item_id.split("*")[1].lstrip("0")
-                temp_size = item.item_id[3:10].lstrip("0")
-                size = ModelConfig.FANGJU_PACK_SIZE[temp_size]
+                # od_id = item.item_id.split("*")[1].lstrip("0")
+                # temp_size = item.item_id[3:10].lstrip("0")
+                # size = ModelConfig.FANGJU_PACK_SIZE[temp_size]
+                size=calculate_size(item.item_id,item.product_type)
             # 为热镀
             elif item.product_type == "热镀":
                 # 通过外径查询热镀成捆后的高和宽：size ，example：360*370
-                size = calculate_size(item.item_id)
+                size = calculate_size(item.item_id,item.product_type)
             elif item.product_type == "螺旋焊管":
                 size = od_id + "*" + od_id
             # 判断所画图形的形状
