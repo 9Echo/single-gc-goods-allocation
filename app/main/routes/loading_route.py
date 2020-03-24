@@ -16,12 +16,10 @@ import turtle as t
 
 
 class LoadingRoute(Resource):
-    # def get(self):
-    #     return Result.success_response(order_dao.get_all())
 
     @staticmethod
     def post():
-        """输入订单，返回开单结果
+        """输入sheets，返回配载方案
         """
         if request.get_data():
             json_data = json.loads(request.get_data().decode("utf-8"))

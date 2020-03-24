@@ -4,10 +4,9 @@ from flask import g
 import math
 import turtle as t
 import requests
-from  app.main.entity.loading_truck import LoadingTruck
-from  app.main.entity.loading_floor import LoadingFloor
-from  app.main.entity.loading_item import LoadingItem
-
+from app.main.entity.loading_truck import LoadingTruck
+from app.main.entity.loading_floor import LoadingFloor
+from app.main.entity.loading_item import LoadingItem
 
 """
 车型：13米，车宽2.4米，车厢高1.5米
@@ -25,16 +24,16 @@ def loading(sheets, car_info):
     car_height = car_info[2]
 
     # 发货通知单转配载列表
-    load_list=sheets_to_load_list(sheets)
+    load_list = sheets_to_load_list(sheets)
     # 装配货物
-    loading_trucks=load_goods(car_length,load_list)
-    #对装配数据处理，转为对象
-    trucks_list=truck_list_to_object(loading_trucks)
+    loading_trucks = load_goods(car_length, load_list)
+    # 对装配数据处理，转为对象
+    trucks_list = truck_list_to_object(loading_trucks)
 
     return trucks_list
 
 
-def load_goods(car_length,load_list):
+def load_goods(car_length, load_list):
     """
         根据传入的list装配货物
         :param load_list: 车辆的装载情况字典 {"1":{left_width_in:??,left_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
@@ -45,8 +44,8 @@ def load_goods(car_length,load_list):
         # 存放所装的货物
         box_list = {}
         # item为发货单中的每一种货物
-        for i in range(len(items)-1):
-            item=items[i]
+        for i in range(len(items) - 1):
+            item = items[i]
             # 货物长
             product_length = float(item[7])
             # 表示该货物在车长面能够放几段
@@ -58,9 +57,11 @@ def load_goods(car_length,load_list):
         total_height_in, total_height_out = caculate_total_hight(box_list)
         # 将每个一辆车上的货物清单和车内外车高都添加到box中
         loading_trucks.append(
-            {"load_task_id":items[-1],"loading_floors": box_list, "total_height_in": total_height_in, "total_height_out": total_height_out})
+            {"load_task_id": items[-1], "loading_floors": box_list, "total_height_in": total_height_in,
+             "total_height_out": total_height_out})
 
     return loading_trucks
+
 
 def put_goods(box_list, item, car_length, part):
     """
@@ -92,9 +93,11 @@ def put_goods(box_list, item, car_length, part):
             if part == 2:
                 # 判断空间是否足够放下该item
                 overspread(item_height, item_width, height_in, left_width_in, item, box_list, "left_width_in", i, part)
-                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i, part)
+                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i,
+                           part)
             else:
-                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i, part)
+                overspread(item_height, item_width, height_out, left_width_out, item, box_list, "left_width_out", i,
+                           part)
         # 已有层都已经摆放过后 ， 继续向新一层摆放
         while item[3]:
             n += 1
@@ -125,7 +128,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
         if item_height < left_width or item_width < left_width:
             # 该层剩余空间可放该item的件数 和 每件的宽度,  比较横着放和竖着放，选取放入数量多的那一种
             can_put_quantity, width, height_new = (
-            math.floor(left_width / item_width), item_width, item_height) if math.floor(
+                math.floor(left_width / item_width), item_width, item_height) if math.floor(
                 left_width / item_width) > math.floor(left_width / item_height) else (
                 math.floor(left_width / item_height), item_height, item_width)
             # 复制一个货物信息，用来添加到该层所装的货物信息中
@@ -185,7 +188,8 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[p][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        left_width = box_list[p]["left_width_in"] if box_list[p]["left_width_in"] < box_list[p]["left_width_out"] else box_list[p][
+        left_width = box_list[p]["left_width_in"] if box_list[p]["left_width_in"] < box_list[p]["left_width_out"] else \
+        box_list[p][
             "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < left_width or item_width < left_width:
@@ -327,7 +331,6 @@ def draw_hexagon(side, turtle, product_type, item_id, T):
     turtle.write(" " * 10 + item_id)
     turtle.bk(side / 3)
     turtle.seth(0)
-
 
 
 def draw_circle(r, turtle, product_type, item_id, T):
@@ -542,7 +545,7 @@ def draw_product(car_dict, turtle, io):
     # turtle.done()
 
 
-def calculate_size(item_id,product_type):
+def calculate_size(item_id, product_type):
     """
     计算品种的尺寸size
     :param item_id: 物资代码
@@ -550,11 +553,11 @@ def calculate_size(item_id,product_type):
     """
     # 该货物每件的根数
     root_quantity = g.ITEM_A_DICT.get(item_id)["GS_PER"]
-    if product_type=="方矩管":
-        row,col=get_row_and_col(root_quantity)
-        size=item_id[3:10]
-        width=str(int(size.split("*")[0].lstrip("0"))*row)
-        height=str(int(size.split("*")[1].lstrip("0"))*col)
+    if product_type == "方矩管":
+        row, col = get_row_and_col(root_quantity)
+        size = item_id[3:10]
+        width = str(int(size.split("*")[0].lstrip("0")) * row)
+        height = str(int(size.split("*")[1].lstrip("0")) * col)
 
     else:
         od_id = float(item_id.split("*")[0][3:6].lstrip("0"))
@@ -567,7 +570,8 @@ def calculate_size(item_id,product_type):
 
     return height + "*" + width
 
-def caculate_total_hight(box_list:list):
+
+def caculate_total_hight(box_list: list):
     """
         计算车中货物的总高度
 
@@ -581,7 +585,8 @@ def caculate_total_hight(box_list:list):
     for k in box_list:
         total_height_out += box_list[k]["height_out"]
         total_height_in += box_list[k]["height_in"]
-    return total_height_in,total_height_out
+    return total_height_in, total_height_out
+
 
 def get_row_and_col(total_count: int):
     """
@@ -603,6 +608,7 @@ def get_row_and_col(total_count: int):
         for i in range(flag - 1, 0, -1):
             if total_count % i == 0:
                 return i, int(total_count / i)
+
 
 def sheets_to_load_list(sheets):
     """
@@ -628,18 +634,18 @@ def sheets_to_load_list(sheets):
             # 为焊管 则查成件的高和宽
             if item.product_type == "焊管":
                 # 通过外径查询焊管成捆后的高和宽：size ，example：360*370
-                size = calculate_size(item.item_id,item.product_type)
+                size = calculate_size(item.item_id, item.product_type)
             # 为方矩管
             elif item.product_type == "方矩管":
                 # 方矩管的外径取长的一个，所以去第二个位置的数据
                 # od_id = item.item_id.split("*")[1].lstrip("0")
                 # temp_size = item.item_id[3:10].lstrip("0")
                 # size = ModelConfig.FANGJU_PACK_SIZE[temp_size]
-                size=calculate_size(item.item_id,item.product_type)
+                size = calculate_size(item.item_id, item.product_type)
             # 为热镀
             elif item.product_type == "热镀":
                 # 通过外径查询热镀成捆后的高和宽：size ，example：360*370
-                size = calculate_size(item.item_id,item.product_type)
+                size = calculate_size(item.item_id, item.product_type)
             elif item.product_type == "螺旋焊管":
                 size = od_id + "*" + od_id
             # 判断所画图形的形状
@@ -651,24 +657,25 @@ def sheets_to_load_list(sheets):
                 shape = "圆形"
             # 将子单信息按【品名，件尺寸，规格，件数，散根数，总根数, 外径，形状, 是否为实体】的格式添加到load_list中
             load_dict[sheet.load_task_id].append([item.product_type,
-                                                     size,
-                                                     item.item_id,
-                                                     item.quantity,
-                                                     item.free_pcs,
-                                                     item.total_pcs,
-                                                     float(od_id),
-                                                     pipe_length,
-                                                     shape,
-                                                     "T"])
+                                                  size,
+                                                  item.item_id,
+                                                  item.quantity,
+                                                  item.free_pcs,
+                                                  item.total_pcs,
+                                                  float(od_id),
+                                                  pipe_length,
+                                                  shape,
+                                                  "T"])
 
     # 将每个订单的所有子单按照已录信息的外径从小到大排序
     for key in load_dict:
         load_dict[key].sort(key=lambda x: x[6])
-        #添加load_task_id
+        # 添加load_task_id
         load_dict[key].append(key)
         # 将该发货单中所装货物添加到load_list中
         load_list.append(load_dict[key])
     return load_list
+
 
 def truck_list_to_object(loading_trucks):
     new_loading_trucks_list = []
@@ -712,7 +719,8 @@ def truck_list_to_object(loading_trucks):
         truck["loading_floors"] = floor_list
         good_object = LoadingTruck(truck)
         new_loading_trucks_list.append(good_object)
-    return  new_loading_trucks_list
+    return new_loading_trucks_list
+
 
 if __name__ == '__main__':
     # with open("result.json", "rt", encoding='utf-8') as f:
@@ -721,40 +729,40 @@ if __name__ == '__main__':
     #     result = loading(temp, [12000, 2400, 1500])
     #     print(result[0][0])
     result = requests.post("http://localhost:9238/order", headers={"Content-Type": "application/json"}, data={
-    "data": {
-        "customer_id": "scymymygxgs",
-        "salesman_id": "4",
-        "company_id": "00",
-        "weight":0,
-        "items": [{
-            "product_type": "方矩管",
-            "spec": "02A165*4.25*6000",
-            "item_id": "058040*040*2.75*6000",
-            "f_whs": "sth",
-            "f_loc": "sth",
-            "material": "sth",
-            "quantity": "30",
-            "free_pcs": "0"
-        },{  "product_type": "热镀",
-            "spec": "016075.5*2.3*6000",
-            "item_id": "020020.5*1.6*6000",
-            "f_whs": "sth",
-            "f_loc": "sth",
-            "material": "sth",
-            "quantity": "30",
-            "free_pcs": "0"
-        },{  "product_type": "螺旋焊管",
-            "spec": "016075.5*2.3*6000",
-            "item_id": "0C0219*8.0*12000",
-            "f_whs": "sth",
-            "f_loc": "sth",
-            "material": "sth",
-            "quantity": "20",
-            "free_pcs": "0"
-        }]
-    }
+        "data": {
+            "customer_id": "scymymygxgs",
+            "salesman_id": "4",
+            "company_id": "00",
+            "weight": 0,
+            "items": [{
+                "product_type": "方矩管",
+                "spec": "02A165*4.25*6000",
+                "item_id": "058040*040*2.75*6000",
+                "f_whs": "sth",
+                "f_loc": "sth",
+                "material": "sth",
+                "quantity": "30",
+                "free_pcs": "0"
+            }, {"product_type": "热镀",
+                "spec": "016075.5*2.3*6000",
+                "item_id": "020020.5*1.6*6000",
+                "f_whs": "sth",
+                "f_loc": "sth",
+                "material": "sth",
+                "quantity": "30",
+                "free_pcs": "0"
+                }, {"product_type": "螺旋焊管",
+                    "spec": "016075.5*2.3*6000",
+                    "item_id": "0C0219*8.0*12000",
+                    "f_whs": "sth",
+                    "f_loc": "sth",
+                    "material": "sth",
+                    "quantity": "20",
+                    "free_pcs": "0"
+                    }]
+        }
 
-})
+    })
     # for i in result:
     #     print(i)
     # draw_product(result[0][0], t, "out")
