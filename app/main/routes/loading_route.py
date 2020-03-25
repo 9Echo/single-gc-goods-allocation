@@ -27,9 +27,7 @@ class LoadingRoute(Resource):
             order = order_service.generate_order(json_data['data'])
             # 规格优先
             sheets_1 = dispatch_service_spec.dispatch(order)
-            loading_result = loading(sheets_1,  [12000, 2400, 1500] )
+            loading_result = loading(sheets_1, [12000, 2400, 1500])
             # draw_product(a[0][0], t, "in")
             print(loading_result)
             return Result.success_response(loading_result)
-
-

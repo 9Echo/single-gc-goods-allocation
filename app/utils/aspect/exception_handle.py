@@ -45,7 +45,7 @@ def handle_type_exception(e):
 
 @blueprint.app_errorhandler(MyException)
 def handle_type_exception(me):
-    """系统错误"""
+    """自定义异常"""
     current_app.logger.error(me.message)
     current_app.logger.exception(me)
     return Result.error_response(me.message)
