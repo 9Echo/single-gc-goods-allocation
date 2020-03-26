@@ -15,6 +15,7 @@ from app.main.entity.loading_item import LoadingItem
 2.获取打包参数，确定摆放位置：[第几层，放什么，放几件，放几根，层高，本层剩余宽度]
 """
 
+
 @get_item_a
 def loading(sheets, car_info):
     # 车长
@@ -192,9 +193,10 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[floor][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor]["left_width_out"] else \
-        box_list[floor][
-            "left_width_out"]
+        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor][
+            "left_width_out"] else \
+            box_list[floor][
+                "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < left_width or item_width < left_width:
             # 该层可放的件数

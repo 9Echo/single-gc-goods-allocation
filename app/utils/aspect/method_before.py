@@ -2,6 +2,8 @@
 # Description: 装饰器
 # Created: shaoluyu 2019/03/05
 import functools
+
+from app.main.entity.order import Order
 from app.utils.code import ResponseCode
 from app.utils.my_exception import MyException
 from app.utils.weight_calculator import get_item_a_dict_list
@@ -18,8 +20,16 @@ def get_item_a(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
+        items = []
+        arg = args[0]
+        if isinstance(arg, Order):
+            items = arg.items
+        elif isinstance(arg, list):
+            items = [j for i in arg for j in i.items]
+        else:
+            raise MyException('未知请求！', ResponseCode.Error)
         item_a_dict = {}
-        data = get_item_a_dict_list(args[0].items)
+        data = get_item_a_dict_list(items)
         for i in data:
             item_a_dict.setdefault(i['ITEMID'], {'GBGZL': i['GBGZL'], 'GS_PER': i['GS_PER']})
         g.ITEM_A_DICT = item_a_dict
