@@ -1,4 +1,5 @@
 from app.main.entity.delivery_sheet import DeliverySheet
+from app.utils.aspect.method_before import get_item_a
 from model_config import ModelConfig
 from flask import g
 import math
@@ -14,7 +15,7 @@ from app.main.entity.loading_item import LoadingItem
 2.获取打包参数，确定摆放位置：[第几层，放什么，放几件，放几根，层高，本层剩余宽度]
 """
 
-
+@get_item_a
 def loading(sheets, car_info):
     # 车长
     car_length = car_info[0]
@@ -172,7 +173,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                         # 单件替换
                         put_item[3] = 1
                         # 将虚拟货物取出
-                        box_list[p][goods_io].pop(list_invented[time])
+                        box_list[floor][goods_io].pop(list_invented[time])
                         # 替换box_list中虚拟的货物
                         box_list[floor][goods_io].insert(list_invented[time], put_item)
                     # 如果没有虚拟货物了，就直接将剩余的货物添加到末尾
@@ -181,6 +182,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                         put_item[3] = can_put_quantity - times
                         # 添加到goods列表末尾
                         box_list[floor][goods_io].append(put_item)
+                        break
             # 没有虚拟货物的情况
             else:
                 # 将货物直接添加到goods列表末尾
