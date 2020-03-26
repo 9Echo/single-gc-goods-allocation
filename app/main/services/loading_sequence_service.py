@@ -109,7 +109,7 @@ def put_goods(box_list, item, car_length, part):
     return box_list
 
 
-def overspread(item_height, item_width, height, left_width, item, box_list, left_width_io, p, part):
+def overspread(item_height, item_width, height, left_width, item, box_list, left_width_io, floor, part):
     """
     将传入的item摆放在剩余的的宽度
     :param item_height: 待摆放货物的高
@@ -119,7 +119,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
     :param item: 待放货物 type: list
     :param box_list: 车层清单 type: dict
     :param left_width_io: left_width_in/left_width_out , 用来区别内外两层
-    :param p: 车层
+    :param floor: 车层
     :param part: 在车长维度上放几段货物
     :return:
     """
@@ -148,7 +148,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 put_item[3] = item[3]
                 item[3] = 0
             # 更新该层的剩余宽度，此处对单层进行分析，所以摆放数量不必除以二
-            box_list[p][left_width_io] = float(left_width) - float(width) * float(can_put_quantity)
+            box_list[floor][left_width_io] = float(left_width) - float(width) * float(can_put_quantity)
             # 区分内外层添加所装货物
             if left_width_io == "left_width_in":
                 goods_io = "goods_in"
@@ -159,9 +159,9 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
             # 存放虚拟货物的下标
             list_invented = []
             # 找出该层货物中为虚的货物并记录下标
-            for product in box_list[p][goods_io]:
+            for product in box_list[floor][goods_io]:
                 if product[9] == "F":
-                    list_invented.append(box_list[p][goods_io].index(product))
+                    list_invented.append(box_list[floor][goods_io].index(product))
             # 有虚拟货物的情况
             if list_invented:
                 # 一共有几件虚拟货物
@@ -172,24 +172,24 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                         # 单件替换
                         put_item[3] = 1
                         # 替换box_list中虚拟的货物
-                        box_list[p][goods_io].insert(list_invented[time], put_item)
+                        box_list[floor][goods_io].insert(list_invented[time], put_item)
                     # 如果没有虚拟货物了，就直接将剩余的货物添加到末尾
                     else:
                         # 添加剩余的件数
                         put_item[3] = can_put_quantity - times
                         # 添加到goods列表末尾
-                        box_list[p][goods_io].append(put_item)
+                        box_list[floor][goods_io].append(put_item)
             # 没有虚拟货物的情况
             else:
                 # 将货物直接添加到goods列表末尾
-                box_list[p][goods_io].append(put_item)
+                box_list[floor][goods_io].append(put_item)
             # 更新层高
             if height < height_new:
-                box_list[p][height_io] = height_new
+                box_list[floor][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        left_width = box_list[p]["left_width_in"] if box_list[p]["left_width_in"] < box_list[p]["left_width_out"] else \
-        box_list[p][
+        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor]["left_width_out"] else \
+        box_list[floor][
             "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < left_width or item_width < left_width:
@@ -211,20 +211,20 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 can_put_quantity = item[3]
                 put_item[3] = item[3]
                 item[3] = 0
-            box_list[p]["left_width_in"] -= float(width) * float(can_put_quantity)
-            box_list[p]["left_width_out"] -= float(width) * float(can_put_quantity)
+            box_list[floor]["left_width_in"] -= float(width) * float(can_put_quantity)
+            box_list[floor]["left_width_out"] -= float(width) * float(can_put_quantity)
             # 添加该层的货物
-            box_list[p]["goods_in"].append(put_item)
-            box_list[p]["goods_out"].append(put_item)
+            box_list[floor]["goods_in"].append(put_item)
+            box_list[floor]["goods_out"].append(put_item)
             # 更新层高
-            if box_list[p]["height_in"] < height_new:
-                box_list[p]["height_in"] = height_new
+            if box_list[floor]["height_in"] < height_new:
+                box_list[floor]["height_in"] = height_new
             # 更新层高
-            if box_list[p]["height_out"] < height_new:
-                box_list[p]["height_out"] = height_new
+            if box_list[floor]["height_out"] < height_new:
+                box_list[floor]["height_out"] = height_new
 
 
-def new_floor(box_list, item_width, item_height, item, n, part):
+def new_floor(box_list, item_width, item_height, item, n, segment):
     """
     添加新的一层，摆放货物
     :param box_list: 车层清单 type:dict
@@ -232,7 +232,7 @@ def new_floor(box_list, item_width, item_height, item, n, part):
     :param item_height:货物高度
     :param item:货物信息 type:list
     :param n:新的一层  层数
-    :param part: 在车长维度上放几段货物
+    :param segment: 在车长维度上放几段货物
     :return:
     """
     # 构建新一层
@@ -244,7 +244,7 @@ def new_floor(box_list, item_width, item_height, item, n, part):
     next_floor_put_item1 = item.copy()
     next_floor_put_item2 = item.copy()
     next_floor_put_item3 = item.copy()
-    if part == 2:
+    if segment == 2:
         if next_floor_can_put_quantity < item[3]:
             # 扣去摆放的件数，得到剩余的件数
             item[3] -= next_floor_can_put_quantity
@@ -254,33 +254,33 @@ def new_floor(box_list, item_width, item_height, item, n, part):
             item[3] = 0
         # 判断摆放的货物件数是否为偶数， 为偶数则内外层摆放数量一致，否则内层多摆
         if next_floor_can_put_quantity % 2 != 0:
-            q = next_floor_can_put_quantity // 2
-            m = q + 1
+            outer_layer_num = next_floor_can_put_quantity // 2
+            inner_layer_num = outer_layer_num + 1
         else:
-            q = m = next_floor_can_put_quantity / 2
+            outer_layer_num = inner_layer_num = next_floor_can_put_quantity / 2
             # 修改放在该层的货物信息
-        # 如果q为0则不添加信息
-        if q != 0:
-            next_floor_put_item1[3] = q
+        # 如果外层为0则不添加信息
+        if outer_layer_num != 0:
+            next_floor_put_item1[3] = outer_layer_num
             next_floor_put_item1[4] = 0
             next_floor_put_item1[5] = 0
-            box_list[n]["left_width_out"] -= q * item_width
+            box_list[n]["left_width_out"] -= outer_layer_num * item_width
             box_list[n]["height_out"] = item_height
             box_list[n]["goods_out"].append(next_floor_put_item1)
-        next_floor_put_item2[3] = m
+        next_floor_put_item2[3] = inner_layer_num
         next_floor_put_item2[4] = 0
         next_floor_put_item2[5] = 0
-        box_list[n]["left_width_in"] -= m * item_width
+        box_list[n]["left_width_in"] -= inner_layer_num * item_width
         box_list[n]["height_in"] = item_height
         box_list[n]["goods_in"].append(next_floor_put_item2)
-        if m != q:
+        if inner_layer_num != outer_layer_num:
             next_floor_put_item3[3] = 1
             next_floor_put_item3[4] = 0
             next_floor_put_item3[5] = 0
             next_floor_put_item3[9] = "F"
             box_list[n]["goods_out"].append(next_floor_put_item3)
 
-    elif part == 1:
+    elif segment == 1:
         if next_floor_can_put_quantity / 2 < item[3]:
             # 扣去摆放的件数，得到剩余的件数
             item[3] -= next_floor_can_put_quantity / 2
