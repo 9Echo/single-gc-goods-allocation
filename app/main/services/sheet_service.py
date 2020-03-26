@@ -15,8 +15,8 @@ def generate_sheets(sheets):
     sheets_list = []
     for sheet in sheets:
         delivery_sheet = DeliverySheet(sheet)
-        for item in delivery_sheet.items:
-            item = DeliveryItem(item)
+        for index in range(len(delivery_sheet.items)):
+            delivery_sheet.items[index] = DeliveryItem(delivery_sheet.items[index])
         sheets_list.append(delivery_sheet)
 
     return sheets_list
