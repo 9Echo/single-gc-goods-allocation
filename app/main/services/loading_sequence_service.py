@@ -15,7 +15,7 @@ from app.main.entity.loading_item import LoadingItem
 2.获取打包参数，确定摆放位置：[第几层，放什么，放几件，放几根，层高，本层剩余宽度]
 """
 
-@get_item_a
+
 def loading(sheets, car_info):
     # 车长
     car_length = car_info[0]
