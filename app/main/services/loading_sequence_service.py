@@ -171,6 +171,8 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                     if time <= (times - 1):
                         # 单件替换
                         put_item[3] = 1
+                        # 将虚拟货物取出
+                        box_list[p][goods_io].pop(list_invented[time])
                         # 替换box_list中虚拟的货物
                         box_list[p][goods_io].insert(list_invented[time], put_item)
                     # 如果没有虚拟货物了，就直接将剩余的货物添加到末尾
