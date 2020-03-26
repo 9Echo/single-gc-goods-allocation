@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-# Description: 订单请求
-# Created: shaoluyu 2019/11/13
-# Modified: shaoluyu 2019/11/13
+# Description: 配载图请求
+# Created: zhouwentao 2020/03/19
 import json
 
 from flask import request, current_app
@@ -16,13 +15,11 @@ from app.main.services.loading_sequence_service import loading, draw_product
 import turtle as t
 
 
-class OrderRoute(Resource):
-    # def get(self):
-    #     return Result.success_response(order_dao.get_all())
+class LoadingRoute(Resource):
 
     @staticmethod
     def post():
-        """输入订单，返回开单结果
+        """输入sheets，返回配载方案
         """
         if request.get_data():
             json_data = json.loads(request.get_data().decode("utf-8"))
@@ -30,10 +27,7 @@ class OrderRoute(Resource):
             order = order_service.generate_order(json_data['data'])
             # 规格优先
             sheets_1 = dispatch_service_spec.dispatch(order)
-            # 重量优先
-            sheets_2 = dispatch_service_weight.dispatch(order)
-            # 综合
-            sheets_3 = dispatch_service_optimize.dispatch(order)
-            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
-
-
+            loading_result = loading(sheets_1, [12000, 2400, 1500])
+            # draw_product(a[0][0], t, "in")
+            print(loading_result)
+            return Result.success_response(loading_result)
