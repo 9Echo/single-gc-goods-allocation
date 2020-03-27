@@ -82,7 +82,7 @@ def dispatch_load_task(sheets: list, task_id):
             # 如果是下差过大的品种，重量累加
             if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
                 rd_lx_total_weight += sheet.weight
-            # 如果有下差过大的品种，动态计算重量上限
+            # 如果该车次有下差过大的品种，动态计算重量上限
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
