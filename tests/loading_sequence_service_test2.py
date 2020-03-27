@@ -156,8 +156,36 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
             else:
                 goods_io = "goods_out"
                 height_io = "height_out"
+            # 存放虚拟货物的下标
+            list_invented = []
+            # 找出该层货物中为虚的货物并记录下标
+            for product in box_list[floor][goods_io]:
+                if product.is_entity == "F":
+                    list_invented.append(box_list[floor][goods_io].index(product))
+            # 有虚拟货物的情况
+            if list_invented:
+                # 一共有几件虚拟货物
+                times = len(list_invented)
+                for time in range(can_put_quantity):
+                    # 如果list_invented中有这个下标表示还有虚拟货物可以替换，则先替换虚拟的货物
+                    if time <= (times - 1):
+                        # 单件替换
+                        put_item.quantity = 1
+                        # 将虚拟货物取出
+                        box_list[floor][goods_io].pop(list_invented[time])
+                        # 替换box_list中虚拟的货物
+                        box_list[floor][goods_io].insert(list_invented[time], put_item)
+                    # 如果没有虚拟货物了，就直接将剩余的货物添加到末尾
+                    else:
+                        # 添加剩余的件数
+                        put_item.quantity = can_put_quantity - times
+                        # 添加到goods列表末尾
+                        box_list[floor][goods_io].append(put_item)
+                        break
+            # 没有虚拟货物的情况
+            else:
                 # 将货物直接添加到goods列表末尾
-            box_list[floor][goods_io].append(put_item)
+                box_list[floor][goods_io].append(put_item)
             # 更新层高
             if height < height_new:
                 box_list[floor][height_io] = height_new
@@ -221,6 +249,7 @@ def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, s
     # 拷贝货物信息
     next_floor_put_item1 = copy.deepcopy(item)
     next_floor_put_item2 = copy.deepcopy(item)
+    next_floor_put_item3 = copy.deepcopy(item)
     if segment == 2:
         if next_floor_can_put_quantity < item.quantity:
             # 扣去摆放的件数，得到剩余的件数
@@ -250,6 +279,12 @@ def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, s
         box_list[new_floor]["left_width_in"] -= inner_layer_num * item_width
         box_list[new_floor]["height_in"] = item_height
         box_list[new_floor]["goods_in"].append(next_floor_put_item2)
+        if inner_layer_num != outer_layer_num:
+            next_floor_put_item3.quantity = 1
+            next_floor_put_item3.free_pcs = 0
+            next_floor_put_item3.total_pcs = 0
+            next_floor_put_item3.is_entity = "F"
+            box_list[new_floor]["goods_out"].append(next_floor_put_item3)
 
     elif segment == 1:
         if next_floor_can_put_quantity / 2 < item.quantity:
