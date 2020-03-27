@@ -8,7 +8,7 @@ from flask_restful import Resource
 
 from app.main.services import sheet_service
 from app.utils.result import Result
-from app.main.services.loading_sequence_service1 import loading
+from app.main.services.loading_sequence_service import loading
 
 
 class LoadingRoute(Resource):
