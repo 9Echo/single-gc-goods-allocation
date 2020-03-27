@@ -6,13 +6,9 @@ import json
 from flask import request, current_app
 from flask_restful import Resource
 
-from app.main.services import order_service,sheet_service, dispatch_service as dispatch_service_spec
-from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
-from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
-from app.utils.my_exception import MyException
+from app.main.services import sheet_service
 from app.utils.result import Result
 from app.main.services.loading_sequence_service1 import loading
-import turtle as t
 
 
 class LoadingRoute(Resource):

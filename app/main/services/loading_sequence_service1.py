@@ -3,7 +3,6 @@ import math
 from flask import g
 import copy
 from app.main.entity.loading_floor import LoadingFloor
-from app.main.entity.loading_item import LoadingItem
 from app.main.entity.loading_truck import LoadingTruck
 from app.utils.aspect.method_before import get_item_a
 
@@ -12,6 +11,7 @@ from app.utils.aspect.method_before import get_item_a
 1.确定摆放顺序，（将大、小管分类）
 2.获取打包参数，确定摆放位置：[第几层，放什么，放几件，放几根，层高，本层剩余宽度]
 """
+
 
 @get_item_a
 def loading(sheets, car_info):
@@ -25,14 +25,14 @@ def loading(sheets, car_info):
     # 发货通知单转配载列表
     load_list = sheets_to_load_list(sheets)
     # 装配货物
-    loading_trucks = load_goods(truck_length,truck_width, load_list)
+    loading_trucks = load_goods(truck_length, truck_width, load_list)
     # 对装配数据处理，转为对象
     trucks_list = truck_list_to_object(loading_trucks)
 
     return trucks_list
 
 
-def load_goods(truck_length,truck_width, load_list):
+def load_goods(truck_length, truck_width, load_list):
     """
         根据传入的list装配货物
         :param load_list: 车辆的装载情况字典 {"1":{left_width_in:??,left_width_out:??,height_in:??,height_out:??,goods_in:[??]，goods_out:[??]}, "2":...}
@@ -101,11 +101,11 @@ def put_goods(box_list, item, truck_width, part):
         # 已有层都已经摆放过后 ， 继续向新一层摆放
         while item.quantity:
             n += 1
-            new_floor(box_list,truck_width, item_width, item_height, item, n, part)
+            new_floor(box_list, truck_width, item_width, item_height, item, n, part)
     else:
         while item.quantity:
             n += 1
-            new_floor(box_list,truck_width,item_width, item_height, item, n, part)
+            new_floor(box_list, truck_width, item_width, item_height, item, n, part)
     return box_list
 
 
@@ -191,9 +191,10 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[floor][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor]["left_width_out"] else \
-        box_list[floor][
-            "left_width_out"]
+        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor][
+            "left_width_out"] else \
+            box_list[floor][
+                "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < left_width or item_width < left_width:
             # 该层可放的件数
@@ -227,7 +228,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[floor]["height_out"] = height_new
 
 
-def new_floor(box_list,truck_width, item_width, item_height, item, new_floor, segment):
+def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, segment):
     """
     添加新的一层，摆放货物
     :param box_list: 车层清单 type:dict
@@ -240,8 +241,9 @@ def new_floor(box_list,truck_width, item_width, item_height, item, new_floor, se
     :return:
     """
     # 构建新一层
-    box_list[new_floor] = {"left_width_in": truck_width, "left_width_out": truck_width, "height_in": 0, "height_out": 0, "goods_in": [],
-                   "goods_out": []}
+    box_list[new_floor] = {"left_width_in": truck_width, "left_width_out": truck_width, "height_in": 0, "height_out": 0,
+                           "goods_in": [],
+                           "goods_out": []}
     # 得到该层可摆放的件数
     next_floor_can_put_quantity = math.floor(box_list[new_floor]["left_width_in"] / item_width) * 2
     # 拷贝货物信息
@@ -411,7 +413,7 @@ def sheets_to_load_list(sheets):
                 item.shape = "矩形"
             elif item.product_type == "螺旋焊管":
                 item.shape = "圆形"
-            item.is_entity="T"
+            item.is_entity = "T"
             # 将子单信息按【品名，件尺寸，规格，件数，散根数，总根数, 外径，形状, 是否为实体】的格式添加到load_list中
             load_dict[sheet.load_task_id].append(item)
 
@@ -468,4 +470,3 @@ def truck_list_to_object(loading_trucks):
         good_object = LoadingTruck(truck)
         new_loading_trucks_list.append(good_object)
     return new_loading_trucks_list
-

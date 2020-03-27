@@ -10,15 +10,10 @@ from flask_restful import Resource
 from app.main.services import order_service, dispatch_service as dispatch_service_spec
 from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
 from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
-from app.utils.my_exception import MyException
 from app.utils.result import Result
-from app.main.services.loading_sequence_service import loading, draw_product
-import turtle as t
 
 
 class OrderRoute(Resource):
-    # def get(self):
-    #     return Result.success_response(order_dao.get_all())
 
     @staticmethod
     def post():
@@ -35,5 +30,3 @@ class OrderRoute(Resource):
             # 综合
             sheets_3 = dispatch_service_optimize.dispatch(order)
             return Result.success_response(sheets_1 + sheets_2 + sheets_3)
-
-

@@ -3,17 +3,6 @@
 # Created: shaoluyu 2019/12/12
 from app.analysis.rules import compose_filter
 from app.main.entity.delivery_sheet import DeliverySheet
-
-# def generate_delivery(delivery_list_data):
-#     """
-#     根据json数据生成对应的发货通知单
-#     """
-#     delivery_model_list = []
-#     for delivery in delivery_list_data:
-#         delivery_model = DeliverySheet(delivery)
-#         delivery_model_list.append(delivery_model)
-#
-#     return delivery_model_list
 from app.utils.aspect.method_before import set_weight
 
 

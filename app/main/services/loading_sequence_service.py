@@ -1,6 +1,4 @@
-from app.main.entity.delivery_sheet import DeliverySheet
 from app.utils.aspect.method_before import get_item_a
-from model_config import ModelConfig
 from flask import g
 import math
 import turtle as t
@@ -14,6 +12,7 @@ from app.main.entity.loading_item import LoadingItem
 1.确定摆放顺序，（将大、小管分类）
 2.获取打包参数，确定摆放位置：[第几层，放什么，放几件，放几根，层高，本层剩余宽度]
 """
+
 
 @get_item_a
 def loading(sheets, car_info):
@@ -192,9 +191,10 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[floor][height_io] = height_new
     elif part == 1:
         # 得到当前内外层剩余宽度较小的宽度
-        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor]["left_width_out"] else \
-        box_list[floor][
-            "left_width_out"]
+        left_width = box_list[floor]["left_width_in"] if box_list[floor]["left_width_in"] < box_list[floor][
+            "left_width_out"] else \
+            box_list[floor][
+                "left_width_out"]
         # 只要剩余宽度比待放货物的高和宽任意一个大，就算是能放得下
         if item_height < left_width or item_width < left_width:
             # 该层可放的件数
@@ -228,7 +228,7 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
                 box_list[floor]["height_out"] = height_new
 
 
-def new_floor(box_list,truck_width, item_width, item_height, item, new_floor, segment):
+def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, segment):
     """
     添加新的一层，摆放货物
     :param box_list: 车层清单 type:dict
@@ -241,8 +241,9 @@ def new_floor(box_list,truck_width, item_width, item_height, item, new_floor, se
     :return:
     """
     # 构建新一层
-    box_list[new_floor] = {"left_width_in": truck_width, "left_width_out": truck_width, "height_in": 0, "height_out": 0, "goods_in": [],
-                   "goods_out": []}
+    box_list[new_floor] = {"left_width_in": truck_width, "left_width_out": truck_width, "height_in": 0, "height_out": 0,
+                           "goods_in": [],
+                           "goods_out": []}
     # 得到该层可摆放的件数
     next_floor_can_put_quantity = math.floor(box_list[new_floor]["left_width_in"] / item_width) * 2
     # 拷贝货物信息

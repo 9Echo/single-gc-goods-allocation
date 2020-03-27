@@ -5,7 +5,6 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.utils.code import ResponseCode
 from app.main.dao.delivery_log_dao import delivery_log_dao
 from app.main.entity.delivery_log import DeliveryLog
-from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services.redis_service import get_delivery_list
 from app.utils.my_exception import MyException
 
