@@ -407,6 +407,11 @@ def box_list_to_goods(box_list):
         goods_out_floor=copy.deepcopy(goods_in_floor)
         goods_in_floor.goods_list=box_list[key]["goods_in"]
         goods_out_floor.goods_list=box_list[key]["goods_out"]
+        # 动态去除goods_in,goods_out属性
+        delattr(goods_in_floor,"goods_in")
+        delattr(goods_in_floor,"goods_out")
+        delattr(goods_out_floor,"goods_in")
+        delattr(goods_out_floor,"goods_out")
         goods_in_list.append(goods_in_floor)
         goods_out_list.append(goods_out_floor)
 
