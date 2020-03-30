@@ -40,6 +40,7 @@ def load_goods(truck_length, truck_width, load_list):
         :param truck_width: 车宽
         :return:loading_trucks(字典)"""
     loading_trucks = []
+    load_list_backup=copy.deepcopy(load_list)
     for items in load_list:
         # 存放所装的货物
         box_list = {}
@@ -53,14 +54,19 @@ def load_goods(truck_length, truck_width, load_list):
             # 摆放货物
             box_list = put_goods(box_list, item, truck_width, part)
         # 计算车内货物的总高度
+        total_height_in, total_height_out,total_weight,total_quantity = caculate_total_quantity_height(load_list_backup[i],box_list)
 
-        total_height_in, total_height_out = caculate_total_hight(box_list)
-        # 将每个一辆车上的货物清单和车内外车高都添加到box中
-
-        goods_in_list, goods_out_list=box_list_to_goods(box_list)
-        loading_trucks.append(
-            {"load_task_id": items[-1], "goods_in": goods_in_list,"goods_out": goods_out_list, "total_height_in": total_height_in,
-             "total_height_out": total_height_out})
+        # 调整数据格式，返回内层、外层货物列表汇总
+        goods_in_list, goods_out_list = box_list_to_goods(box_list)
+        loading_trucks.append({
+            "load_task_id": items[-1],
+            "total_weight": total_weight,
+            "total_quantity": total_quantity,
+            "goods_in": goods_in_list,
+            "goods_out": goods_out_list,
+            "total_height_in": total_height_in,
+            "total_height_out": total_height_out
+        })
 
     return loading_trucks
 
@@ -299,12 +305,12 @@ def calculate_size(item_id, product_type):
     return height + "*" + width
 
 
-def caculate_total_hight(box_list: list):
+def caculate_total_quantity_height(load_list_backup,box_list):
     """
-        计算车中货物的总高度
+        计算车中货物的总高度,总重量，总数量
 
         :param boxlist: 货物列表
-        :return: total_height_in,total_height_out
+        :return: total_height_in,total_height_out,total_weight,total_quantity
         """
     # 装车内外总高度
     total_height_out = 0
@@ -313,7 +319,9 @@ def caculate_total_hight(box_list: list):
     for k in box_list:
         total_height_out += box_list[k]["height_out"]
         total_height_in += box_list[k]["height_in"]
-    return total_height_in, total_height_out
+    total_weight=sum(load_list_backup[i].weight for i in range(len(load_list_backup)-1))
+    total_quantity=sum(load_list_backup[i].quantity for i in range(len(load_list_backup)-1))
+    return total_height_in, total_height_out,total_weight,total_quantity
 
 
 def get_row_and_col(total_count: int):
@@ -380,7 +388,6 @@ def sheets_to_load_list(sheets):
                 item.shape = "矩形"
             elif item.product_type == "螺旋焊管":
                 item.shape = "圆形"
-            item.is_entity = "T"
             # 将子单信息按【品名，件尺寸，规格，件数，散根数，总根数, 外径，形状, 是否为实体】的格式添加到load_list中
             load_dict[sheet.load_task_id].append(item)
 
@@ -393,34 +400,36 @@ def sheets_to_load_list(sheets):
         load_list.append(load_dict[key])
     return load_list
 
+
 def box_list_to_goods(box_list):
     """将数据结构打包为内层货物和外层货物"""
-    goods_in_list=[]
-    goods_out_list=[]
+    goods_in_list = []
+    goods_out_list = []
     for key in box_list:
-        goods_in_floor=LoadingFloor()
-        goods_in_floor.floor=key
-        goods_in_floor.left_width_in=box_list[key]["left_width_in"]
-        goods_in_floor.left_width_out=box_list[key]["left_width_out"]
-        goods_in_floor.height_in=box_list[key]["height_in"]
-        goods_in_floor.height_out=box_list[key]["height_out"]
-        goods_out_floor=copy.deepcopy(goods_in_floor)
-        goods_in_floor.goods_list=box_list[key]["goods_in"]
-        goods_out_floor.goods_list=box_list[key]["goods_out"]
+        goods_in_floor = LoadingFloor()
+        goods_in_floor.floor = key
+        goods_in_floor.left_width_in = box_list[key]["left_width_in"]
+        goods_in_floor.left_width_out = box_list[key]["left_width_out"]
+        goods_in_floor.height_in = box_list[key]["height_in"]
+        goods_in_floor.height_out = box_list[key]["height_out"]
+        goods_out_floor = copy.deepcopy(goods_in_floor)
+        goods_in_floor.goods_list = box_list[key]["goods_in"]
+        goods_out_floor.goods_list = box_list[key]["goods_out"]
         # 动态去除goods_in,goods_out属性
-        delattr(goods_in_floor,"goods_in")
-        delattr(goods_in_floor,"goods_out")
-        delattr(goods_out_floor,"goods_in")
-        delattr(goods_out_floor,"goods_out")
+        delattr(goods_in_floor, "goods_in")
+        delattr(goods_in_floor, "goods_out")
+        delattr(goods_out_floor, "goods_in")
+        delattr(goods_out_floor, "goods_out")
         goods_in_list.append(goods_in_floor)
         goods_out_list.append(goods_out_floor)
 
-    return goods_in_list,goods_out_list
+    return goods_in_list, goods_out_list
 
 
 def truck_list_to_object(loading_trucks):
     new_loading_trucks_list = []
     for truck in loading_trucks:
         good_object = LoadingTruck(truck)
+        delattr(good_object,"loading_floors")
         new_loading_trucks_list.append(good_object)
     return new_loading_trucks_list

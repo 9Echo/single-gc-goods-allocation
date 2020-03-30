@@ -26,7 +26,7 @@ class OrderRoute(Resource):
             # 规格优先
             sheets_1 = dispatch_service_spec.dispatch(order)
             # 重量优先
-            sheets_2 = dispatch_service_weight.dispatch(order)
+            # sheets_2 = dispatch_service_weight.dispatch(order)
             # 综合
-            sheets_3 = dispatch_service_optimize.dispatch(order)
-            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+            # sheets_3 = dispatch_service_optimize.dispatch(order)
+            return Result.success_response(sheets_1)
