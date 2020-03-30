@@ -16,21 +16,18 @@ def compose(filtered_item, left_items: list):
     :param left_items:超重子单列表
     :return:
     """
-    candidate_items = []
     new_max_weight = g.RD_LX_MAX_WEIGHT if filtered_item and filtered_item.product_type in ModelConfig.RD_LX_GROUP \
         else g.MAX_WEIGHT
     if filtered_item.weight <= new_max_weight:
-        candidate_items.append(filtered_item)
         left_items.remove(filtered_item)
-        return candidate_items, left_items
+        return filtered_item, left_items
     # 依次将子发货单装入发货单中
     else:
         item, new_item = split_item(filtered_item, filtered_item.weight - new_max_weight)
         if new_item:
-            candidate_items.append(item)
             left_items.remove(item)
             left_items.insert(0, new_item)
-    return candidate_items, left_items
+    return item, left_items
 
 
 def split_item(item, delta_weight):
@@ -64,4 +61,3 @@ def split_item(item, delta_weight):
     else:
         # 超重的数量等于子发货单数量时忽略该子发货单
         return item, None
-
