@@ -18,6 +18,7 @@ class LoadingFloor(BaseEntity):
         self.height_out=None    # 每层外侧高度
         self.goods_in = []      # 内侧装配货物
         self.goods_out = []     # 外侧装配货物
+        self.goods_list = []     # 装配的货物
         self.create_time = None # 创建时间
         self.update_time = None # 更新时间
         if loading_floor:
