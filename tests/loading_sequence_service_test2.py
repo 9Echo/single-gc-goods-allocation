@@ -56,10 +56,8 @@ def load_goods(truck_length, truck_width, load_list):
 
         total_height_in, total_height_out = caculate_total_hight(box_list)
         # 将每个一辆车上的货物清单和车内外车高都添加到box中
-
-        goods_in_list, goods_out_list=box_list_to_goods(box_list)
         loading_trucks.append(
-            {"load_task_id": items[-1], "goods_in": goods_in_list,"goods_out": goods_out_list, "total_height_in": total_height_in,
+            {"load_task_id": items[-1], "loading_floors": box_list, "total_height_in": total_height_in,
              "total_height_out": total_height_out})
 
     return loading_trucks
@@ -158,8 +156,36 @@ def overspread(item_height, item_width, height, left_width, item, box_list, left
             else:
                 goods_io = "goods_out"
                 height_io = "height_out"
+            # 存放虚拟货物的下标
+            list_invented = []
+            # 找出该层货物中为虚的货物并记录下标
+            for product in box_list[floor][goods_io]:
+                if product.is_entity == "F":
+                    list_invented.append(box_list[floor][goods_io].index(product))
+            # 有虚拟货物的情况
+            if list_invented:
+                # 一共有几件虚拟货物
+                times = len(list_invented)
+                for time in range(can_put_quantity):
+                    # 如果list_invented中有这个下标表示还有虚拟货物可以替换，则先替换虚拟的货物
+                    if time <= (times - 1):
+                        # 单件替换
+                        put_item.quantity = 1
+                        # 将虚拟货物取出
+                        box_list[floor][goods_io].pop(list_invented[time])
+                        # 替换box_list中虚拟的货物
+                        box_list[floor][goods_io].insert(list_invented[time], put_item)
+                    # 如果没有虚拟货物了，就直接将剩余的货物添加到末尾
+                    else:
+                        # 添加剩余的件数
+                        put_item.quantity = can_put_quantity - times
+                        # 添加到goods列表末尾
+                        box_list[floor][goods_io].append(put_item)
+                        break
+            # 没有虚拟货物的情况
+            else:
                 # 将货物直接添加到goods列表末尾
-            box_list[floor][goods_io].append(put_item)
+                box_list[floor][goods_io].append(put_item)
             # 更新层高
             if height < height_new:
                 box_list[floor][height_io] = height_new
@@ -223,6 +249,7 @@ def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, s
     # 拷贝货物信息
     next_floor_put_item1 = copy.deepcopy(item)
     next_floor_put_item2 = copy.deepcopy(item)
+    next_floor_put_item3 = copy.deepcopy(item)
     if segment == 2:
         if next_floor_can_put_quantity < item.quantity:
             # 扣去摆放的件数，得到剩余的件数
@@ -252,6 +279,12 @@ def new_floor(box_list, truck_width, item_width, item_height, item, new_floor, s
         box_list[new_floor]["left_width_in"] -= inner_layer_num * item_width
         box_list[new_floor]["height_in"] = item_height
         box_list[new_floor]["goods_in"].append(next_floor_put_item2)
+        if inner_layer_num != outer_layer_num:
+            next_floor_put_item3.quantity = 1
+            next_floor_put_item3.free_pcs = 0
+            next_floor_put_item3.total_pcs = 0
+            next_floor_put_item3.is_entity = "F"
+            box_list[new_floor]["goods_out"].append(next_floor_put_item3)
 
     elif segment == 1:
         if next_floor_can_put_quantity / 2 < item.quantity:
@@ -393,34 +426,47 @@ def sheets_to_load_list(sheets):
         load_list.append(load_dict[key])
     return load_list
 
-def box_list_to_goods(box_list):
-    """将数据结构打包为内层货物和外层货物"""
-    goods_in_list=[]
-    goods_out_list=[]
-    for key in box_list:
-        goods_in_floor=LoadingFloor()
-        goods_in_floor.floor=key
-        goods_in_floor.left_width_in=box_list[key]["left_width_in"]
-        goods_in_floor.left_width_out=box_list[key]["left_width_out"]
-        goods_in_floor.height_in=box_list[key]["height_in"]
-        goods_in_floor.height_out=box_list[key]["height_out"]
-        goods_out_floor=copy.deepcopy(goods_in_floor)
-        goods_in_floor.goods_list=box_list[key]["goods_in"]
-        goods_out_floor.goods_list=box_list[key]["goods_out"]
-        # 动态去除goods_in,goods_out属性
-        delattr(goods_in_floor,"goods_in")
-        delattr(goods_in_floor,"goods_out")
-        delattr(goods_out_floor,"goods_in")
-        delattr(goods_out_floor,"goods_out")
-        goods_in_list.append(goods_in_floor)
-        goods_out_list.append(goods_out_floor)
-
-    return goods_in_list,goods_out_list
-
 
 def truck_list_to_object(loading_trucks):
     new_loading_trucks_list = []
     for truck in loading_trucks:
+        floor_list = []
+        for key in truck["loading_floors"]:
+            # goods_in = []
+            # goods_out = []
+            # for item in truck["loading_floors"][key]["goods_in"]:
+            #     loading_item = LoadingItem()
+            #     loading_item.product_type = item[0]
+            #     loading_item.size = item[1]
+            #     loading_item.item_id = item[2]
+            #     loading_item.quantity = item[3]
+            #     loading_item.free_pcs = item[4]
+            #     loading_item.total_pcs = item[5]
+            #     loading_item.od_id = item[6]
+            #     loading_item.pipe_length = item[7]
+            #     loading_item.is_entity = item[9]
+            #     goods_in.append(loading_item)
+            #
+            # for item in truck["loading_floors"][key]["goods_out"]:
+            #     loading_item = LoadingItem()
+            #     loading_item.product_type = item[0]
+            #     loading_item.size = item[1]
+            #     loading_item.item_id = item[2]
+            #     loading_item.quantity = item[3]
+            #     loading_item.free_pcs = item[4]
+            #     loading_item.total_pcs = item[5]
+            #     loading_item.od_id = item[6]
+            #     loading_item.pipe_length = item[7]
+            #     loading_item.is_entity = item[9]
+            #     goods_out.append(loading_item)
+
+            loading_floor = LoadingFloor(truck["loading_floors"][key])
+            loading_floor.floor = key
+            # loading_floor.goods_in = goods_in
+            # loading_floor.goods_out = goods_out
+            floor_list.append(loading_floor)
+        # 重新填充
+        truck["loading_floors"] = floor_list
         good_object = LoadingTruck(truck)
         new_loading_trucks_list.append(good_object)
     return new_loading_trucks_list
