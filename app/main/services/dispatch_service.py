@@ -31,7 +31,7 @@ def dispatch(order):
         sheet.items = delivery_items
         return [sheet]
     # 2、使用模型过滤器生成发货通知单
-    sheets, task_id = dispatch_filter.filter(delivery_items)
+    sheets, task_id = dispatch_filter.model_filter(delivery_items)
     # 3、补充发货单的属性
     replenish_property(sheets, order)
     # 4、为发货单分配车次
@@ -60,7 +60,7 @@ def dispatch_load_task(sheets: list, task_id):
             continue
         max_weight = g.RD_LX_MAX_WEIGHT if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP \
             else g.MAX_WEIGHT
-        if sheet.weight == 0 or sheet.weight >= max_weight:
+        if sheet.weight >= max_weight:
             task_id += 1
             sheet.load_task_id = task_id
         else:
@@ -86,7 +86,7 @@ def dispatch_load_task(sheets: list, task_id):
             if rd_lx_total_weight:
                 # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
                 new_max_weight = round(
-                    g.MAX_WEIGHT + (rd_lx_total_weight / g.RD_LX_MAX_WEIGHT) * 1000)
+                    g.MAX_WEIGHT + (rd_lx_total_weight / g.RD_LX_MAX_WEIGHT) * g.RD_LX_UP_WEIGHT)
                 new_max_weight = min(g.RD_LX_MAX_WEIGHT, new_max_weight)
 
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单

@@ -29,4 +29,6 @@ class OrderRoute(Resource):
             sheets_2 = dispatch_service_weight.dispatch(order)
             # 综合
             sheets_3 = dispatch_service_optimize.dispatch(order)
-            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+
+            return Result.success_response(sheets_1)
+
