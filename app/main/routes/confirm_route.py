@@ -2,12 +2,10 @@
 # Description: 发货通知单确认
 # Created: shaoluyu 2019/11/13
 # Modified: shaoluyu 2019/11/13
-from flask import current_app
 from flask import request
 from flask_restful import Resource
 from app.main.services.confirm_delivery_service import confirm
 from app.main.services.confirm_delivery_service import generate_delivery
-from app.utils.my_exception import MyException
 from app.utils.result import Result
 
 

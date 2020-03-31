@@ -2,10 +2,8 @@
 # Description: 内存数据库服务
 # Created: shaoluyu 2019/12/04
 import json
-
 import redis
 from flask import current_app
-
 from app.main.redis_pool import redis_pool
 from app.main.entity.delivery_item import DeliveryItem
 from app.utils.result import Result

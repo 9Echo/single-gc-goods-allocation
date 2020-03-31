@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/15 16:17
 # @Author  : Zihao.Liu
-from flask import request, current_app, jsonify
+from flask import request
 from flask_restful import Resource
-
 from app.main.services.compose_service import compose
-from app.utils.my_exception import MyException
 from app.utils.result import Result
 
 

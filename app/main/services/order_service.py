@@ -2,7 +2,6 @@
 # @Time    : 2019/11/19 16:14
 # @Author  : Zihao.Liu
 from threading import Thread
-
 from app.main.dao.order_dao import order_dao
 from app.main.entity.order import Order
 from app.main.entity.order_item import OrderItem

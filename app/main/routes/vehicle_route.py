@@ -2,12 +2,9 @@
 # Description: 车辆请求
 # Created: shaoluyu 2020/03/12
 import json
-
-from flask import request, current_app
+from flask import request
 from flask_restful import Resource
-
 from app.main.services import vehicle_service, steel_dispatch_service
-from app.utils.my_exception import MyException
 from app.utils.result import Result
 
 

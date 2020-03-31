@@ -3,7 +3,6 @@
 # Created: shaoluyu 2019/11/13
 # Modified: shaoluyu 2019/11/13
 import json
-
 from flask import request
 from flask_restful import Resource
 from app.main.services import order_service, dispatch_service as dispatch_service_spec
