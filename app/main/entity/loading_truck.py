@@ -15,6 +15,7 @@ class LoadingTruck(BaseEntity):
         self.total_height_out=None #外侧总高度
         self.total_weight=None #总重量
         self.total_quantity=None #总件数
+        self.total_pcs=None #总根数
         self.loading_floors = []  # 配载每层的具体货物
         self.goods_in = []  # 内层货物
         self.goods_out = []  # 外城货物

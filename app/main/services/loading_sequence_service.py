@@ -41,12 +41,12 @@ def load_goods(truck_length, truck_width, load_list):
         :return:loading_trucks(字典)"""
     loading_trucks = []
     load_list_backup=copy.deepcopy(load_list)
-    for items in load_list:
+    for index in range(len(load_list)):
         # 存放所装的货物
         box_list = {}
         # item为发货单中的每一种货物
-        for i in range(len(items) - 1):
-            item = items[i]
+        for i in range(len(load_list[index]) - 1):
+            item = load_list[index][i]
             # 货物长
             product_length = float(item.pipe_length)
             # 表示该货物在车长面能够放几段
@@ -54,14 +54,16 @@ def load_goods(truck_length, truck_width, load_list):
             # 摆放货物
             box_list = put_goods(box_list, item, truck_width, part)
         # 计算车内货物的总高度
-        total_height_in, total_height_out,total_weight,total_quantity = caculate_total_quantity_height(load_list_backup[i],box_list)
+        total_height_in, total_height_out,total_weight,total_quantity,total_pcs = \
+        caculate_total_quantity_height(load_list_backup[index],box_list)
 
         # 调整数据格式，返回内层、外层货物列表汇总
         goods_in_list, goods_out_list = box_list_to_goods(box_list)
         loading_trucks.append({
-            "load_task_id": items[-1],
+            "load_task_id": load_list[index][-1],
             "total_weight": total_weight,
             "total_quantity": total_quantity,
+            "total_pcs": total_pcs,
             "goods_in": goods_in_list,
             "goods_out": goods_out_list,
             "total_height_in": total_height_in,
@@ -307,10 +309,10 @@ def calculate_size(item_id, product_type):
 
 def caculate_total_quantity_height(load_list_backup,box_list):
     """
-        计算车中货物的总高度,总重量，总数量
+        计算车中货物的总高度,总重量，总数量,总根数
 
         :param boxlist: 货物列表
-        :return: total_height_in,total_height_out,total_weight,total_quantity
+        :return: total_height_in,total_height_out,total_weight,total_quantity,total_pcs
         """
     # 装车内外总高度
     total_height_out = 0
@@ -321,7 +323,8 @@ def caculate_total_quantity_height(load_list_backup,box_list):
         total_height_in += box_list[k]["height_in"]
     total_weight=sum(load_list_backup[i].weight for i in range(len(load_list_backup)-1))
     total_quantity=sum(load_list_backup[i].quantity for i in range(len(load_list_backup)-1))
-    return total_height_in, total_height_out,total_weight,total_quantity
+    total_pcs=sum(load_list_backup[i].total_pcs for i in range(len(load_list_backup)-1))
+    return total_height_in, total_height_out,total_weight,total_quantity,total_pcs
 
 
 def get_row_and_col(total_count: int):
@@ -363,6 +366,8 @@ def sheets_to_load_list(sheets):
 
         # 遍历发货单中的每一个子单，整理子单信息添加到load_list中
         for item in sheet.items:
+            # 车次号
+            item.load_task_id=sheet.load_task_id
             # 分割 物资代码 得到外径：od_id
             item.od_id = item.item_id.split("*")[0][3:].lstrip("0")
             # 管长
@@ -388,7 +393,7 @@ def sheets_to_load_list(sheets):
                 item.shape = "矩形"
             elif item.product_type == "螺旋焊管":
                 item.shape = "圆形"
-            # 将子单信息按【品名，件尺寸，规格，件数，散根数，总根数, 外径，形状, 是否为实体】的格式添加到load_list中
+            # 将子单信息按【车次号，品名，件尺寸，规格，件数，散根数，总根数, 外径，形状, 是否为实体】的格式添加到load_list中
             load_dict[sheet.load_task_id].append(item)
 
     # 将每个订单的所有子单按照已录信息的外径从小到大排序
@@ -408,6 +413,7 @@ def box_list_to_goods(box_list):
     for key in box_list:
         goods_in_floor = LoadingFloor()
         goods_in_floor.floor = key
+        goods_in_floor.load_task_id = box_list[key]["goods_in"][0].load_task_id
         goods_in_floor.left_width_in = box_list[key]["left_width_in"]
         goods_in_floor.left_width_out = box_list[key]["left_width_out"]
         goods_in_floor.height_in = box_list[key]["height_in"]
