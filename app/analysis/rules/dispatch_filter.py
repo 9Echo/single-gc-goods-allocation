@@ -5,6 +5,8 @@ import copy
 from flask import g, current_app
 from app.analysis.rules import weight_rule, package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
+from app.utils.code import ResponseCode
+from app.utils.my_exception import MyException
 from model_config import ModelConfig
 
 
@@ -29,9 +31,6 @@ def model_filter(delivery_items: list):
     while left_items:
         # 每次取第一个元素进行compose,  filtered_item是得到的一个饱和(饱和即已达到重量上限)的子单
         filtered_item, left_items = weight_rule.compose(left_items[0], left_items)
-        # 如果过滤完后没有可用的发货子单则返回
-        # if not filtered_item:
-        #     break
         item_list.append(filtered_item)
     # 上一步filtered_item中可能含有weight为0的子项，为无效子项
     item_list = list(filter(lambda x: x.weight > 0, item_list))
@@ -47,15 +46,8 @@ def model_filter(delivery_items: list):
             package_solution.dynamic_programming(len(item_list), g.PACKAGE_MAX_WEIGHT, ModelConfig.MAX_VOLUME,
                                                  weight_cost)
         # 如果满足，说明有重量超出背包重量上限的子单，则返回
-        if final_weight == 0:
-            for i in item_list:
-                sheet = DeliverySheet()
-                sheet.items = i
-                sheet.volume = i.volume
-                sheet.type = 'spec_first'
-                sheets.append(sheet)
-            current_app.logger.info('data exception')
-            break
+        if final_weight <= 0:
+            raise MyException('package exception', ResponseCode.Error)
         # 如果本次选中的组合价值在合理值范围内，直接赋车次号，不参于后续的操作
         if (g.PACKAGE_MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.PACKAGE_MAX_WEIGHT:
             is_full = True
