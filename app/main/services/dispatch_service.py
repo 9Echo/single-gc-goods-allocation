@@ -53,16 +53,10 @@ def dispatch_load_task(sheets: list, task_id):
 
     doc_type = '提货单'
     left_sheets = []
-    # 先为重量为空或已满的单子生成单独车次
     for sheet in sheets:
         # 如果已经生成车次的sheet，则跳过不处理
         if sheet.load_task_id:
             continue
-        max_weight = g.RD_LX_MAX_WEIGHT if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP \
-            else g.MAX_WEIGHT
-        if sheet.weight >= max_weight:
-            task_id += 1
-            sheet.load_task_id = task_id
         else:
             left_sheets.append(sheet)
     # 记录是否有未分车的单子
@@ -71,13 +65,12 @@ def dispatch_load_task(sheets: list, task_id):
         total_volume = 0
         task_id += 1
         no = 0
-        # 动态计算的车次总重量
-
         # 下差组别的总重量
         rd_lx_total_weight = 0
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
             total_volume += sheet.volume
+            # 初始重量
             new_max_weight = g.MAX_WEIGHT
             # 如果是下差过大的品种，重量累加
             if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
@@ -88,7 +81,6 @@ def dispatch_load_task(sheets: list, task_id):
                 new_max_weight = round(
                     g.MAX_WEIGHT + (rd_lx_total_weight / g.RD_LX_MAX_WEIGHT) * g.RD_LX_UP_WEIGHT)
                 new_max_weight = min(g.RD_LX_MAX_WEIGHT, new_max_weight)
-
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 limit_volume_weight = (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight

@@ -2,10 +2,8 @@
 # Description: 配载图请求
 # Created: zhouwentao 2020/03/19
 import json
-
-from flask import request, current_app
+from flask import request
 from flask_restful import Resource
-
 from app.main.services import sheet_service
 from app.utils.result import Result
 from app.main.services.loading_sequence_service import loading

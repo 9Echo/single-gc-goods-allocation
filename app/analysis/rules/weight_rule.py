@@ -27,6 +27,7 @@ def compose(filtered_item, left_items: list):
         if new_item:
             left_items.remove(item)
             left_items.insert(0, new_item)
+
     return item, left_items
 
 
