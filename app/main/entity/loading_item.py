@@ -10,11 +10,11 @@ class LoadingItem(BaseEntity):
     def __init__(self, loading_item=None):
         self.rowid = None  # 主键id
         self.product_type = None  # 产品类型
-        self.size = None  # 产品大小
+        self.quantity_size = None  # 件数规格(高*宽)
+        self.free_pcs_size = None  # 散根规格(高*宽)
         self.item_id = None  # 物资代码
         self.quantity = None  # 件数
         self.free_pcs = None  # 散根数
-        self.total_pcs = None  # 总根数
         self.od_id=None         #外径
         self.pipe_length = None  # 管长
         self.shape = None  # 形状
