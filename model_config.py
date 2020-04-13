@@ -1,6 +1,8 @@
 class ModelConfig:
     """模型参数配置
     """
+    # 日钢标载
+    RG_MAX_WEIGHT = 32
     # 标准车载最大重量
     STANDARD_MAX_WEIGHT = 33000
     # 标准热镀、螺旋最大载重

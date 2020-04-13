@@ -9,7 +9,7 @@
 """
 
 
-def get_stock(vehicle):
+def get_stock(vehicle=None):
     """
     根据车辆属性获取库存
     包括，城市、区县、品种、是否运输外库
