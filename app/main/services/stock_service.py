@@ -57,10 +57,11 @@ def deal_stock():
                 deal_data.append(stock)
             else:
                 CANSENDNUMBER = float(stock.CANSENDNUMBER)
+                CANSENDWEIGHT = float(stock.CANSENDWEIGHT) * 1000
                 # 件重
-                per_weight = float(stock.CANSENDWEIGHT) / CANSENDNUMBER
+                per_weight = CANSENDWEIGHT / CANSENDNUMBER
                 # 32吨最多能有几件向下取整
-                num = 32.0 // per_weight
+                num = 32000 // per_weight
                 stock_copy = copy.deepcopy(stock)
                 # CANSENDNUMBER一共可以分几组
                 if num == 0:
