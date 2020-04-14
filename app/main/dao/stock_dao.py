@@ -1,6 +1,7 @@
 from app.main.db_pool import db_pool_ods
 import pymysql
 from datetime import datetime
+import datetime as dt
 import time
 
 
@@ -16,7 +17,7 @@ def select_stock():
     """
     conn = db_pool_ods.connection()
     cursor = conn.cursor(pymysql.cursors.DictCursor)
-    date = time.strftime("%Y-%m-%d", time.localtime(time.mktime(datetime.timetuple(datetime.now())) - 86400))
+    date = datetime.now().date() + dt.timedelta(-1)
     sql = """
             SELECT
                 t2.prod_kind_price_out as prod_kind_price_out,
@@ -47,5 +48,6 @@ def select_stock():
         """
     cursor.execute(sql.format(date))
     return cursor.fetchall()
+
 
 
