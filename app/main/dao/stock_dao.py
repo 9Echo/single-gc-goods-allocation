@@ -40,6 +40,7 @@ def select_stock():
                 AND t1.COMMODITYNAME = t2.prod_kind
                 AND t1.CANSENDNUMBER > 0
                 AND t1.CANSENDWEIGHT is not NULL 
+                AND t1.id = '1186197766719971328'
         """
     cursor.execute(sql)
     return cursor.fetchall()

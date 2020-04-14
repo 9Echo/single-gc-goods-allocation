@@ -13,7 +13,7 @@ import copy
 import traceback
 
 
-def get_stock():
+def get_stock(vehicle=None):
     """
     根据车辆属性获取库存
     包括，城市、区县、品种、是否运输外库
@@ -51,26 +51,31 @@ def deal_stock():
     stock_list = get_stock()
     for stock in stock_list:
         try:
-            if float(stock.CANSENDWEIGHT) <= 32.0:
+            if round(float(stock.CANSENDWEIGHT) * 1000) <= 32000:
                 deal_data.append(stock)
             else:
-                CANSENDNUMBER = float(stock.CANSENDNUMBER)
+                # 可发件数
+                CANSENDNUMBER = int(stock.CANSENDNUMBER)
+                # 可发重量
+                CANSENDWEIGHT = round(float(stock.CANSENDWEIGHT) * 1000)
                 # 件重
-                per_weight = float(stock.CANSENDWEIGHT) / CANSENDNUMBER
+                per_weight = CANSENDWEIGHT / CANSENDNUMBER
                 # 32吨最多能有几件向下取整
-                num = 32.0 // per_weight
+                num = 32000 // per_weight
                 stock_copy = copy.deepcopy(stock)
-                # CANSENDNUMBER一共可以分几组
                 if num == 0:
                     continue
+                # CANSENDNUMBER一共可以分几组
                 group_num = int(CANSENDNUMBER // num)
                 # 余数
                 remainder = CANSENDNUMBER % num
-                stock_copy.CANSENDWEIGHT = per_weight * num
-                stock_copy.CANSENDNUMBER = num
+                stock_copy.CANSENDWEIGHT = round(per_weight * num)
+                stock_copy.CANSENDNUMBER = int(num)
                 if group_num > 0:
                     for i in range(group_num):
                         deal_data.append(stock_copy)
+                if remainder == 0:
+                    continue
                 stock_copy.CANSENDWEIGHT = per_weight * remainder
                 stock_copy.CANSENDNUMBER = remainder
                 deal_data.append(stock_copy)
@@ -113,4 +118,7 @@ def update_stock_task():
 
 
 data = deal_stock()
-print(data)
+# for i in data:
+#     if i.CANSENDWEIGHT == 0:
+#         print(i.__dict__.values())
+#         break
