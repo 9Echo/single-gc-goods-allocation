@@ -51,8 +51,8 @@ def deal_stock():
     stock_list = get_stock()
     for stock in stock_list:
         try:
-            if float(stock.CANSENDWEIGHT * 1000) <= 32000:
-                stock.CANSENDWEIGHT = int(round(float(stock.CANSENDWEIGHT * 1000)))
+            if float(stock.CANSENDWEIGHT) <= 32.0:
+                stock.CANSENDWEIGHT = int(round(float(stock.CANSENDWEIGHT) * 1000))
                 stock.CANSENDNUMBER = int(stock.CANSENDNUMBER)
                 deal_data.append(stock)
             else:
@@ -77,8 +77,6 @@ def deal_stock():
                 stock_copy.CANSENDNUMBER = int(remainder)
                 deal_data.append(stock_copy)
         except Exception as e:
-            print(num)
-            print(CANSENDNUMBER)
             traceback.print_exc(e)
     return deal_data
 
