@@ -51,7 +51,9 @@ def deal_stock():
     stock_list = get_stock()
     for stock in stock_list:
         try:
-            if float(stock.CANSENDWEIGHT) <= 32.0:
+            if float(stock.CANSENDWEIGHT * 1000) <= 32000:
+                stock.CANSENDWEIGHT = int(round(float(stock.CANSENDWEIGHT * 1000)))
+                stock.CANSENDNUMBER = int(stock.CANSENDNUMBER)
                 deal_data.append(stock)
             else:
                 CANSENDNUMBER = float(stock.CANSENDNUMBER)
@@ -66,13 +68,13 @@ def deal_stock():
                 group_num = int(CANSENDNUMBER // num)
                 # 余数
                 remainder = CANSENDNUMBER % num
-                stock_copy.CANSENDWEIGHT = per_weight * num
-                stock_copy.CANSENDNUMBER = num
+                stock_copy.CANSENDWEIGHT = int(round(per_weight * num))
+                stock_copy.CANSENDNUMBER = int(num)
                 if group_num > 0:
                     for i in range(group_num):
                         deal_data.append(stock_copy)
-                stock_copy.CANSENDWEIGHT = per_weight * remainder
-                stock_copy.CANSENDNUMBER = remainder
+                stock_copy.CANSENDWEIGHT = int(round(per_weight * remainder))
+                stock_copy.CANSENDNUMBER = int(remainder)
                 deal_data.append(stock_copy)
         except Exception as e:
             print(num)
