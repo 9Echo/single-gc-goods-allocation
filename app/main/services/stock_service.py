@@ -58,14 +58,14 @@ def deal_stock():
             else:
                 CANSENDNUMBER = float(stock.CANSENDNUMBER)
                 CANSENDWEIGHT = float(stock.CANSENDWEIGHT) * 1000
-                # 件重
+                # 件重是千克单位
                 per_weight = CANSENDWEIGHT / CANSENDNUMBER
                 # 32吨最多能有几件向下取整
                 num = 32000 // per_weight
                 stock_copy = copy.deepcopy(stock)
-                # CANSENDNUMBER一共可以分几组
                 if num == 0:
                     continue
+                # CANSENDNUMBER一共可以分几组
                 group_num = int(CANSENDNUMBER // num)
                 # 余数
                 remainder = CANSENDNUMBER % num
@@ -74,6 +74,8 @@ def deal_stock():
                 if group_num > 0:
                     for i in range(group_num):
                         deal_data.append(stock_copy)
+                if remainder == 0:
+                    continue
                 stock_copy.CANSENDWEIGHT = int(round(per_weight * remainder))
                 stock_copy.CANSENDNUMBER = int(remainder)
                 deal_data.append(stock_copy)
@@ -114,4 +116,7 @@ def update_stock_task():
 
 
 data = deal_stock()
-print(data)
+for i in data:
+    if i.CANSENDWEIGHT == 0:
+        print(i.__dict__.values())
+        break
