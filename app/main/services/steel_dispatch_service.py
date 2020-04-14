@@ -20,7 +20,7 @@ def dispatch():
     # 根据车辆条件获取库存
     city_stock_list_dict = dict()
     result = list()
-    stock_list = stock_service.get_stock()
+    stock_list = stock_service.deal_stock()
     for i in stock_list:
         city_stock_list_dict.setdefault(i.CITY, []).append(i)
     # 过滤库存，调用算法进行配货
@@ -60,10 +60,14 @@ def goods_filter(city, stock_list):
             load_task.city = city
             load_task_id += 1
             load_task.load_task_id = city + str(load_task_id)
-            load_task.weight+=stock_list[i].CANSENDWEIGHT
+            load_task.weight += stock_list[i].CANSENDWEIGHT
             load_task.items.append(stock_list[i])
         result.append(load_task)
         for i in result_index_list:
             stock_list.pop(i)
     # 数据返回
     return result
+
+
+if __name__ == '__main__':
+    dispatch()

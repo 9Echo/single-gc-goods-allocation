@@ -68,6 +68,7 @@ def combine_sheets(sheets):
                 # 如果发现重量为0的明细，移除
                 if citem.weight == 0:
                     source.items.remove(citem)
+                    continue
                 if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
                     item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
                 else:

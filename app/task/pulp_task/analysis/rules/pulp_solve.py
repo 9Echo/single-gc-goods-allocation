@@ -1,6 +1,9 @@
 from pulp import *
 from flask import g
 from model_config import ModelConfig
+import sys
+
+# sys.setrecursionlimit(3000)  # 设置最大递归深度为3000
 
 
 def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
