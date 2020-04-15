@@ -10,5 +10,6 @@ class LoadTask(BaseEntity):
     def __init__(self):
         self.load_task_id = None  # 所属车次号
         self.items = []  # 明细
-        self.weight = None
+        self.weight = 0
         self.city = None
+        self.end_point = None

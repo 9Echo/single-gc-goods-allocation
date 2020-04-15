@@ -43,7 +43,7 @@ def select_stock():
                 AND PRODCOMPANY NOT IN ( '日照钢铁供应有限公司', '日照京华管业有限公司' ) 
                 AND t1.COMMODITYNAME = t2.prod_kind
                 AND t1.CANSENDNUMBER > 0
-                AND t1.CANSENDWEIGHT is not NULL 
+                AND t1.CANSENDWEIGHT is not NULL
                 AND t1.CITY not in ('青岛市','临沂市','日照市')
         """
     cursor.execute(sql.format(date))

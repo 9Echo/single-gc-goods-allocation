@@ -3,6 +3,7 @@ from flask import g
 from model_config import ModelConfig
 import sys
 
+
 # sys.setrecursionlimit(3000)  # 设置最大递归深度为3000
 
 
@@ -21,6 +22,4 @@ def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
     # print(('车次载重' + str(value(prob.objective)) + 'kg', '选中变量' + str([i for i in r if value(x[i]) > 0.5])))
     # print(len([i for i in r if value(x[i]) > 0.5]))
     # print(len(result_index_list))
-    for i in r:
-        print(value(x[i]))
     return [i for i in r if value(x[i]) > 0.5]

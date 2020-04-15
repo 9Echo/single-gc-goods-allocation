@@ -2,6 +2,8 @@
 # Description: 钢铁配货服务
 # Created: shaoluyu 2020/03/12
 import copy
+import math
+from typing import List
 
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.entity.load_task import LoadTask
@@ -18,56 +20,101 @@ def dispatch():
     :return:
     """
     # 根据车辆条件获取库存
-    city_stock_list_dict = dict()
+    end_point_stock_list_dict = dict()
     result = list()
     stock_list = stock_service.deal_stock()
+    print('今日0点总库存:' + str(sum(i.CANSENDWEIGHT for i in stock_list)) + 'kg')
     for i in stock_list:
-        city_stock_list_dict.setdefault(i.CITY, []).append(i)
+        end_point_stock_list_dict.setdefault(i.end_point, []).append(i)
     # 过滤库存，调用算法进行配货
-    for k, v in city_stock_list_dict.items():
+    for k, v in end_point_stock_list_dict.items():
         load_task_list = goods_filter(k, v)
         result.extend(load_task_list)
     return result
 
 
-def goods_filter(city, stock_list):
+def goods_filter(end_point, stock_list):
     """
-    货物按照逾期时间倒序排序，选出第一个
-    1 选出与第一个同一收货地的数据，并且出库仓库不超过两个
-    if 有数据：
-        将数据进行背包，约束条件有重量、件数，价值是重量
-    else:
-        选出与第一个同一出库仓库的数据，并且收货地址不超过两个
-        if 有数据：
-            将数据进行背包，约束条件有重量、件数，价值是重量
-        else:
-            将stock_list去除第一个，回到第一步操作，以此类推
-    :param city:
+    :param end_point:
     :param stock_list:
     :return:
     """
-    load_task_id = 0
-    # 数据格式处理，进行背包处理
-    result = []
-    while stock_list:
-        weight_list = []
-        for i in stock_list:
-            weight_list.append(i.CANSENDWEIGHT)
-        value_list = copy.deepcopy(weight_list)
-        result_index_list = pulp_solve.pulp_pack(weight_list, None, value_list, ModelConfig.RG_MAX_WEIGHT)
-        load_task = LoadTask()
-        for i in result_index_list:
-            load_task.city = city
-            load_task_id += 1
-            load_task.load_task_id = city + str(load_task_id)
-            load_task.weight += stock_list[i].CANSENDWEIGHT
-            load_task.items.append(stock_list[i])
-        result.append(load_task)
-        for i in result_index_list:
-            stock_list.pop(i)
+    surplus_list = []
+    load_task_result = []
+    name_stock_list_dict = dict()
+    for stock in stock_list:
+        name_stock_list_dict.setdefault(stock.prod_kind_price_out, []).append(stock)
+    for prod, prod_stock_list in name_stock_list_dict.items():
+        while prod_stock_list:
+            weight_list = ([item.CANSENDWEIGHT for item in prod_stock_list])
+            value_list = copy.deepcopy(weight_list)
+            result_index_list = pulp_solve.pulp_pack(weight_list, None, value_list, ModelConfig.RG_MAX_WEIGHT)
+            if ModelConfig.RG_MAX_WEIGHT - 1000 <= sum([prod_stock_list[r].CANSENDWEIGHT for r in result_index_list]) \
+                    <= ModelConfig.RG_MAX_WEIGHT:
+                load_task = LoadTask()
+                for index in sorted(result_index_list, reverse=True):
+                    load_task.city = prod_stock_list[index].CITY
+                    load_task.end_point = end_point
+                    load_task.weight += prod_stock_list[index].CANSENDWEIGHT
+                    load_task.items.append(prod_stock_list[index])
+                    prod_stock_list.pop(index)
+                load_task_result.append(load_task)
+            else:
+                break
+        if prod_stock_list:
+            surplus_list.extend(prod_stock_list)
+    load_task_result.extend(limit_stock(surplus_list))
     # 数据返回
-    return result
+    return load_task_result
+
+
+def limit_stock(stock_list):
+    load_task_list = []
+    while stock_list:
+        stock_list.sort(key=lambda x: x.end_point)
+        total_weight = 0
+        load_task = LoadTask()
+        load_task_list.append(load_task)
+        for i in copy.copy(stock_list):
+            total_weight += i.CANSENDWEIGHT
+            if total_weight <= ModelConfig.RG_MAX_WEIGHT:
+                load_task.items.append(i)
+                load_task.end_point = i.end_point
+                load_task.weight += i.CANSENDWEIGHT
+                stock_list.remove(i)
+                if total_weight > ModelConfig.RG_MAX_WEIGHT - 500:
+                    break
+            else:
+                item, new_item = split_item(i, total_weight - ModelConfig.RG_MAX_WEIGHT)
+                if item.CANSENDWEIGHT > 0:
+                    load_task.items.append(item)
+                    load_task.end_point = i.end_point
+                    load_task.weight += i.CANSENDWEIGHT
+                stock_list.remove(item)
+                stock_list.insert(0, new_item)
+                break
+    return load_task_list
+
+
+def split_item(item: Stock, delta_weight):
+    """
+
+    :param item:
+    :param delta_weight:
+    :return:
+    """
+    new_cunt = math.ceil(delta_weight / item.CANSENDWEIGHT * item.CANSENDNUMBER)
+    new_weight = new_cunt * (item.CANSENDWEIGHT / item.CANSENDNUMBER)
+
+    new_item = copy.deepcopy(item)
+    new_item.CANSENDWEIGHT = new_weight
+    new_item.CANSENDNUMBER = new_cunt
+    item.CANSENDWEIGHT = item.CANSENDWEIGHT - new_weight
+    item.CANSENDNUMBER = item.CANSENDNUMBER - new_cunt
+    return item, new_item
 
 
 if __name__ == '__main__':
-    dispatch()
+    result = dispatch()
+    stad_list = list(filter(lambda x: x.weight > 30000, result))
+    print(len(stad_list))
