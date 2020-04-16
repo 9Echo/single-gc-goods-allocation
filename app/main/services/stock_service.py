@@ -7,6 +7,8 @@
 1、库存来源是日钢中间库，每20分钟可获取最新库存，并且库存信息跟实际库存有误差
 2、没有修改库存的权限
 """
+from typing import List
+
 from app.main.dao.stock_dao import select_stock
 from app.main.entity.stock import Stock
 import copy
@@ -37,7 +39,7 @@ def get_stock():
     return stock_list
 
 
-def deal_stock():
+def deal_stock() -> List[Stock]:
     """
     处理库存数据 将数据都分为32吨及以下的标准
     Args:
@@ -117,4 +119,3 @@ def update_stock_task():
 
 
 deal_stock()
-
