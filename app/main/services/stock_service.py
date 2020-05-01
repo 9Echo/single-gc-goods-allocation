@@ -12,22 +12,18 @@ from typing import List
 from app.main.dao.stock_dao import select_stock
 from app.main.entity.stock import Stock
 import copy
-import traceback
 
 
 def get_stock():
     """
-    根据车辆属性获取库存
-    包括，城市、区县、品种、是否运输外库
+    获取库存
     :param vehicle:
     :return: 库存
     """
     """
     步骤：
-    提取车辆条件
-    提取redis中保存的库存
-    筛选库存并返回
-    
+    1 读取Excel，省内1  0点库存明细和省内2、3及连云港库存两个sheet页
+    2 数据合并
     """
     # 获取库存
     datas = select_stock()
@@ -41,14 +37,18 @@ def get_stock():
 
 def deal_stock() -> List[Stock]:
     """
-    处理库存数据 将数据都分为32吨及以下的标准
-    Args:
 
-    Returns:
-
-    Raise:
-
+    :return:
     """
+    """
+        步骤：
+        1 调用get_stock(),获取库存列表
+        2 将可发重量+=需开单重量合并，可发件数+=需开单件数合并，
+        若需短溢重量>0,减去相应的件数和重量，若品名为窄带，将可发件数=窄带捆包数,若品名为开平板，品名=if出库仓库包含P 西区开平板 else 老区开平板
+        3 过滤掉可发重量或可发件数或窄带捆包数<=0的数据
+        4 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
+        5 得到新的库存列表，返回
+        """
     deal_data = []
     stock_list = get_stock()
     for stock in stock_list:
@@ -87,35 +87,7 @@ def deal_stock() -> List[Stock]:
     return deal_data
 
 
-def subtract_stock(goods_list):
-    """
-    扣减redis库存
-    :param goods_list:
-    :return:
-    """
 
-
-def restore_stock(goods_list):
-    """
-    还原redis库存
-    :param goods_list:
-    :return:
-    """
-
-
-def update_stock_task():
-    """
-    定时更新redis库存，时间间隔20分钟，或监听最新库存刷新
-    :return:
-    """
-    """
-    if中间表方式获取库存：
-    设定每小时预估库存刷新完毕的时间点
-    将库存覆盖到redis
-    if消息队列方式：
-    监听订阅库存消息
-    将库存覆盖到redis
-    """
 
 
 deal_stock()
