@@ -29,109 +29,60 @@ def dispatch() -> List[LoadTask]:
     """
 
     load_task_id = 0
-    # 根据车辆条件获取库存
-    end_point_stock_list_dict: Dict[str, List[Stock]] = dict()
-    result_list: List[LoadTask] = list()
+    load_task_list = list()
+    # 库存信息获取
     stock_list: List[Stock] = stock_service.deal_stock()
-    for i in copy.copy(stock_list):
-        if 31000 <= i.CANSENDWEIGHT <= 33000:
-            pass
-    for i in stock_list:
-        end_point_stock_list_dict.setdefault(i.end_point, []).append(i)
-    # 过滤库存，调用算法进行配货
-    for k, v in end_point_stock_list_dict.items():
-        load_task_list: List[LoadTask] = goods_filter(k, v)
-        result_list.extend(load_task_list)
-    return result_list
+    # 标载车次列表
+    standard_stock_list = list(
+        filter(lambda x: x.CANSENDWEIGH >= ModelConfig.RG_MIN_WEIGHT, stock_list))
+    # 普通车次列表
+    general_stock_list = list(
+        filter(lambda x: x.CANSENDWEIGH < ModelConfig.RG_MIN_WEIGHT, stock_list))
+    # 标载车次拼凑一装一卸小件货物
+    for standard_stock in standard_stock_list:
+        # 可拼车列表
+        compose_list = list()
+        # 车次剩余载重
+        surplus_weight = ModelConfig.RG_MAX_WEIGHT - standard_stock.CANSENDWEIGHT
+        # 筛选符合拼车条件的库存列表
+        temp_list = list(filter(lambda x: x.DELIWAREHOUSE == standard_stock.DELIWAREHOUSE
+                                          and x.DETAILADDRESS == standard_stock.DETAILADDRESS
+                                          and x.CANSENDWEIGH <= surplus_weight
+                                          and x.COMMODITYNAME in ModelConfig.RG_COMMODITY_GROUP.get(
+            standard_stock.COMMODITYNAME), general_stock_list))
+        # 如果有，按照surplus_weight为背包上限进行匹配
+        if temp_list:
+            compose_list = goods_filter(standard_stock, temp_list, surplus_weight)
+        # 生成车次数据
+        load_task_list.extend(create_load_task(compose_list + [standard_stock], load_task_id))
 
 
-def goods_filter(end_point: str, stock_list: List) -> List[LoadTask]:
+def goods_filter(stock: Stock, general_stock_list: List[Stock], surplus_weight: int) -> List[Stock]:
     """
-    :param end_point:
-    :param stock_list:
+    背包过滤方法
+    :param surplus_weight:
+    :param general_stock_list:
+    :param stock:
     :return:
     """
-    surplus_list: List[Stock] = list()
-    load_task_result: List[LoadTask] = list()
-    name_stock_list_dict: Dict[str, List[Stock]] = dict()
-    for stock in stock_list:
-        name_stock_list_dict.setdefault(stock.prod_kind_price_out, []).append(stock)
-    for prod, prod_stock_list in name_stock_list_dict.items():
-        while prod_stock_list:
-            weight_list = ([item.CANSENDWEIGHT for item in prod_stock_list])
-            value_list = copy.deepcopy(weight_list)
-            result_index_list = pulp_solve.pulp_pack(weight_list, None, value_list, ModelConfig.RG_MAX_WEIGHT)
-            if ModelConfig.RG_MAX_WEIGHT - 1000 <= sum([prod_stock_list[r].CANSENDWEIGHT for r in result_index_list]) \
-                    <= ModelConfig.RG_MAX_WEIGHT:
-                load_task = LoadTask()
-                for index in sorted(result_index_list, reverse=True):
-                    load_task.city = prod_stock_list[index].CITY
-                    load_task.end_point = end_point
-                    load_task.weight += prod_stock_list[index].CANSENDWEIGHT
-                    load_task.items.append(prod_stock_list[index])
-                    prod_stock_list.pop(index)
-                load_task_result.append(load_task)
-            else:
-                break
-        if prod_stock_list:
-            surplus_list.extend(prod_stock_list)
-    load_task_result.extend(limit_stock(surplus_list))
+    compose_list = list()
+    weight_list = ([item.CANSENDWEIGHT for item in general_stock_list])
+    value_list = copy.deepcopy(weight_list)
+    result_index_list = pulp_solve.pulp_pack(weight_list, None, value_list, surplus_weight)
+    for index in sorted(result_index_list, reverse=True):
+        compose_list.append(general_stock_list[index])
+        general_stock_list.pop(index)
     # 数据返回
-    return load_task_result
-
-
-def limit_stock(stock_list: List[Stock]) -> List[LoadTask]:
-    """
-
-    :param stock_list:
-    :return:
-    """
-    load_task_list: List[LoadTask] = list()
-    while stock_list:
-        stock_list.sort(key=lambda x: x.end_point)
-        total_weight: float = 0
-        load_task = LoadTask()
-        load_task_list.append(load_task)
-        for i in copy.copy(stock_list):
-            total_weight += i.CANSENDWEIGHT
-            if total_weight <= ModelConfig.RG_MAX_WEIGHT:
-                load_task.items.append(i)
-                load_task.end_point = i.end_point
-                load_task.weight += i.CANSENDWEIGHT
-                stock_list.remove(i)
-                if total_weight > ModelConfig.RG_MAX_WEIGHT - 500:
-                    break
-            else:
-                item, new_item = split_item(i, total_weight - ModelConfig.RG_MAX_WEIGHT)
-                if item.CANSENDWEIGHT > 0:
-                    load_task.items.append(item)
-                    load_task.end_point = i.end_point
-                    load_task.weight += i.CANSENDWEIGHT
-                stock_list.remove(item)
-                stock_list.insert(0, new_item)
-                break
-    return load_task_list
-
-
-def split_item(item: Stock, delta_weight: float) -> Tuple[Stock, Stock]:
-    """
-
-    :param item:
-    :param delta_weight:
-    :return:
-    """
-    new_cunt: int = math.ceil(delta_weight / item.CANSENDWEIGHT * item.CANSENDNUMBER)
-    new_weight: float = new_cunt * (item.CANSENDWEIGHT / item.CANSENDNUMBER)
-
-    new_item = copy.deepcopy(item)
-    new_item.CANSENDWEIGHT = new_weight
-    new_item.CANSENDNUMBER = new_cunt
-    item.CANSENDWEIGHT = item.CANSENDWEIGHT - new_weight
-    item.CANSENDNUMBER = item.CANSENDNUMBER - new_cunt
-    return item, new_item
+    return compose_list
 
 
 def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
+    """
+    车次创建方法
+    :param stock_list:
+    :param load_task_id:
+    :return:
+    """
     total_weight = sum(i.CANSENDWEIGHT for i in stock_list)
     load_task_id += 1
     load_task_list = list()
