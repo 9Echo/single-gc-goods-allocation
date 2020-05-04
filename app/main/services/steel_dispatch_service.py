@@ -59,6 +59,7 @@ def dispatch() -> List[LoadTask]:
 
 def goods_filter(stock: Stock, general_stock_list: List[Stock], surplus_weight: int) -> List[Stock]:
     """
+    背包过滤方法
     :param surplus_weight:
     :param general_stock_list:
     :param stock:
@@ -75,58 +76,13 @@ def goods_filter(stock: Stock, general_stock_list: List[Stock], surplus_weight: 
     return compose_list
 
 
-def limit_stock(stock_list: List[Stock]) -> List[LoadTask]:
-    """
-
-    :param stock_list:
-    :return:
-    """
-    load_task_list: List[LoadTask] = list()
-    while stock_list:
-        stock_list.sort(key=lambda x: x.end_point)
-        total_weight: float = 0
-        load_task = LoadTask()
-        load_task_list.append(load_task)
-        for i in copy.copy(stock_list):
-            total_weight += i.CANSENDWEIGHT
-            if total_weight <= ModelConfig.RG_MAX_WEIGHT:
-                load_task.items.append(i)
-                load_task.end_point = i.end_point
-                load_task.weight += i.CANSENDWEIGHT
-                stock_list.remove(i)
-                if total_weight > ModelConfig.RG_MAX_WEIGHT - 500:
-                    break
-            else:
-                item, new_item = split_item(i, total_weight - ModelConfig.RG_MAX_WEIGHT)
-                if item.CANSENDWEIGHT > 0:
-                    load_task.items.append(item)
-                    load_task.end_point = i.end_point
-                    load_task.weight += i.CANSENDWEIGHT
-                stock_list.remove(item)
-                stock_list.insert(0, new_item)
-                break
-    return load_task_list
-
-
-def split_item(item: Stock, delta_weight: float) -> Tuple[Stock, Stock]:
-    """
-
-    :param item:
-    :param delta_weight:
-    :return:
-    """
-    new_cunt: int = math.ceil(delta_weight / item.CANSENDWEIGHT * item.CANSENDNUMBER)
-    new_weight: float = new_cunt * (item.CANSENDWEIGHT / item.CANSENDNUMBER)
-
-    new_item = copy.deepcopy(item)
-    new_item.CANSENDWEIGHT = new_weight
-    new_item.CANSENDNUMBER = new_cunt
-    item.CANSENDWEIGHT = item.CANSENDWEIGHT - new_weight
-    item.CANSENDNUMBER = item.CANSENDNUMBER - new_cunt
-    return item, new_item
-
-
 def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
+    """
+    车次创建方法
+    :param stock_list:
+    :param load_task_id:
+    :return:
+    """
     total_weight = sum(i.CANSENDWEIGHT for i in stock_list)
     load_task_id += 1
     load_task_list = list()
