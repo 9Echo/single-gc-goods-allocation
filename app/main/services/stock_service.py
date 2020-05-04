@@ -9,10 +9,8 @@
 """
 # from typing import List
 # from app.main.dao.stock_dao import select_stock
-# from app.main.entity.stock import Stock
-# import copy
+from app.main.entity.stock import Stock
 import pandas as pd
-import math
 
 
 def get_stock():
@@ -54,6 +52,10 @@ def deal_stock():
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
+    # 存放stock的结果
+    stock_list = []
+    # 存放dataframe的结果
+    result = pd.DataFrame()
     # 获取库存
     df_stock = get_stock()
     # 根据公式，计算实际可发重量，实际可发件数
@@ -70,16 +72,35 @@ def deal_stock():
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
     # 筛选出不为0的数据
-    deal_stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    for index, row in deal_stock1.iteritems():
-        print(row)
-
-
-
-
-
-
-    return deal_stock1
+    stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    for i, j in stock.iterrows():
+        # 33000kg能放几件
+        num = 33000 // j["件重"]
+        # 以下为33吨至少放的下一件的情况
+        if num < 1:
+            continue
+        elif num >= j["实际可发件数"]:
+            result = result.append(j, ignore_index=True)
+        else:
+            # 能分几组33吨出来
+            group_num = j["实际可发件数"] // num
+            # 余几件
+            left_num = j["实际可发件数"] % num
+            copy_j = j
+            copy_j1 = j
+            copy_j["实际可发件数"] = num
+            copy_j["实际可发重量"] = j["件重"] * num
+            copy_j1["实际可发件数"] = left_num
+            copy_j1["实际可发重量"] = j["件重"] * left_num
+            result = result.append(copy_j1, ignore_index=True)
+            for q in range(int(group_num)):
+                result = result.append(copy_j, ignore_index=True)
+    result = rename_pd(result)
+    dic = result.to_dict(orient="record")
+    for record in dic:
+        stock = Stock(record)
+        stock_list.append(stock)
+    return stock_list
 #     deal_data = []
 #     stock_list = get_stock()
 #     for stock in stock_list:
@@ -118,5 +139,41 @@ def deal_stock():
 #     return deal_data
 
 
-a = deal_stock()
-print(a)
+def rename_pd(dataframe):
+    """
+    更改列名
+    Args:
+        dataframe: dataframe数据
+
+    Returns:
+
+    Raise:
+
+    """
+    dataframe.rename(index=str,
+                     columns={
+                         "发货通知单": "Delivery",
+                         "订单号": "Order",
+                         "优先发运": "Priority",
+                         "收货用户": "Consumer",
+                         "品名名称": "Small_product_name",
+                         "品名": "Big_product_name",
+                         "牌号": "mark",
+                         "规格": "specs",
+                         "出库仓库": "Warehouse_out",
+                         "省份": "Province",
+                         "城市": "City",
+                         "终点": "End_point",
+                         "物流公司类型": "Logistics",
+                         "包装形式": "Pack_form",
+                         "卸货地址": "Address",
+                         "最新挂单时间": "Latest_order_time",
+                         "合同未发总重量": "Unissued_contract",
+                     },
+                     inplace=True)
+    return dataframe
+
+
+if __name__ == "__main__":
+   a = deal_stock()
+   print(a)
