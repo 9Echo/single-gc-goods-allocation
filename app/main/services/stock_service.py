@@ -9,6 +9,8 @@
 """
 # from typing import List
 # from app.main.dao.stock_dao import select_stock
+import copy
+
 from app.main.entity.stock import Stock
 import pandas as pd
 
@@ -73,6 +75,7 @@ def deal_stock():
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
     # 筛选出不为0的数据
     stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    print("分货之前总重量：{}".format(stock["实际可发重量"].sum()))
     for i, j in stock.iterrows():
         # 33000kg能放几件
         num = 33000 // j["件重"]
@@ -86,8 +89,8 @@ def deal_stock():
             group_num = j["实际可发件数"] // num
             # 余几件
             left_num = j["实际可发件数"] % num
-            copy_j = j
-            copy_j1 = j
+            copy_j = copy.deepcopy(j)
+            copy_j1 = copy.deepcopy(j)
             copy_j["实际可发件数"] = num
             copy_j["实际可发重量"] = j["件重"] * num
             copy_j1["实际可发件数"] = left_num
@@ -96,6 +99,8 @@ def deal_stock():
             for q in range(int(group_num)):
                 result = result.append(copy_j, ignore_index=True)
     result = rename_pd(result)
+    print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
+    # return result
     dic = result.to_dict(orient="record")
     for record in dic:
         stock = Stock(record)
@@ -169,6 +174,10 @@ def rename_pd(dataframe):
                          "卸货地址": "Address",
                          "最新挂单时间": "Latest_order_time",
                          "合同未发总重量": "Unissued_contract",
+                         "实际可发重量": "Actual_weight",
+                         "实际可发件数": "Actual_number",
+                         "件重": "Piece_weight",
+                         "入库仓库": "Warehouse_in"
                      },
                      inplace=True)
     return dataframe
@@ -176,4 +185,5 @@ def rename_pd(dataframe):
 
 if __name__ == "__main__":
    a = deal_stock()
-   print(a)
+   for i in a:
+       print(i.Actual_weight)

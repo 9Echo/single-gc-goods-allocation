@@ -58,7 +58,7 @@ class DevelopmentConfig(Config):
     """
     # Mysql配置，可选（不使用时可删除）
     MYSQL_HOST = '172.16.110.156'
-    MYSQL_PORT = 3307
+    MYSQL_PORT = 3306
     MYSQL_USER = 'v3dev_user'
     MYSQL_PASSWD = 'JTcztee829#bv'
     MYSQL_DB = 'db_trans_plan'
