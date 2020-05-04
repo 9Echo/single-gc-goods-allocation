@@ -70,7 +70,7 @@ def deal_stock():
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("p")), ["品名"]] = ["西区开平板"]
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("p") == False), ["品名"]] = ["老区开平板"]
     deal_stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    print(deal_stock1)
+    return deal_stock1
 #     deal_data = []
 #     stock_list = get_stock()
 #     for stock in stock_list:

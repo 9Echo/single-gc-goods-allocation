@@ -50,4 +50,5 @@ def select_stock():
     return cursor.fetchall()
 
 
-
+if __name__ == "__main__":
+    print(select_stock())
