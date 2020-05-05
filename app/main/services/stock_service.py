@@ -89,14 +89,14 @@ def deal_stock():
             group_num = j["实际可发件数"] // num
             # 余几件
             left_num = j["实际可发件数"] % num
-            copy_j = copy.deepcopy(j)
             copy_j1 = copy.deepcopy(j)
-            copy_j["实际可发件数"] = num
-            copy_j["实际可发重量"] = j["件重"] * num
             copy_j1["实际可发件数"] = left_num
             copy_j1["实际可发重量"] = j["件重"] * left_num
             result = result.append(copy_j1, ignore_index=True)
             for q in range(int(group_num)):
+                copy_j = copy.deepcopy(j)
+                copy_j["实际可发件数"] = num
+                copy_j["实际可发重量"] = j["件重"] * num
                 result = result.append(copy_j, ignore_index=True)
     result = rename_pd(result)
     print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
