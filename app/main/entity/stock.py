@@ -10,6 +10,7 @@ class Stock(BaseEntity):
     """
 
     def __init__(self, stock=None):
+        self.stock_id = None
         self.Delivery = None   # 发货通知单
         self.Order = None  # 订单号
         self.Priority = None   # 优先发运
