@@ -2,15 +2,8 @@
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
 
-"""
-库存管理局限：
-1、库存来源是日钢中间库，每20分钟可获取最新库存，并且库存信息跟实际库存有误差
-2、没有修改库存的权限
-"""
-# from typing import List
-# from app.main.dao.stock_dao import select_stock
-import copy
 
+import copy
 from app.main.entity.stock import Stock
 import pandas as pd
 
@@ -121,42 +114,6 @@ def deal_stock():
         num.Stock_id = count
         count += 1
     return stock_list
-#     deal_data = []
-#     stock_list = get_stock()
-#     for stock in stock_list:
-#         # 将str的件数转化为整数
-#         CANSENDNUMBER = int(stock.CANSENDNUMBER)
-#         # 将str的可发重量先转化为浮点型*1000在四舍五入后转为整数 千克
-#         CANSENDWEIGHT = int(round(float(stock.CANSENDWEIGHT) * 1000))
-#         if float(stock.CANSENDWEIGHT) <= 32.0:
-#             stock_copy = copy.deepcopy(stock)
-#             stock_copy.CANSENDWEIGHT = CANSENDWEIGHT
-#             stock_copy.CANSENDNUMBER = CANSENDNUMBER
-#             deal_data.append(stock_copy)
-#         else:
-#             # 件重是千克单位
-#             per_weight = CANSENDWEIGHT / CANSENDNUMBER
-#             # 32吨最多能有几件向下取整
-#             num = 32000 // per_weight
-#             if num == 0:
-#                 continue
-#             # CANSENDNUMBER一共可以分几组
-#             group_num = int(CANSENDNUMBER // num)
-#             # 余数
-#             remainder = CANSENDNUMBER % num
-#             if group_num > 0:
-#                 for j in range(group_num):
-#                     stock_copy = copy.deepcopy(stock)
-#                     stock_copy.CANSENDWEIGHT = int(round(per_weight * num))
-#                     stock_copy.CANSENDNUMBER = int(num)
-#                     deal_data.append(stock_copy)
-#             if remainder == 0:
-#                 continue
-#             stock_copy = copy.deepcopy(stock)
-#             stock_copy.CANSENDWEIGHT = int(round(per_weight * remainder))
-#             stock_copy.CANSENDNUMBER = int(remainder)
-#             deal_data.append(stock_copy)
-#     return deal_data
 
 
 def rename_pd(dataframe):
