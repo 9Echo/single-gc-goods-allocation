@@ -75,7 +75,7 @@ def deal_stock():
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
     # 筛选出不为0的数据
     stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    print("分货之前总重量：{}".format(stock["实际可发重量"].sum()))
+    # print("分货之前总重量：{}".format(stock["实际可发重量"].sum()))
     for i, j in stock.iterrows():
         # 33000kg能放几件
         num = 33000 // j["件重"]
@@ -92,19 +92,34 @@ def deal_stock():
             copy_j1 = copy.deepcopy(j)
             copy_j1["实际可发件数"] = left_num
             copy_j1["实际可发重量"] = j["件重"] * left_num
+            copy_j = copy.deepcopy(j)
+            copy_j["实际可发件数"] = num
+            copy_j["实际可发重量"] = j["件重"] * num
             result = result.append(copy_j1, ignore_index=True)
             for q in range(int(group_num)):
-                copy_j = copy.deepcopy(j)
-                copy_j["实际可发件数"] = num
-                copy_j["实际可发重量"] = j["件重"] * num
                 result = result.append(copy_j, ignore_index=True)
     result = rename_pd(result)
-    print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
+    # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
     for record in dic:
         stock = Stock(record)
+        # 使用数字代替优先级 0 表示最优先，以此类推
+        if stock.Priority == "客户催货":
+            stock.Priority = 0
+        elif stock.Priority == "超期清理":
+            stock.Priority = 1
+        else:
+            stock.Priority = 2
+        # 添加到stock_list列表中去
         stock_list.append(stock)
+    # 按照优先发运和最新挂单时间排序
+    stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time), reverse=False)
+    count = 1
+    # 为排序的stock对象赋Id
+    for num in stock_list:
+        num.Stock_id = count
+        count += 1
     return stock_list
 #     deal_data = []
 #     stock_list = get_stock()
@@ -178,12 +193,23 @@ def rename_pd(dataframe):
                          "实际可发件数": "Actual_number",
                          "件重": "Piece_weight",
                          "入库仓库": "Warehouse_in"
+
                      },
                      inplace=True)
     return dataframe
 
 
 if __name__ == "__main__":
-   a = deal_stock()
-   for i in a:
-       print(i.Actual_weight)
+    a = deal_stock()
+    # k = False
+    # for i in a:
+    #     if i.Delivery == "F2003310270" and i.Actual_weight > 30000:
+    #         i.Actual_weight = 1
+    #         for j in a:
+    #             if j.Delivery == "F2003310270":
+    #                 print(j.Actual_weight)
+    #         k = True
+    #     if k:
+    #         break
+    for i in a:
+        print(i.Stock_id, i.Priority, i.Latest_order_time)
