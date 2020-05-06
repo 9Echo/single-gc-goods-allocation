@@ -60,7 +60,8 @@ def deal_stock():
     df_stock = get_stock()
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
-    df_stock["实际可发件数"] = int(df_stock["可发件数"] + df_stock["需开单件数"])
+    df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
+    df_stock["实际可发件数"] = df_stock["实际可发件数"].astype("int")
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[df_stock["品名"] == "窄带", ["实际可发件数"]] = df_stock["窄带捆包数"]
     # 根据公式计算件重
@@ -95,7 +96,8 @@ def deal_stock():
             copy_j = copy.deepcopy(j)
             copy_j["实际可发件数"] = num
             copy_j["实际可发重量"] = j["件重"] * num
-            result = result.append(copy_j1, ignore_index=True)
+            if left_num:
+                result = result.append(copy_j1, ignore_index=True)
             for q in range(int(group_num)):
                 result = result.append(copy_j, ignore_index=True)
     result = rename_pd(result)
@@ -176,4 +178,4 @@ if __name__ == "__main__":
     #     if k:
     #         break
     for i in a:
-        print(i.Stock_id, i.Priority, i.Latest_order_time)
+        print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight)
