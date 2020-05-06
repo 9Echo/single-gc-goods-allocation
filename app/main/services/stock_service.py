@@ -106,6 +106,8 @@ def deal_stock():
     for record in dic:
         stock = Stock(record)
         stock.Actual_number = int(stock.Actual_number)
+        stock.Actual_weight = int(stock.Actual_weight)
+        stock.Piece_weight = int(stock.Piece_weight)
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
             stock.Priority = 0
