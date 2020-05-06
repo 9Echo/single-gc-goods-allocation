@@ -77,11 +77,15 @@ def deal_stock():
     stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     result = result.append(stock1)
     result = rename_pd(result)
+    # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
+    # return result
     dic = result.to_dict(orient="record")
     for record in dic:
         stock = Stock(record)
         stock.Actual_number = int(stock.Actual_number)
-        # 根据优先发运和最新挂单时间排序 0 为最优 而后为1 最差是2
+        stock.Actual_weight = int(stock.Actual_weight)
+        stock.Piece_weight = int(stock.Piece_weight)
+        # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
             stock.Priority = 0
         elif stock.Priority == "超期清理":
