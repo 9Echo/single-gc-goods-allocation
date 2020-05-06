@@ -4,8 +4,9 @@ from app.main.entity.load_task import LoadTask
 from app.main.services.steel_dispatch_service import dispatch
 
 def generate_excel():
-    load_task_list=dispatch()
-    # load_task_list2=[]
+    # load_task_list=dispatch()
+    load_task_list2=[]
+    load_task_list=[]
     load_task1= LoadTask()
     load_task2= LoadTask()
     load_task1.city='泰安市'
@@ -46,9 +47,19 @@ def generate_excel():
     load_task_list.append(load_task2)
     df=pd.DataFrame(load_task_list)
     df.to_excel("sheet3.xls")
-    # group_df1=df.groupby(['city', 'end_point','commodity'])['weight'].agg(['sum']).reset_index()
-    # group_df2=df.groupby(['city', 'end_point','commodity'])['load_task_id'].nunique().reset_index()
-    # # print(group_df)
+    df.drop_duplicates(subset=['load_task_id'],keep='first',inplace=True)
+    group_df1=df.groupby(['city', 'end_point']).agg({'total_weight':['sum'],'load_task_id':['count']}).reset_index()
+    group_df1.rename(index=str,
+                     columns={
+                         "city": "城市",
+                         "end_point": "区县",
+                         "commodity": "品种",
+                         "sum": "总重量",
+                         "count": "车次数"
+                     },
+                     inplace=True)
+
+    print(group_df1)
 
 
 if __name__ == '__main__':
