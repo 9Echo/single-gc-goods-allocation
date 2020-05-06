@@ -61,7 +61,6 @@ def deal_stock():
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
     df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
-    df_stock["实际可发件数"] = df_stock["实际可发件数"].astype("int")
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[df_stock["品名"] == "窄带", ["实际可发件数"]] = df_stock["窄带捆包数"]
     # 根据公式计算件重
@@ -106,6 +105,7 @@ def deal_stock():
     dic = result.to_dict(orient="record")
     for record in dic:
         stock = Stock(record)
+        stock.Actual_number = int(stock.Actual_number)
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
             stock.Priority = 0
@@ -178,4 +178,4 @@ if __name__ == "__main__":
     #     if k:
     #         break
     for i in a:
-        print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight)
+        print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)
