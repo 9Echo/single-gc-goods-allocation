@@ -53,7 +53,6 @@ def generate_excel():
                      columns={
                          "city": "城市",
                          "end_point": "区县",
-                         "commodity": "品种",
                          "sum": "总重量",
                          "count": "车次数"
                      },
