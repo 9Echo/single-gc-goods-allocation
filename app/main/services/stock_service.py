@@ -74,47 +74,42 @@ def deal_stock():
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
     # 筛选出不为0的数据
-    stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    # print("分货之前总重量：{}".format(stock["实际可发重量"].sum()))
-    for i, j in stock.iterrows():
-        # 33000kg能放几件
-        num = 33000 // j["件重"]
-        # 以下为33吨至少放的下一件的情况
-        if num < 1:
-            continue
-        elif num >= j["实际可发件数"]:
-            result = result.append(j, ignore_index=True)
-        else:
-            # 能分几组33吨出来
-            group_num = j["实际可发件数"] // num
-            # 余几件
-            left_num = j["实际可发件数"] % num
-            copy_j1 = copy.deepcopy(j)
-            copy_j1["实际可发件数"] = left_num
-            copy_j1["实际可发重量"] = j["件重"] * left_num
-            if left_num:
-                result = result.append(copy_j1, ignore_index=True)
-            for q in range(int(group_num)):
-                copy_j = copy.deepcopy(j)
-                copy_j["实际可发件数"] = num
-                copy_j["实际可发重量"] = j["件重"] * num
-                result = result.append(copy_j, ignore_index=True)
+    stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    result = result.append(stock1)
     result = rename_pd(result)
-    # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
-    # return result
     dic = result.to_dict(orient="record")
     for record in dic:
         stock = Stock(record)
         stock.Actual_number = int(stock.Actual_number)
-        # 使用数字代替优先级 0 表示最优先，以此类推
+        # 根据优先发运和最新挂单时间排序 0 为最优 而后为1 最差是2
         if stock.Priority == "客户催货":
             stock.Priority = 0
         elif stock.Priority == "超期清理":
             stock.Priority = 1
         else:
             stock.Priority = 2
-        # 添加到stock_list列表中去
-        stock_list.append(stock)
+        # 按33000将货物分成若干份
+        num = 33000 // stock.Piece_weight
+        # 首先去除 件重大于33000的货物
+        if num < 1:
+            continue
+        # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
+        elif num > stock.Actual_number:
+            stock_list.append(stock)
+        # 最后不满足则拆分
+        else:
+            group_num = stock.Actual_number // num
+            left_num = stock.Actual_number % num
+            copy_1 = copy.deepcopy(stock)
+            copy_1.Actual_number = int(left_num)
+            copy_1.Actual_weight = left_num * stock.Piece_weight
+            if left_num:
+                stock_list.append(copy_1)
+            for q in range(int(group_num)):
+                copy_2 = copy.deepcopy(stock)
+                copy_2.Actual_weight = num * stock.Piece_weight
+                copy_2.Actual_number = int(num)
+                stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
     stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time), reverse=False)
     count = 1
