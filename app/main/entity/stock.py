@@ -10,10 +10,10 @@ class Stock(BaseEntity):
     """
 
     def __init__(self, stock=None):
-        self.stock_id = None
-        self.Delivery = None   # 发货通知单
+        self.Stock_id = None  # Id
+        self.Delivery = None  # 发货通知单
         self.Order = None  # 订单号
-        self.Priority = None   # 优先发运
+        self.Priority = None  # 优先发运
         self.Consumer = None  # 收货用户
         self.Small_product_name = None  # 品名名称
         self.Big_product_name = None  # 品名
@@ -25,13 +25,13 @@ class Stock(BaseEntity):
         self.End_point = None  # 终点
         self.Logistics = None  # 物流公司类型
         self.Pack_form = None  # 包装形式
-        self.Address = None   # 卸货地址
+        self.Address = None  # 卸货地址
         self.Latest_order_time = None  # 最新挂单时间
         self.Unissued_contract = None  # 合同未发总重量
-        self.Actual_weight = None  # 实际可发重量
-        self.Actual_number = None  # 实际可发件数
-        self.Piece_weight = None  # 件重
-        self.Warehouse_in = None   # 入库仓库
+        self.Actual_weight: int = 0  # 实际可发重量
+        self.Actual_number: int = 0  # 实际可发件数
+        self.Piece_weight: int = 0  # 件重
+        self.Warehouse_in = None  # 入库仓库
 
         if stock:
             self.set_attr(stock)

@@ -59,7 +59,7 @@ def dispatch() -> List[LoadTask]:
         # general_stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time))
         general_stock_dict = dict()
         for i in general_stock_list:
-            general_stock_dict[i.stock_id] = i
+            general_stock_dict[i.Stock_id] = i
         first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, load_task_id)
         second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, load_task_id)
         surplus_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, load_task_id)
@@ -78,7 +78,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     result_dict = dict()
     while general_stock_dict:
         # 取第一个
-        stock_id = general_stock_dict.keys()[0]
+        stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
         # 拆分成件的stock列表
         temp_list = list()
@@ -98,11 +98,11 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         # 选中的列表
         compose_list = goods_filter(temp_list, surplus_weight)
         if compose_list and (
-                sum(x.Actual_weight for x in compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MAX_WEIGHT:
+                sum(x.Actual_weight for x in compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
             temp_dict = dict()
             # 选中的stock按照stock_id分类
             for compose_stock in compose_list:
-                temp_dict.setdefault(compose_stock.stock_id, []).append(compose_stock)
+                temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
             new_compose_list = list()
             for k, v in temp_dict.items():
                 # 获取被选中的原始stock
@@ -132,7 +132,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
     result_dict = dict()
     while general_stock_dict:
         # 取第一个
-        stock_id = general_stock_dict.keys()[0]
+        stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
         # 拆分成件的stock列表
         temp_list = list()
@@ -157,11 +157,11 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                 compose_list = goods_filter(temp_list, surplus_weight)
                 if compose_list and (
                         sum(x.Actual_weight for x in
-                            compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MAX_WEIGHT:
+                            compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
                     temp_dict = dict()
                     # 选中的stock按照stock_id分类
                     for compose_stock in compose_list:
-                        temp_dict.setdefault(compose_stock.stock_id, []).append(compose_stock)
+                        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
                     new_compose_list = list()
                     for k, v in temp_dict.items():
                         # 获取被选中的原始stock
@@ -192,7 +192,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     result_dict = dict()
     while general_stock_dict:
         # 取第一个
-        stock_id = general_stock_dict.keys()[0]
+        stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
         # 拆分成件的stock列表
         temp_list = list()
@@ -218,11 +218,11 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                 compose_list = goods_filter(temp_list, surplus_weight)
                 if compose_list and (
                         sum(x.Actual_weight for x in
-                            compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MAX_WEIGHT:
+                            compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
                     temp_dict = dict()
                     # 选中的stock按照stock_id分类
                     for compose_stock in compose_list:
-                        temp_dict.setdefault(compose_stock.stock_id, []).append(compose_stock)
+                        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
                     new_compose_list = list()
                     for k, v in temp_dict.items():
                         # 获取被选中的原始stock
@@ -293,5 +293,4 @@ def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
 
 if __name__ == '__main__':
     result = dispatch()
-    stad_list = list(filter(lambda x: x.weight > 30000, result))
-    print(len(stad_list))
+    print(result)
