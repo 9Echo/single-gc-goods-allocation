@@ -1,7 +1,6 @@
 import pandas as pd
-from typing import List, Dict, Any, Tuple
+from typing import List
 from app.main.entity.load_task import LoadTask
-from app.main.services.steel_dispatch_service import dispatch
 from app.utils.get_static_path import get_path
 
 
@@ -33,7 +32,6 @@ def generate_excel(load_task_list: List[LoadTask]):
 
     df1.to_excel(writer, sheet_name="分货车次汇总")
     writer.save()
-    print(df1)
 
 
 if __name__ == '__main__':

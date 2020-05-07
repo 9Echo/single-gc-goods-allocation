@@ -142,8 +142,11 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         filter_dict = {k: v for k, v in general_stock_dict.items() if v.Address == temp_stock.Address
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
-        warehouse_out_set = {i.Warehouse_out for i in filter_dict.values()}
-        for warehouse_out in warehouse_out_set:
+        warehouse_out_list = list()
+        for i in filter_dict.values():
+            if i.Warehouse_out not in warehouse_out_list:
+                warehouse_out_list.append(i.Warehouse_out)
+        for warehouse_out in warehouse_out_list:
             if warehouse_out != temp_stock.Warehouse_out:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Warehouse_out == warehouse_out or v.Warehouse_out == temp_stock.Warehouse_out}
@@ -175,7 +178,8 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
-                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_3))
+                    load_task_list.extend(
+                        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_3))
                     is_error = False
                     break
         if is_error:
@@ -204,8 +208,11 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                        v.Warehouse_out == temp_stock.Warehouse_out and v.End_point == temp_stock.End_point
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
-        address_set = {i.Address for i in filter_dict.values()}
-        for address in address_set:
+        address_list = list()
+        for i in filter_dict.values():
+            if i.Address not in address_list:
+                address_list.append(i.Address)
+        for address in address_list:
             if address != temp_stock.Address:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Address == address or v.Address == temp_stock.Address}
@@ -237,7 +244,8 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
-                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_2))
+                    load_task_list.extend(
+                        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_2))
                     is_error = False
                     break
         if is_error:
