@@ -273,8 +273,8 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     for i in stock_list:
         load_task = LoadTask()
         load_task.load_task_id = load_task_id
-        load_task.total_weight = total_weight
-        load_task.weight = i.Actual_weight
+        load_task.total_weight = total_weight / 1000
+        load_task.weight = i.Actual_weight / 1000
         load_task.count = i.Actual_number
         load_task.city = i.City
         load_task.end_point = i.End_point
@@ -286,8 +286,12 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.outstock_code = i.Warehouse_out
         load_task.instock_code = i.Warehouse_in
         load_task.load_task_type = load_task_type
-        if i.Priority:
-            load_task.priority = 1
+        if i.Priority == 0:
+            load_task.priority = "客户催货"
+        elif i.Priority == 1:
+            load_task.priority = "超期库存"
+        else:
+            load_task.priority = ""
         load_task_list.append(load_task)
     return load_task_list
 
