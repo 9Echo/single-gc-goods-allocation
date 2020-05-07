@@ -4,6 +4,8 @@
 
 
 import copy
+import os
+from datetime import datetime
 
 from app.main.entity.stock import Stock
 import pandas as pd
@@ -91,6 +93,8 @@ def deal_stock():
         stock.Actual_number = int(stock.Actual_number)
         stock.Actual_weight = int(stock.Actual_weight)
         stock.Piece_weight = int(stock.Piece_weight)
+        if datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= datetime.now():
+            stock.Priority = "客户催货"
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
             stock.Priority = 0
@@ -159,7 +163,7 @@ def rename_pd(dataframe):
                          "包装形式": "Pack_form",
                          "卸货地址": "Address",
                          "最新挂单时间": "Latest_order_time",
-                         "合同未发总重量": "Unissued_contract",
+                         "合同约定交货日期": "Delivery_date",
                          "实际可发重量": "Actual_weight",
                          "实际可发件数": "Actual_number",
                          "件重": "Piece_weight",
