@@ -64,7 +64,7 @@ def dispatch() -> List[LoadTask]:
         surplus_stock_dict = third_deal_general_stock(second_result_dict, load_task_list)
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
-            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_1))
+            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_4))
         return load_task_list
 
 

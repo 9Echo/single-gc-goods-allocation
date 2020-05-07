@@ -9,6 +9,7 @@ class LoadTask(BaseEntity):
     type_1 = "一装一卸"
     type_2 = "一装两卸"
     type_3 = "两装一卸"
+    type_4 = "甩货"
 
     def __init__(self):
         self.load_task_id = None  # 所属车次号
