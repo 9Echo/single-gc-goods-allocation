@@ -10,6 +10,7 @@ from app.main.services import stock_service
 from app.main.services import generate_excel_service
 from app.task.pulp_task.analysis.rules import pulp_solve
 from app.utils.generate_id import TrainId
+from app.utils.get_static_path import get_path
 from model_config import ModelConfig
 
 
@@ -65,7 +66,7 @@ def dispatch() -> List[LoadTask]:
         surplus_stock_dict = third_deal_general_stock(second_result_dict, load_task_list)
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
-            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_1))
+            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_4))
         return load_task_list
 
 
@@ -274,8 +275,8 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     for i in stock_list:
         load_task = LoadTask()
         load_task.load_task_id = load_task_id
-        load_task.total_weight = total_weight
-        load_task.weight = i.Actual_weight
+        load_task.total_weight = total_weight / 1000
+        load_task.weight = i.Actual_weight / 1000
         load_task.count = i.Actual_number
         load_task.city = i.City
         load_task.end_point = i.End_point
@@ -287,8 +288,14 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.outstock_code = i.Warehouse_out
         load_task.instock_code = i.Warehouse_in
         load_task.load_task_type = load_task_type
-        if i.Priority:
-            load_task.priority = 1
+        load_task.big_commodity = i.Big_product_name
+        load_task.receive_address = i.Address
+        if i.Priority == 0:
+            load_task.priority = "客户催货"
+        elif i.Priority == 1:
+            load_task.priority = "超期库存"
+        else:
+            load_task.priority = ""
         load_task_list.append(load_task)
     return load_task_list
 
