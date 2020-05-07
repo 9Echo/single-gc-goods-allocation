@@ -7,6 +7,7 @@ from typing import List, Dict
 from app.main.entity.load_task import LoadTask
 from app.main.entity.stock import Stock
 from app.main.services import stock_service
+from app.main.services import generate_excel_service
 from app.task.pulp_task.analysis.rules import pulp_solve
 from app.utils.generate_id import TrainId
 from app.utils.get_static_path import get_path
@@ -305,5 +306,6 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
 
 if __name__ == '__main__':
     result = dispatch()
-    df = pd.DataFrame([item.as_dict() for item in result])
-    df.to_excel(get_path("result.xls"))
+    # df = pd.DataFrame([item.as_dict() for item in result])
+    generate_excel_service.generate_excel(result)
+    # df.to_excel("result.xls")
