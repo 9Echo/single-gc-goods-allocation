@@ -52,7 +52,7 @@ def dispatch() -> List[LoadTask]:
         if filter_list:
             compose_list = goods_filter(filter_list, surplus_weight)
         # 生成车次数据
-        load_task_list.extend(create_load_task(compose_list + [standard_stock], TrainId.get_id()))
+        load_task_list.extend(create_load_task(compose_list + [standard_stock], TrainId.get_id(), LoadTask.type_1))
     if general_stock_list:
         # priority_list = list(filter(lambda x: x.Priority in ModelConfig.RG_PRIORITY, general_stock_list))
         # general_stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time))
@@ -64,7 +64,7 @@ def dispatch() -> List[LoadTask]:
         surplus_stock_dict = third_deal_general_stock(second_result_dict, load_task_list)
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
-            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1))
+            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_1))
         return load_task_list
 
 
@@ -115,7 +115,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                 if general_stock.Actual_number == 0:
                     general_stock_dict.pop(k)
             # 生成车次数据
-            load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id()))
+            load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_1))
         else:
             result_dict[stock_id] = temp_stock
     return result_dict
@@ -172,7 +172,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
-                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id()))
+                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_3))
                     is_error = False
                     break
         if is_error:
@@ -232,7 +232,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
-                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id()))
+                    load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_2))
                     is_error = False
                     break
         if is_error:
@@ -258,11 +258,12 @@ def goods_filter(general_stock_list: List[Stock], surplus_weight: int) -> List[S
     return compose_list
 
 
-def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
+def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> List[LoadTask]:
     """
     车次创建方法
     :param stock_list:
     :param load_task_id:
+    :param load_task_type:
     :return:
     """
     total_weight = sum(i.Actual_weight for i in stock_list)
@@ -284,6 +285,9 @@ def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
         load_task.sgsign = i.mark
         load_task.outstock_code = i.Warehouse_out
         load_task.instock_code = i.Warehouse_in
+        load_task.load_task_type = load_task_type
+        if i.Priority:
+            load_task.priority = 1
         load_task_list.append(load_task)
     return load_task_list
 
@@ -291,4 +295,4 @@ def create_load_task(stock_list: List[Stock], load_task_id) -> List[LoadTask]:
 if __name__ == '__main__':
     result = dispatch()
     df = pd.DataFrame([item.as_dict() for item in result])
-
+    df.to_excel("result.xls")
