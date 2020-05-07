@@ -4,7 +4,6 @@
 
 
 import copy
-import os
 
 from app.main.entity.stock import Stock
 import pandas as pd
