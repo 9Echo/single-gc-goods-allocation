@@ -286,6 +286,8 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.outstock_code = i.Warehouse_out
         load_task.instock_code = i.Warehouse_in
         load_task.load_task_type = load_task_type
+        load_task.big_commodity = i.Big_product_name
+        load_task.receive_address = i.Address
         if i.Priority == 0:
             load_task.priority = "客户催货"
         elif i.Priority == 1:
