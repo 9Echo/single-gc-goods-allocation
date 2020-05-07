@@ -7,8 +7,10 @@ from typing import List, Dict
 from app.main.entity.load_task import LoadTask
 from app.main.entity.stock import Stock
 from app.main.services import stock_service
+from app.main.services import generate_excel_service
 from app.task.pulp_task.analysis.rules import pulp_solve
 from app.utils.generate_id import TrainId
+from app.utils.get_static_path import get_path
 from model_config import ModelConfig
 
 
@@ -48,14 +50,12 @@ def dispatch() -> List[LoadTask]:
                                             and x.Actual_weight <= surplus_weight
                                             and x.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(
             standard_stock.Big_product_name), general_stock_list))
-        # 如果有，按照surplus_weight为背包上限进行匹配
+        # 如果有，按照surplus_weight为约束进行匹配
         if filter_list:
             compose_list = goods_filter(filter_list, surplus_weight)
         # 生成车次数据
         load_task_list.extend(create_load_task(compose_list + [standard_stock], TrainId.get_id(), LoadTask.type_1))
     if general_stock_list:
-        # priority_list = list(filter(lambda x: x.Priority in ModelConfig.RG_PRIORITY, general_stock_list))
-        # general_stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time))
         general_stock_dict = dict()
         for i in general_stock_list:
             general_stock_dict[i.Stock_id] = i
@@ -64,13 +64,15 @@ def dispatch() -> List[LoadTask]:
         surplus_stock_dict = third_deal_general_stock(second_result_dict, load_task_list)
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
-            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_1))
+            load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTask.type_4))
         return load_task_list
 
 
 def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask]) -> Dict[int, Stock]:
     """
-    优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
+    一装一卸筛选器
+    :param general_stock_dict:
+    :param load_task_list:
     :return:
     """
     result_dict = dict()
@@ -123,7 +125,9 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
 
 def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask]) -> Dict[int, Stock]:
     """
-    优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
+    两装一卸（同区仓库）筛选器
+    :param general_stock_dict:
+    :param load_task_list:
     :return:
     """
     result_dict = dict()
@@ -182,7 +186,9 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
 
 def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask]) -> Dict[int, Stock]:
     """
-    优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
+    一装两卸筛选器
+    :param general_stock_dict:
+    :param load_task_list:
     :return:
     """
     result_dict = dict()
@@ -300,5 +306,6 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
 
 if __name__ == '__main__':
     result = dispatch()
-    df = pd.DataFrame([item.as_dict() for item in result])
-    df.to_excel("result.xls")
+    # df = pd.DataFrame([item.as_dict() for item in result])
+    generate_excel_service.generate_excel(result)
+    # df.to_excel("result.xls")
