@@ -27,7 +27,7 @@ class Stock(BaseEntity):
         self.Pack_form = None  # 包装形式
         self.Address = None  # 卸货地址
         self.Latest_order_time = None  # 最新挂单时间
-        self.Unissued_contract = None  # 合同未发总重量
+        self.Delivery_date = None  # 合同约定交货日期
         self.Actual_weight: int = 0  # 实际可发重量
         self.Actual_number: int = 0  # 实际可发件数
         self.Piece_weight: int = 0  # 件重
