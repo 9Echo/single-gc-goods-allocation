@@ -2,11 +2,12 @@ import pandas as pd
 from typing import List, Dict, Any, Tuple
 from app.main.entity.load_task import LoadTask
 from app.main.services.steel_dispatch_service import dispatch
+from app.utils.get_static_path import get_path
 
 
 def generate_excel(load_task_list: List[LoadTask]):
     df = pd.DataFrame([item.as_dict() for item in load_task_list])
-    writer = pd.ExcelWriter("库存.xlsx")
+    writer = pd.ExcelWriter(get_path("分货结果.xlsx"))
     df.to_excel(writer, sheet_name="分货车次明细")
 
     df1 = df.groupby(['city', 'end_point', 'big_commodity']).agg(
