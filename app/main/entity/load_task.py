@@ -9,6 +9,7 @@ class LoadTask(BaseEntity):
     type_1 = "一装一卸"
     type_2 = "一装两卸"
     type_3 = "两装一卸"
+    type_4 = "甩货"
 
     def __init__(self):
         self.load_task_id = None  # 所属车次号
@@ -26,6 +27,8 @@ class LoadTask(BaseEntity):
         self.city = None
         # 区县
         self.end_point = None
+        # 大品种
+        self.big_commodity = None
         # 品种
         self.commodity = None
         # 发货通知单号
@@ -40,3 +43,10 @@ class LoadTask(BaseEntity):
         self.outstock_code = None
         # 入库仓库
         self.instock_code = None
+        # 收货地址
+        self.receive_address = None
+        # 车次吨单价
+        self.price_per_ton = 0
+        # 车次总价
+        self.total_price = 0
+
