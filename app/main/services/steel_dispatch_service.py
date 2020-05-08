@@ -54,7 +54,7 @@ def dispatch() -> List[LoadTask]:
         # 生成车次数据
         load_task_list.extend(create_load_task(compose_list + [standard_stock], TrainId.get_id(), LoadTask.type_1))
     if general_stock_list:
-        general_stock_dict = dict()
+        general_stock_dict: Dict[int, Stock] = dict()
         for i in general_stock_list:
             general_stock_dict[i.Stock_id] = i
         first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list)
@@ -79,8 +79,6 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         # 取第一个
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
-        # 拆分成件的stock列表
-        temp_list = list()
         # 约束
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.Actual_weight
         general_stock_dict.pop(stock_id)
@@ -88,13 +86,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                        v.Warehouse_out == temp_stock.Warehouse_out and v.Address == temp_stock.Address
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
-        # 符合条件的stock拆分到临时列表
-        for i in filter_dict.values():
-            for j in range(i.Actual_number):
-                copy_stock = copy.deepcopy(i)
-                copy_stock.Actual_number = 1
-                copy_stock.Actual_weight = i.Piece_weight
-                temp_list.append(copy_stock)
+        temp_list = split(filter_dict)
         # 选中的列表
         compose_list = goods_filter(temp_list, surplus_weight)
         if compose_list and (
@@ -157,13 +149,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             if warehouse_out != temp_stock.Warehouse_out:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Warehouse_out == warehouse_out or v.Warehouse_out == temp_stock.Warehouse_out}
-                temp_list: List[Stock] = list()
-                for i in temp_dict.values():
-                    for j in range(i.Actual_number):
-                        copy_stock = copy.deepcopy(i)
-                        copy_stock.Actual_number = 1
-                        copy_stock.Actual_weight = i.Piece_weight
-                        temp_list.append(copy_stock)
+                temp_list = split(temp_dict)
                 # 选中的列表
                 compose_list = goods_filter(temp_list, surplus_weight)
                 if compose_list and (
@@ -225,13 +211,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             if warehouse_out != temp_stock.Warehouse_out:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Warehouse_out == warehouse_out or v.Warehouse_out == temp_stock.Warehouse_out}
-                temp_list: List[Stock] = list()
-                for i in temp_dict.values():
-                    for j in range(i.Actual_number):
-                        copy_stock = copy.deepcopy(i)
-                        copy_stock.Actual_number = 1
-                        copy_stock.Actual_weight = i.Piece_weight
-                        temp_list.append(copy_stock)
+                temp_list = split(temp_dict)
                 # 选中的列表
                 compose_list = goods_filter(temp_list, surplus_weight)
                 if compose_list and (
@@ -292,14 +272,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             if address != temp_stock.Address:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Address == address or v.Address == temp_stock.Address}
-                # 拆分成件的stock列表
-                temp_list: List[Stock] = list()
-                for i in temp_dict.values():
-                    for j in range(i.Actual_number):
-                        copy_stock = copy.deepcopy(i)
-                        copy_stock.Actual_number = 1
-                        copy_stock.Actual_weight = i.Piece_weight
-                        temp_list.append(copy_stock)
+                temp_list = split(temp_dict)
                 # 选中的列表
                 compose_list = goods_filter(temp_list, surplus_weight)
                 if compose_list and (
@@ -395,6 +368,23 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
             load_task.priority = ""
         load_task_list.append(load_task)
     return load_task_list
+
+
+def split(temp_dict: Dict[int, Stock]):
+    """
+    拆分到单件
+    :param temp_dict:
+    :return:
+    """
+    # 拆分成件的stock列表
+    temp_list: List[Stock] = list()
+    for i in temp_dict.values():
+        for j in range(i.Actual_number):
+            copy_stock = copy.deepcopy(i)
+            copy_stock.Actual_number = 1
+            copy_stock.Actual_weight = i.Piece_weight
+            temp_list.append(copy_stock)
+    return temp_list
 
 
 if __name__ == '__main__':
