@@ -1,6 +1,6 @@
 # gc-goods-allocation
 
-## 分货项目结构
+## 智能配载项目结构
 
 - app/analysis 建模和分析包 
   - models 模型包
