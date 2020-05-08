@@ -91,26 +91,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         compose_list = goods_filter(temp_list, surplus_weight)
         if compose_list and (
                 sum(x.Actual_weight for x in compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
-            temp_dict = dict()
-            # 选中的stock按照stock_id分类
-            for compose_stock in compose_list:
-                temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
-            new_compose_list = list()
-            for k, v in temp_dict.items():
-                # 获取被选中的原始stock
-                general_stock = general_stock_dict.get(k)
-                stock = v[0]
-                stock.Actual_number = len(v)
-                stock.Actual_weight = len(v) * stock.Piece_weight
-                new_compose_list.append(stock)
-                general_stock.Actual_number -= len(v)
-                general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
-                if stock.Actual_number < 0 or general_stock.Actual_number < 0:
-                    print(stock.Delivery)
-                if general_stock.Actual_number == 0:
-                    general_stock_dict.pop(k)
-            # 生成车次数据
-            load_task_list.extend(create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_1))
+            calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTask.type_1)
         else:
             result_dict[stock_id] = temp_stock
     return result_dict
@@ -155,27 +136,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                 if compose_list and (
                         sum(x.Actual_weight for x in
                             compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
-                    temp_dict = dict()
-                    # 选中的stock按照stock_id分类
-                    for compose_stock in compose_list:
-                        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
-                    new_compose_list = list()
-                    for k, v in temp_dict.items():
-                        # 获取被选中的原始stock
-                        general_stock = general_stock_dict.get(k)
-                        stock = v[0]
-                        stock.Actual_number = len(v)
-                        stock.Actual_weight = len(v) * stock.Piece_weight
-                        new_compose_list.append(stock)
-                        general_stock.Actual_number -= len(v)
-                        general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
-                        if stock.Actual_number < 0 or general_stock.Actual_number < 0:
-                            print(stock.Stock_id)
-                        if general_stock.Actual_number == 0:
-                            general_stock_dict.pop(k)
-                    # 生成车次数据
-                    load_task_list.extend(
-                        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_2))
+                    calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTask.type_2)
                     is_error = False
                     break
         if is_error:
@@ -217,27 +178,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                 if compose_list and (
                         sum(x.Actual_weight for x in
                             compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
-                    temp_dict = dict()
-                    # 选中的stock按照stock_id分类
-                    for compose_stock in compose_list:
-                        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
-                    new_compose_list = list()
-                    for k, v in temp_dict.items():
-                        # 获取被选中的原始stock
-                        general_stock = general_stock_dict.get(k)
-                        stock = v[0]
-                        stock.Actual_number = len(v)
-                        stock.Actual_weight = len(v) * stock.Piece_weight
-                        new_compose_list.append(stock)
-                        general_stock.Actual_number -= len(v)
-                        general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
-                        if stock.Actual_number < 0 or general_stock.Actual_number < 0:
-                            print(stock.Stock_id)
-                        if general_stock.Actual_number == 0:
-                            general_stock_dict.pop(k)
-                    # 生成车次数据
-                    load_task_list.extend(
-                        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_3))
+                    calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTask.type_3)
                     is_error = False
                     break
         if is_error:
@@ -278,32 +219,44 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                 if compose_list and (
                         sum(x.Actual_weight for x in
                             compose_list) + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
-                    temp_dict = dict()
-                    # 选中的stock按照stock_id分类
-                    for compose_stock in compose_list:
-                        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
-                    new_compose_list = list()
-                    for k, v in temp_dict.items():
-                        # 获取被选中的原始stock
-                        general_stock = general_stock_dict.get(k)
-                        stock = v[0]
-                        stock.Actual_number = len(v)
-                        stock.Actual_weight = len(v) * stock.Piece_weight
-                        new_compose_list.append(stock)
-                        general_stock.Actual_number -= len(v)
-                        general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
-                        if stock.Actual_number < 0 or general_stock.Actual_number < 0:
-                            print(stock.Delivery)
-                        if general_stock.Actual_number == 0:
-                            general_stock_dict.pop(k)
-                    # 生成车次数据
-                    load_task_list.extend(
-                        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), LoadTask.type_4))
+                    calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTask.type_4)
                     is_error = False
                     break
         if is_error:
             result_dict[stock_id] = temp_stock
     return result_dict
+
+
+def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask],
+              temp_stock: Stock, load_task_type: str):
+    """
+    重量计算
+    :param compose_list:
+    :param general_stock_dict:
+    :param load_task_list:
+    :param temp_stock:
+    :param load_task_type:
+    :return:
+    """
+    temp_dict = dict()
+    # 选中的stock按照stock_id分类
+    for compose_stock in compose_list:
+        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
+    new_compose_list = list()
+    for k, v in temp_dict.items():
+        # 获取被选中的原始stock
+        general_stock = general_stock_dict.get(k)
+        stock = v[0]
+        stock.Actual_number = len(v)
+        stock.Actual_weight = len(v) * stock.Piece_weight
+        new_compose_list.append(stock)
+        general_stock.Actual_number -= len(v)
+        general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
+        if general_stock.Actual_number == 0:
+            general_stock_dict.pop(k)
+    # 生成车次数据
+    load_task_list.extend(
+        create_load_task(new_compose_list + [temp_stock], TrainId.get_id(), load_task_type))
 
 
 def goods_filter(general_stock_list: List[Stock], surplus_weight: int) -> List[Stock]:
