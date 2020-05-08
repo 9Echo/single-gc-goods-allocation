@@ -34,3 +34,13 @@ if hasattr(active_config, 'MYSQL_HOST'):
         passwd=active_config.ODS_MYSQL_PASSWD,
         db=active_config.ODS_MYSQL_DB,
         charset=active_config.ODS_MYSQL_CHARSET)
+
+    db_pool_db_sys = PooledDB(
+        pymysql,
+        2,
+        host=active_config.PRO_MYSQL_HOST,
+        port=active_config.PRO_MYSQL_PORT,
+        user=active_config.PRO_MYSQL_USER,
+        passwd=active_config.PRO_MYSQL_PASSWD,
+        db=active_config.PRO_MYSQL_DB,
+        charset=active_config.PRO_MYSQL_CHARSET)
