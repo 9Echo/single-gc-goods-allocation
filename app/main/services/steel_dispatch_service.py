@@ -360,6 +360,11 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     :return:
     """
     total_weight = sum(i.Actual_weight for i in stock_list)
+    all_product = set([i.Big_product_name for i in stock_list])
+    remark = []
+    for product in all_product:
+        remark += ModelConfig.RG_VARIETY_VEHICLE[product]
+    remark = set(remark)
     if total_weight > 33000:
         print(total_weight)
     load_task_list = list()
@@ -381,6 +386,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.load_task_type = load_task_type
         load_task.big_commodity = i.Big_product_name
         load_task.receive_address = i.Address
+        load_task.remark = ",".join(remark)
         if i.Priority == 0:
             load_task.priority = "客户催货"
         elif i.Priority == 1:

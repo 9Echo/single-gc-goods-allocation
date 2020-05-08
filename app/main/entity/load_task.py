@@ -50,4 +50,6 @@ class LoadTask(BaseEntity):
         self.price_per_ton = 0
         # 车次总价
         self.total_price = 0
+        # 注释
+        self.remark = None
 
