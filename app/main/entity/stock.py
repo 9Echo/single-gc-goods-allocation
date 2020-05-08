@@ -32,6 +32,9 @@ class Stock(BaseEntity):
         self.Actual_number: int = 0  # 实际可发件数
         self.Piece_weight: int = 0  # 件重
         self.Warehouse_in = None  # 入库仓库
+        self.longitude = None   # 经度
+        self.latitude = None   # 纬度
+        self.Address2 = None    # 合并卸货地址
 
         if stock:
             self.set_attr(stock)

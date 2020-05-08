@@ -9,7 +9,7 @@ from datetime import datetime
 
 from app.main.entity.stock import Stock
 import pandas as pd
-
+from app.main.db_pool import db_pool_db_sys
 from app.utils.get_static_path import get_path
 
 
@@ -53,12 +53,32 @@ def deal_stock():
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
+    sql = """
+        select address as '卸货地址',longitude, latitude
+        from t_point
+    """
+    sql1 = """
+        select address as '卸货地址2',longitude as '经度', latitude as '纬度'
+        from t_point
+        where longitude is not null
+        And latitude is not null
+        GROUP BY longitude, latitude
+    """
+    data = pd.read_sql(sql, db_pool_db_sys.connection())
+    data2 = pd.read_sql(sql1, db_pool_db_sys.connection())
     # 存放stock的结果
     stock_list = []
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
     df_stock = get_stock()
+    df_stock["index"] = df_stock.index
+    df_stock = df_stock.set_index("卸货地址").join(data.set_index("卸货地址"), on="卸货地址", how="left")
+    df_stock["卸货地址"] = df_stock.index
+    df_stock["经度"] = df_stock["longitude"]
+    df_stock["纬度"] = df_stock["latitude"]
+    df_stock = df_stock.set_index(["纬度", "经度"]).join(data2.set_index(["纬度", "经度"]), on=["纬度", "经度"], how="left")
+    df_stock = df_stock.set_index(["index"])
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
     df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
@@ -85,6 +105,8 @@ def deal_stock():
     stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     result = result.append(stock1)
     result = rename_pd(result)
+    result.loc[result["Address2"].isnull(), ["Address2"]] = result["Address"]
+    result.to_excel("1.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
@@ -93,6 +115,8 @@ def deal_stock():
         stock.Actual_number = int(stock.Actual_number)
         stock.Actual_weight = int(stock.Actual_weight)
         stock.Piece_weight = int(stock.Piece_weight)
+        if not stock.Address2:
+            stock.Address2 = stock.Address
         if datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= datetime.now():
             stock.Priority = "客户催货"
         # 使用数字代替优先级 0 表示最优先，以此类推
@@ -167,7 +191,8 @@ def rename_pd(dataframe):
                          "实际可发重量": "Actual_weight",
                          "实际可发件数": "Actual_number",
                          "件重": "Piece_weight",
-                         "入库仓库": "Warehouse_in"
+                         "入库仓库": "Warehouse_in",
+                         "卸货地址2": "Address2"
 
                      },
                      inplace=True)
