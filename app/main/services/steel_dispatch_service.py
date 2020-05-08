@@ -2,7 +2,6 @@
 # Description: 钢铁配货服务
 # Created: shaoluyu 2020/03/12
 import copy
-import pandas as pd
 from typing import List, Dict
 from app.main.entity.load_task import LoadTask
 from app.main.entity.stock import Stock
@@ -113,6 +112,8 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                 new_compose_list.append(stock)
                 general_stock.Actual_number -= len(v)
                 general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
+                if stock.Actual_number < 0 or general_stock.Actual_number < 0:
+                    print(stock.Delivery)
                 if general_stock.Actual_number == 0:
                     general_stock_dict.pop(k)
             # 生成车次数据
@@ -135,7 +136,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
         # 拆分成件的stock列表
-        temp_list = list()
+
         is_error = True
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.Actual_weight
         general_stock_dict.pop(stock_id)
@@ -150,6 +151,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             if warehouse_out != temp_stock.Warehouse_out:
                 temp_dict = {k: v for k, v in filter_dict.items() if
                              v.Warehouse_out == warehouse_out or v.Warehouse_out == temp_stock.Warehouse_out}
+                temp_list = list()
                 for i in temp_dict.values():
                     for j in range(i.Actual_number):
                         copy_stock = copy.deepcopy(i)
@@ -175,6 +177,8 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                         new_compose_list.append(stock)
                         general_stock.Actual_number -= len(v)
                         general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
+                        if stock.Actual_number < 0 or general_stock.Actual_number < 0:
+                            print(stock.Stock_id)
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
@@ -241,6 +245,8 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                         new_compose_list.append(stock)
                         general_stock.Actual_number -= len(v)
                         general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
+                        if stock.Actual_number < 0 or general_stock.Actual_number < 0:
+                            print(stock.Delivery)
                         if general_stock.Actual_number == 0:
                             general_stock_dict.pop(k)
                     # 生成车次数据
