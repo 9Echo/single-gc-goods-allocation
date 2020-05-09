@@ -208,7 +208,7 @@ class TestConfig(Config):
 class UatConfig(Config):
     """测试环境配置
     """
-# Mysql配置，可选（不使用时可删除）
+    # Mysql配置，可选（不使用时可删除）
     MYSQL_HOST = '47.99.118.183'
     MYSQL_PORT = 3306
     MYSQL_USER = 'v3dev_user'
@@ -275,11 +275,12 @@ class UatConfig(Config):
     #         'args': (3, 4)  # 任务函数参数
     #     },
     # }
+
 
 class ProductionConfig(Config):
     """生产环境配置
     """
-# Mysql配置，可选（不使用时可删除）
+    # Mysql配置，可选（不使用时可删除）
     MYSQL_HOST = '47.99.118.183'
     MYSQL_PORT = 3306
     MYSQL_USER = 'v3dev_user'
@@ -346,6 +347,7 @@ class ProductionConfig(Config):
     #         'args': (3, 4)  # 任务函数参数
     #     },
     # }
+
 
 # 设置环境配置映射
 config = {
