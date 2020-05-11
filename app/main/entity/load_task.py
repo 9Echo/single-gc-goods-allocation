@@ -6,11 +6,6 @@ from app.main.entity.base_entity import BaseEntity
 
 class LoadTask(BaseEntity):
     """车次类"""
-    type_1 = "一装一卸"
-    type_2 = "两装一卸(同区仓库)"
-    type_3 = "两装一卸(非同区仓库)"
-    type_4 = "一装两卸"
-    type_5 = "甩货"
 
     def __init__(self):
         self.load_task_id = None  # 所属车次号
