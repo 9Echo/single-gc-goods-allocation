@@ -8,6 +8,7 @@ def generate_excel(load_task_list: List[LoadTask]):
     df = pd.DataFrame([item.as_dict() for item in load_task_list])
     writer = pd.ExcelWriter(get_path("分货结果.xlsx"))
     # 去除甩货
+    raw_df=df
     df=df[df['load_task_id']>=1]
 
     df1 = df.groupby(['city', 'end_point', 'big_commodity']).agg(
@@ -34,48 +35,59 @@ def generate_excel(load_task_list: List[LoadTask]):
     # 增加新的一列车次数
     df1['load_num'] = load_list
     df1['load_advice'] = load_advice_list
+    # 更改字段名
+    df=rename_load_result(raw_df)
+    df1=rename_collect_result(df1)
 
-
-
-
-    df.rename( columns={
-                   "load_task_id": "车次号",
-                   "priority": "优先级",
-                   "load_task_type": "装卸类型",
-                   "total_weight": "总重量",
-                   "weight": "重量",
-                   "count": "件数",
-                   "city": "城市",
-                   "end_point": "区县",
-                   "big_commodity": "大品种",
-                   "commodity": "小品种",
-                   "notice_num": "发货通知单号",
-                   "oritem_num": "订单号",
-                   "standard": "规格",
-                   "sgsign": "材质",
-                   "outstock_code": "出库仓库",
-                   "instock_code": "入库仓库",
-                   "receive_address": "卸货地址",
-                   "price_per_ton": "吨公里/价格",
-                   "total_price": "总价格",
-                   "remark": "备注(配件)",
-               },
-               inplace=True)
-
-    df1.rename(columns={
-                   "city": "城市",
-                   "end_point": "区县",
-                   "big_commodity": "大品种",
-                   "weight": "总重量",
-                   "load_advice": "混装配载建议",
-                   "load_num": "区县总车次数"
-               },
-               inplace=True)
     df.to_excel(writer, sheet_name="分货车次明细")
     df1.to_excel(writer, sheet_name="分货车次汇总")
     writer.save()
 
+def rename_load_result(dataframe):
+    """
+      分货结果字段重命名
+      :param dataframe:
+      :return:dataframe
+      """
+    dataframe=dataframe.rename(columns={
+        "load_task_id": "车次号",
+        "priority": "优先级",
+        "load_task_type": "装卸类型",
+        "total_weight": "总重量",
+        "weight": "重量",
+        "count": "件数",
+        "city": "城市",
+        "end_point": "区县",
+        "big_commodity": "大品种",
+        "commodity": "小品种",
+        "notice_num": "发货通知单号",
+        "oritem_num": "订单号",
+        "standard": "规格",
+        "sgsign": "材质",
+        "outstock_code": "出库仓库",
+        "instock_code": "入库仓库",
+        "receive_address": "卸货地址",
+        "price_per_ton": "吨公里/价格",
+        "total_price": "总价格",
+        "remark": "备注(配件)",
+    })
+    return  dataframe
 
+def rename_collect_result(dataframe):
+    """
+      分货汇总结果重命名
+      :param dataframe:
+      :return:dataframe
+      """
+    dataframe=dataframe.rename(columns={
+        "city": "城市",
+        "end_point": "区县",
+        "big_commodity": "大品种",
+        "weight": "总重量",
+        "load_advice": "混装配载建议",
+        "load_num": "区县总车次数"
+    })
+    return dataframe
 def drop_duplicate_list(joint_str_list :List):
     """
       二位数组内部去除重复数组
