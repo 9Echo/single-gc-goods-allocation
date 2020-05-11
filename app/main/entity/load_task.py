@@ -47,4 +47,6 @@ class LoadTask(BaseEntity):
         self.total_price = 0
         # 注释
         self.remark = None
+        # 父Id
+        self.parent_load_task_id = None
 

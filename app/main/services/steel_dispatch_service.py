@@ -64,6 +64,7 @@ def dispatch() -> List[LoadTask]:
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
             load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
+        # load_task_list = merge_result(load_task_list)
         return load_task_list
 
 
@@ -357,6 +358,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.big_commodity = i.Big_product_name
         load_task.receive_address = i.Address
         load_task.remark = ",".join(remark)
+        load_task.parent_load_task_id = i.Parent_stock_id
         if i.Priority == 0:
             load_task.priority = "客户催货"
         elif i.Priority == 1:
@@ -397,6 +399,35 @@ def dispatch_filter(general_stock_dict, load_task_list, dispatch_type):
     third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type)
     surplus_stock_dict = fourth_deal_general_stock(third_stock_dict, load_task_list, dispatch_type)
     return surplus_stock_dict
+
+
+def merge_result(load_task_list: list):
+    """合并结果中load_task_id相同的信息
+
+    Args:
+        load_task_list: load_task的列表
+    Returns:
+
+    Raise:
+
+    """
+    result_dic = {}
+    last_result = []
+    for task in load_task_list:
+        if (task.load_task_id, task.parent_load_task_id) not in result_dic:
+            result_dic[(task.load_task_id, task.parent_load_task_id)] = []
+        result_dic[(task.load_task_id, task.parent_load_task_id)].append(task)
+    for res in result_dic:
+        # 同一个(load_task_id,parent_load_task_id)的load_task列表
+        res_list = result_dic[res]
+        if len(res_list) > 1:
+            sum_list = [(i.weight, i.count) for i in res_list]
+            sum_weight = sum(i[0] for i in sum_list)
+            sum_count = sum(i[1] for i in sum_list)
+            res_list[0].weight = sum_weight
+            res_list[0].count = sum_count
+        last_result.append(res_list[0])
+    return last_result
 
 
 if __name__ == '__main__':
