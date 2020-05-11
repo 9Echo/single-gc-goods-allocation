@@ -27,7 +27,6 @@ def dispatch() -> List[LoadTask]:
     4 按照优先级将待选集与目标数据利用背包进行匹配，使重量最大化，匹配成功（总量在[31,33]）生成车次，标注是否急发和类型，匹配不成功放入甩货列表，
     优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
     """
-
     load_task_list = list()
     # 库存信息获取
     stock_list: List[Stock] = stock_service.deal_stock()
@@ -64,7 +63,7 @@ def dispatch() -> List[LoadTask]:
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
             load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
-        return merge_result(load_task_list)
+    return merge_result(load_task_list)
 
 
 def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
