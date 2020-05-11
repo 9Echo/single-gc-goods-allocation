@@ -27,7 +27,7 @@ def generate_excel(load_task_list: List[LoadTask]):
                    "end_point": "区县",
                    "big_commodity": "大品种",
                    "weight": "总重量",
-                   "load_num": "车次数"
+                   "load_num": "区县总车次数"
                },
                inplace=True)
 
