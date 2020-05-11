@@ -413,9 +413,6 @@ def merge_result(load_task_list: list):
     last_result = []
     for task in load_task_list:
         result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
-        # if (task.load_task_id, task.parent_load_task_id) not in result_dic:
-        #     result_dic[(task.load_task_id, task.parent_load_task_id)] = []
-        # result_dic[(task.load_task_id, task.parent_load_task_id)].append(task)
     for res in result_dic:
         # 同一个(load_task_id,parent_load_task_id)的load_task列表
         res_list = result_dic[res]
