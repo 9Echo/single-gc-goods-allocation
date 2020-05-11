@@ -35,6 +35,7 @@ class Stock(BaseEntity):
         self.longitude = None   # 经度
         self.latitude = None   # 纬度
         self.Address2 = None    # 合并卸货地址
+        self.Parent_stock_id = None     # 父Id
 
         if stock:
             self.set_attr(stock)
