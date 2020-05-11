@@ -101,7 +101,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                     calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                     continue
             else:
-                if value >= ModelConfig.RG_MIN_WEIGHT:
+                if value >= min_weight:
                     calculate(compose_list, general_stock_dict, load_task_list, None, LoadTaskType.TYPE_1.value)
                     continue
         general_stock_dict.pop(stock_id, 404)
@@ -156,7 +156,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_2.value)
                             is_error = False
@@ -211,7 +211,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_3.value)
                             is_error = False
@@ -265,7 +265,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_4.value)
                             is_error = False
