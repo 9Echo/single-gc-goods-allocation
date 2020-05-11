@@ -58,12 +58,13 @@ def deal_stock():
         from t_point
     """
     sql1 = """
-        select address as '卸货地址2',longitude as '经度', latitude as '纬度'
+        select address as '卸货地址2',longitude, latitude 
         from t_point
         where longitude is not null
         And latitude is not null
         GROUP BY longitude, latitude
     """
+
     data = pd.read_sql(sql, db_pool_db_sys.connection())
     data2 = pd.read_sql(sql1, db_pool_db_sys.connection())
     # 存放stock的结果
@@ -72,13 +73,8 @@ def deal_stock():
     result = pd.DataFrame()
     # 获取库存
     df_stock = get_stock()
-    df_stock["index"] = df_stock.index
-    df_stock = df_stock.set_index("卸货地址").join(data.set_index("卸货地址"), on="卸货地址", how="left")
-    df_stock["卸货地址"] = df_stock.index
-    df_stock["经度"] = df_stock["longitude"]
-    df_stock["纬度"] = df_stock["latitude"]
-    df_stock = df_stock.set_index(["纬度", "经度"]).join(data2.set_index(["纬度", "经度"]), on=["纬度", "经度"], how="left")
-    df_stock = df_stock.set_index(["index"])
+    df_stock = pd.merge(df_stock, data, on="卸货地址", how="left")
+    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
     df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
@@ -99,14 +95,14 @@ def deal_stock():
     # 区分西老区的开平板
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
-    # 筛选出不为0的数据
     # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
+    # 筛选出不为0的数据
     stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     result = result.append(stock1)
     result = rename_pd(result)
     result.loc[result["Address2"].isnull(), ["Address2"]] = result["Address"]
-    result.to_excel("1.xls")
+    result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
