@@ -35,7 +35,7 @@ def get_stock():
     data_path = get_path('sheet1.xls')
     df_stock1 = pd.read_excel(data_path, 1)
     df_stock3 = pd.read_excel(data_path, 4)
-    return pd.concat([df_stock1, df_stock3], ignore_index=True)
+    return pd.concat([df_stock1, df_stock3], ignore_index=True, sort=True)
 
 
 def deal_stock():
@@ -90,7 +90,7 @@ def deal_stock():
     # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
     df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
     df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-                -df_stock["需短溢重量"] // df_stock["件重"])
+            -df_stock["需短溢重量"] // df_stock["件重"])
     # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
     # 区分西老区的开平板
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
@@ -116,7 +116,8 @@ def deal_stock():
         stock.Piece_weight = int(stock.Piece_weight)
         if not stock.Address2:
             stock.Address2 = stock.Address
-        if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (datetime.datetime.now() + datetime.timedelta(days=-2)):
+        if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
+                datetime.datetime.now() + datetime.timedelta(days=-2)):
             stock.Priority = "超期清理"
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
