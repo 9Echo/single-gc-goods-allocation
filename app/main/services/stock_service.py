@@ -102,12 +102,15 @@ def deal_stock():
     result = result.append(stock1)
     result = rename_pd(result)
     result.loc[result["Address2"].isnull(), ["Address2"]] = result["Address"]
-    result.to_excel("3.xls")
+    # result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
+    count_parent = 0
     for record in dic:
+        count_parent += 1
         stock = Stock(record)
+        stock.Parent_stock_id = count_parent
         stock.Actual_number = int(stock.Actual_number)
         stock.Actual_weight = int(stock.Actual_weight)
         stock.Piece_weight = int(stock.Piece_weight)
