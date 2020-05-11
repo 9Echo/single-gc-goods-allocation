@@ -188,7 +188,7 @@ def call_pulp_solve(weight_list, volume_list, value_list, obj_dict, obj_index_li
     while weight_list:
         load_task_id += 1
         # plup求解，得到选中的下标序列
-        result_index_list = pulp_solve.pulp_pack(weight_list, volume_list, value_list, new_max_weight)
+        result_index_list, value = pulp_solve.pulp_pack(weight_list, volume_list, value_list, new_max_weight)
         # 下标减少量
         temp = 0
         for i in result_index_list:
