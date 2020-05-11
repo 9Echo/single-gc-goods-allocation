@@ -94,7 +94,7 @@ def deal_stock():
     # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
     # 区分西老区的开平板
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
-    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
+    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["开平板"]
     # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
     # 筛选出不为0的数据
