@@ -9,6 +9,7 @@ def generate_excel(load_task_list: List[LoadTask]):
     writer = pd.ExcelWriter(get_path("分货结果.xlsx"))
     df.to_excel(writer, sheet_name="分货车次明细")
 
+    df=df[(df['load_task_id']>1)]
     df1 = df.groupby(['city', 'end_point', 'big_commodity']).agg(
         {'weight': 'sum'}).reset_index()
     df2 = df.groupby(['city', 'end_point'])['load_task_id'].nunique().reset_index()
