@@ -399,6 +399,34 @@ def dispatch_filter(general_stock_dict, load_task_list, dispatch_type):
     return surplus_stock_dict
 
 
+def merge_result(load_task_list: list):
+    """合并结果中load_task_id相同的信息
+
+    Args:
+        load_task_list: load_task的列表
+    Returns:
+
+    Raise:
+
+    """
+    result_dic = {}
+    last_result = []
+    for task in load_task_list:
+        if task.load_task_id not in result_dic:
+            result_dic[task.load_task_id] = []
+        result_dic[task.load_task_id].append(task)
+    for res in result_dic:
+        # 同一个load_task_id的load_task列表
+        res_list = result_dic[res]
+        sum_list = [(i.weight, i.count) for i in res_list]
+        sum_weight = sum(i[0] for i in sum_list)
+        sum_count = sum(i[1] for i in sum_list)
+        res_list[0].weight = sum_weight
+        res_list[0].count = sum_count
+        last_result.append(res_list[0])
+    return last_result
+
+
 if __name__ == '__main__':
     result = dispatch()
     generate_excel_service.generate_excel(result)

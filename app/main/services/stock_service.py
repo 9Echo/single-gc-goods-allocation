@@ -5,7 +5,7 @@
 
 import copy
 import os
-from datetime import datetime
+import datetime
 
 from app.main.entity.stock import Stock
 import pandas as pd
@@ -116,8 +116,8 @@ def deal_stock():
         stock.Piece_weight = int(stock.Piece_weight)
         if not stock.Address2:
             stock.Address2 = stock.Address
-        if datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= datetime.now():
-            stock.Priority = "客户催货"
+        if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now() + datetime.timedelta(days=-2)):
+            stock.Priority = "超期清理"
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":
             stock.Priority = 0
