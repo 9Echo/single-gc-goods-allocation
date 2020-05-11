@@ -64,8 +64,7 @@ def dispatch() -> List[LoadTask]:
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
             load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
-        # load_task_list = merge_result(load_task_list)
-        return load_task_list
+        return merge_result(load_task_list)
 
 
 def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
@@ -414,9 +413,10 @@ def merge_result(load_task_list: list):
     result_dic = {}
     last_result = []
     for task in load_task_list:
-        if (task.load_task_id, task.parent_load_task_id) not in result_dic:
-            result_dic[(task.load_task_id, task.parent_load_task_id)] = []
-        result_dic[(task.load_task_id, task.parent_load_task_id)].append(task)
+        result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
+        # if (task.load_task_id, task.parent_load_task_id) not in result_dic:
+        #     result_dic[(task.load_task_id, task.parent_load_task_id)] = []
+        # result_dic[(task.load_task_id, task.parent_load_task_id)].append(task)
     for res in result_dic:
         # 同一个(load_task_id,parent_load_task_id)的load_task列表
         res_list = result_dic[res]
