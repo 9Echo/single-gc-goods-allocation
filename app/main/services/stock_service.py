@@ -162,7 +162,8 @@ def deal_stock():
         stock.Piece_weight = int(stock.Piece_weight)
         if not stock.Address2:
             stock.Address2 = stock.Address
-        if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (datetime.datetime.now() + datetime.timedelta(days=-2)):
+        if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
+                datetime.datetime.now() + datetime.timedelta(days=-2)):
             stock.Priority = "超期清理"
         # 使用数字代替优先级 0 表示最优先，以此类推
         if stock.Priority == "客户催货":

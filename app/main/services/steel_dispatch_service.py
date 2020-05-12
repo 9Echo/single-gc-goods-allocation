@@ -27,7 +27,6 @@ def dispatch() -> List[LoadTask]:
     4 按照优先级将待选集与目标数据利用背包进行匹配，使重量最大化，匹配成功（总量在[31,33]）生成车次，标注是否急发和类型，匹配不成功放入甩货列表，
     优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
     """
-
     load_task_list = list()
     # 库存信息获取
     stock_list: List[Stock] = stock_service.deal_stock()
@@ -59,19 +58,21 @@ def dispatch() -> List[LoadTask]:
         general_stock_dict: Dict[int, Stock] = dict()
         for i in general_stock_list:
             general_stock_dict[i.Stock_id] = i
-        first_surplus_stock_dict = dispatch_filter(general_stock_dict, load_task_list, DispatchType.FIRST)
-        surplus_stock_dict = dispatch_filter(first_surplus_stock_dict, load_task_list, DispatchType.SECOND)
+        first_surplus_stock_dict = dispatch_filter(general_stock_dict, load_task_list, DispatchType.FIRST,
+                                                   ModelConfig.RG_MIN_WEIGHT)
+        surplus_stock_dict = dispatch_filter(first_surplus_stock_dict, load_task_list, DispatchType.SECOND,
+                                             ModelConfig.SECOND_RG_MIN_WEIGHT)
         # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
         if surplus_stock_dict:
             load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
-        # load_task_list = merge_result(load_task_list)
-        return load_task_list
+    return merge_result(load_task_list)
 
 
-def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
-        Dict[int, Stock]:
+def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
+                             min_weight) -> Dict[int, Stock]:
     """
     一装一卸筛选器
+    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -96,11 +97,11 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             # 选中的列表
             compose_list, value = goods_filter(temp_list, surplus_weight)
             if dispatch_type is DispatchType.FIRST:
-                if (value + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
+                if (value + temp_stock.Actual_weight) >= min_weight:
                     calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                     continue
             else:
-                if value >= ModelConfig.RG_MIN_WEIGHT:
+                if value >= min_weight:
                     calculate(compose_list, general_stock_dict, load_task_list, None, LoadTaskType.TYPE_1.value)
                     continue
         general_stock_dict.pop(stock_id, 404)
@@ -108,10 +109,11 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     return result_dict
 
 
-def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
-        Dict[int, Stock]:
+def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
+                              min_weight) -> Dict[int, Stock]:
     """
     两装一卸（同区仓库）筛选器
+    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -148,13 +150,13 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
                     if dispatch_type is DispatchType.FIRST:
-                        if (value + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
+                        if (value + temp_stock.Actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_2.value)
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_2.value)
                             is_error = False
@@ -165,10 +167,11 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
     return result_dict
 
 
-def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
-        Dict[int, Stock]:
+def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
+                             min_weight) -> Dict[int, Stock]:
     """
     两装一卸（非同区仓库）筛选器
+    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -202,13 +205,13 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
                     if dispatch_type is DispatchType.FIRST:
-                        if (value + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
+                        if (value + temp_stock.Actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_3.value)
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_3.value)
                             is_error = False
@@ -219,10 +222,11 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     return result_dict
 
 
-def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type) -> \
-        Dict[int, Stock]:
+def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
+                              min_weight) -> Dict[int, Stock]:
     """
     一装两卸筛选器
+    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -255,13 +259,13 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
                     if dispatch_type is DispatchType.FIRST:
-                        if (value + temp_stock.Actual_weight) >= ModelConfig.RG_MIN_WEIGHT:
+                        if (value + temp_stock.Actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_4.value)
                             is_error = False
                             break
                     else:
-                        if value >= ModelConfig.RG_MIN_WEIGHT:
+                        if value >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, None,
                                       LoadTaskType.TYPE_4.value)
                             is_error = False
@@ -386,18 +390,19 @@ def split(temp_dict: Dict[int, Stock]):
     return temp_list
 
 
-def dispatch_filter(general_stock_dict, load_task_list, dispatch_type):
+def dispatch_filter(general_stock_dict, load_task_list, dispatch_type, min_weight):
     """
 
+    :param min_weight:
     :param general_stock_dict:
     :param load_task_list:
     :param dispatch_type:
     :return:
     """
-    first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, dispatch_type)
-    second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type)
-    third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type)
-    surplus_stock_dict = fourth_deal_general_stock(third_stock_dict, load_task_list, dispatch_type)
+    first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, dispatch_type, min_weight)
+    second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type, min_weight)
+    third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
+    surplus_stock_dict = fourth_deal_general_stock(third_stock_dict, load_task_list, dispatch_type, min_weight)
     return surplus_stock_dict
 
 
@@ -414,9 +419,7 @@ def merge_result(load_task_list: list):
     result_dic = {}
     last_result = []
     for task in load_task_list:
-        if (task.load_task_id, task.parent_load_task_id) not in result_dic:
-            result_dic[(task.load_task_id, task.parent_load_task_id)] = []
-        result_dic[(task.load_task_id, task.parent_load_task_id)].append(task)
+        result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
     for res in result_dic:
         # 同一个(load_task_id,parent_load_task_id)的load_task列表
         res_list = result_dic[res]
