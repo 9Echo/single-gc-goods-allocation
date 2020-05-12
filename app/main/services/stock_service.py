@@ -9,7 +9,7 @@ import datetime
 
 from app.main.entity.stock import Stock
 import pandas as pd
-from app.main.db_pool import db_pool_db_sys
+from app.main.db_pool import db_pool_db_sys, db_pool_ods
 from app.utils.get_static_path import get_path
 
 
@@ -32,10 +32,69 @@ def get_stock():
     #     stock = Stock(data)
     #     stock_list.append(stock)
     # return stock_list
-    data_path = get_path('sheet1.xls')
-    df_stock1 = pd.read_excel(data_path, 1)
-    df_stock3 = pd.read_excel(data_path, 4)
-    return pd.concat([df_stock1, df_stock3], ignore_index=True)
+    sql_old = """
+        SELECT
+            stock_id as id,
+            NOTICENUM as '发货通知单',
+            order_no as '订单号',
+            prior_flag as '优先发运',
+            consignee_name as '收货用户',
+            product_name as '品名名称',
+            material_no as '牌号',
+            spec_desc as '规格',
+            DELIWAREHOUSE as '出库仓库',
+            province_name as '省份',
+            city_name as '城市',
+            end_point_name as '终点',
+            logistics_type as '物流公司类型',
+            PACK as '包装形式',
+            DETAILADDRESS as '卸货地址',
+            new_pending_time as '最新挂单时间',
+            DEVPERIOD as '合同约定交货日期',
+            DELIWARE as '入库仓库'
+        FROM
+            db_dev.ods_outer_rgsd_warehouse_amount_20200509
+    """
+    sql_new = """
+        SELECT
+            stock_id as id,
+            product_name as '品名',
+            actual_number as '实际可发件数',
+            Actual_weight as '实际可发重量',
+            piece_weight as '件重'
+        FROM
+            db_dev.dwd_rgsd_warehouse_amount_20200509
+    """
+    df_old = pd.read_sql(sql_old, db_pool_ods.connection())
+    df_new = pd.read_sql(sql_new, db_pool_ods.connection())
+    df_result = pd.merge(df_old, df_new, on="id", how="right")
+    return df_result
+
+
+def address_latitude_and_longitude():
+    """获取数据表中地址经纬度信息
+
+    Args:
+
+    Returns:
+
+    Raise:
+
+    """
+    sql1 = """
+            select address as '卸货地址',longitude, latitude
+            from t_point
+        """
+    sql2 = """
+            select address as '卸货地址2',longitude, latitude 
+            from t_point
+            where longitude is not null
+            And latitude is not null
+            GROUP BY longitude, latitude
+        """
+    result_1 = pd.read_sql(sql1, db_pool_db_sys.connection())
+    result_2 = pd.read_sql(sql2, db_pool_db_sys.connection())
+    return result_1, result_2
 
 
 def deal_stock():
@@ -53,53 +112,40 @@ def deal_stock():
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
-    sql = """
-        select address as '卸货地址',longitude, latitude
-        from t_point
-    """
-    sql1 = """
-        select address as '卸货地址2',longitude, latitude 
-        from t_point
-        where longitude is not null
-        And latitude is not null
-        GROUP BY longitude, latitude
-    """
-
-    data = pd.read_sql(sql, db_pool_db_sys.connection())
-    data2 = pd.read_sql(sql1, db_pool_db_sys.connection())
+    data1, data2 = address_latitude_and_longitude()
     # 存放stock的结果
     stock_list = []
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
     df_stock = get_stock()
-    df_stock = pd.merge(df_stock, data, on="卸货地址", how="left")
+    df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    # 根据公式，计算实际可发重量，实际可发件数
-    df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
-    df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
-    df_stock["需短溢重量"] = df_stock["需短溢重量"] * 1000
-    # 窄带按捆包数计算，实际可发件数 = 捆包数
-    df_stock.loc[df_stock["品名"] == "窄带", ["实际可发件数"]] = df_stock["窄带捆包数"]
-    # 根据公式计算件重
-    df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
-    df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
-    # print("分货前重量:{}".format(df_stock["实际可发重量"].sum()))
-    # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
-    # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
-    # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
-    df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
-    df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-                -df_stock["需短溢重量"] // df_stock["件重"])
-    # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
-    # 区分西老区的开平板
-    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
-    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
-    # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
-    # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
-    # 筛选出不为0的数据
-    stock1 = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    result = result.append(stock1)
+    # # 根据公式，计算实际可发重量，实际可发件数
+    # df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
+    # df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
+    # df_stock["需短溢重量"] = df_stock["需短溢重量"] * 1000
+    # # 窄带按捆包数计算，实际可发件数 = 捆包数
+    # df_stock.loc[df_stock["品名"] == "窄带", ["实际可发件数"]] = df_stock["窄带捆包数"]
+    # # 根据公式计算件重
+    # df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
+    # df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
+    # # print("分货前重量:{}".format(df_stock["实际可发重量"].sum()))
+    # # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
+    # # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
+    # # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
+    # df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
+    # df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
+    #             -df_stock["需短溢重量"] // df_stock["件重"])
+    # # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
+    # # 区分西老区的开平板
+    # df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
+    # df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["老区开平板"]
+    # # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
+    # # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
+    # # 筛选出不为0的数据
+    df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["Address2"].isnull(), ["Address2"]] = result["Address"]
     # result.to_excel("3.xls")
