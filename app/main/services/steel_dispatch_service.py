@@ -51,6 +51,8 @@ def dispatch() -> List[LoadTask]:
         # 如果有，按照surplus_weight为约束进行匹配
         if filter_list:
             compose_list, value = goods_filter(filter_list, surplus_weight)
+            for stock in compose_list:
+                general_stock_list.remove(stock)
         # 生成车次数据
         load_task_list.extend(
             create_load_task(compose_list + [standard_stock], TrainId.get_id(), LoadTaskType.TYPE_1.value))
