@@ -44,7 +44,7 @@ def dispatch() -> List[LoadTask]:
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - standard_stock.Actual_weight
         # 筛选符合拼车条件的库存列表
         filter_list = list(filter(lambda x: x.Warehouse_out == standard_stock.Warehouse_out
-                                            and x.Address == standard_stock.Address
+                                            and x.Standard_address == standard_stock.Standard_address
                                             and x.Actual_weight <= surplus_weight
                                             and x.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(
             standard_stock.Big_product_name), general_stock_list))
@@ -89,7 +89,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         if dispatch_type is DispatchType.FIRST:
             general_stock_dict.pop(stock_id)
         filter_dict = {k: v for k, v in general_stock_dict.items() if
-                       v.Warehouse_out == temp_stock.Warehouse_out and v.Address == temp_stock.Address
+                       v.Warehouse_out == temp_stock.Warehouse_out and v.Standard_address == temp_stock.Standard_address
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
         if filter_dict:
@@ -133,7 +133,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                 warehouse_out_group = group
         if dispatch_type is DispatchType.FIRST:
             general_stock_dict.pop(stock_id)
-        filter_dict = {k: v for k, v in general_stock_dict.items() if v.Address == temp_stock.Address
+        filter_dict = {k: v for k, v in general_stock_dict.items() if v.Standard_address == temp_stock.Standard_address
                        and v.Warehouse_out in warehouse_out_group
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
@@ -189,7 +189,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             if dispatch_type is DispatchType.FIRST else ModelConfig.RG_MAX_WEIGHT
         if dispatch_type is DispatchType.FIRST:
             general_stock_dict.pop(stock_id)
-        filter_dict = {k: v for k, v in general_stock_dict.items() if v.Address == temp_stock.Address
+        filter_dict = {k: v for k, v in general_stock_dict.items() if v.Standard_address == temp_stock.Standard_address
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
         if filter_dict:
@@ -249,12 +249,12 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         if filter_dict:
             address_list: List[str] = list()
             for i in filter_dict.values():
-                if i.Address not in address_list:
-                    address_list.append(i.Address)
+                if i.Standard_address not in address_list:
+                    address_list.append(i.Standard_address)
             for address in address_list:
-                if address != temp_stock.Address:
+                if address != temp_stock.Standard_address:
                     temp_dict = {k: v for k, v in filter_dict.items() if
-                                 v.Address == address or v.Address == temp_stock.Address}
+                                 v.Standard_address == address or v.Standard_address == temp_stock.Standard_address}
                     temp_list = split(temp_dict)
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
