@@ -2,7 +2,6 @@
 # @Time    : 2019/11/25
 # @Author  : biyushuang
 from app.main.dao.weight_calculator_dao import weight_calculator_dao
-from model_config import ModelConfig
 from flask import g
 
 
