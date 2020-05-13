@@ -116,6 +116,7 @@ def deal_stock():
     df_stock = get_stock()
     df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    df_stock["实际终点"] = df_stock["终点"]
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
     df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
@@ -140,6 +141,8 @@ def deal_stock():
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
     # 筛选出不为0的数据
     df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
+    df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["Standard_address"].isnull(), ["Standard_address"]] = result["Address"]
@@ -235,7 +238,8 @@ def rename_pd(dataframe):
                          "实际可发件数": "Actual_number",
                          "件重": "Piece_weight",
                          "入库仓库": "Warehouse_in",
-                         "卸货地址2": "Standard_address"
+                         "卸货地址2": "Standard_address",
+                         "实际终点": "Actual_end_point"
 
                      },
                      inplace=True)
