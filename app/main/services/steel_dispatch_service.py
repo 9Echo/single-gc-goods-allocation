@@ -245,7 +245,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         if dispatch_type is DispatchType.FIRST:
             general_stock_dict.pop(stock_id)
         filter_dict = {k: v for k, v in general_stock_dict.items() if
-                       v.Warehouse_out == temp_stock.Warehouse_out and v.End_point == temp_stock.End_point
+                       v.Warehouse_out == temp_stock.Warehouse_out and v.Actual_end_point == temp_stock.Actual_end_point
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
         if filter_dict:
