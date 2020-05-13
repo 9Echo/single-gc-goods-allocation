@@ -6,7 +6,7 @@
 import copy
 import os
 import datetime
-
+from model_config import ModelConfig
 from app.main.entity.stock import Stock
 import pandas as pd
 from app.main.db_pool import db_pool_db_sys, db_pool_ods
@@ -158,16 +158,17 @@ def deal_stock():
         if not stock.Address2:
             stock.Address2 = stock.Address
         if stock.Priority == "客户催货":
-            stock.Priority = 0
+            stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
         else:
             if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
                     datetime.datetime.now() + datetime.timedelta(days=-2)):
                 stock.Priority = "超期清理"
-            # 使用数字代替优先级 0 表示最优先，以此类推
-            if stock.Priority == "超期清理":
-                stock.Priority = 1
+            if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
+                stock.Priority = "合同逾期"
+            if stock.Priority:
+                stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
             else:
-                stock.Priority = 2
+                stock.Priority = 4
         # 按33000将货物分成若干份
         num = 33000 // stock.Piece_weight
         # 首先去除 件重大于33000的货物

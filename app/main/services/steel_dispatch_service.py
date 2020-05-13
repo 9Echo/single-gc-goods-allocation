@@ -363,12 +363,11 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.receive_address = i.Address
         load_task.remark = ",".join(remark)
         load_task.parent_load_task_id = i.Parent_stock_id
-        if i.Priority == 0:
-            load_task.priority = "客户催货"
-        elif i.Priority == 1:
-            load_task.priority = "超期库存"
-        else:
+        dic_priority = dict([val, key] for key, val in ModelConfig.RG_PRIORITY.items())
+        if i.Priority == 4:
             load_task.priority = ""
+        else:
+            load_task.priority = dic_priority[i.Priority]
         load_task_list.append(load_task)
     return load_task_list
 
