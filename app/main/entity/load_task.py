@@ -49,4 +49,6 @@ class LoadTask(BaseEntity):
         self.remark = None
         # 父Id
         self.parent_load_task_id = None
+        # 优先级对应的ABCD等级
+        self.priority_grade = None
 

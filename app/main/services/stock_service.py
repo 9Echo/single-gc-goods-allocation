@@ -131,7 +131,7 @@ def deal_stock():
     # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
     df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
     df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-                -df_stock["需短溢重量"] // df_stock["件重"])
+            -df_stock["需短溢重量"] // df_stock["件重"])
     # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
     # 区分西老区的开平板
     df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
@@ -142,7 +142,7 @@ def deal_stock():
     df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     result = result.append(df_stock)
     result = rename_pd(result)
-    result.loc[result["Address2"].isnull(), ["Address2"]] = result["Address"]
+    result.loc[result["Standard_address"].isnull(), ["Standard_address"]] = result["Address"]
     # result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
@@ -155,8 +155,8 @@ def deal_stock():
         stock.Actual_number = int(stock.Actual_number)
         stock.Actual_weight = int(stock.Actual_weight)
         stock.Piece_weight = int(stock.Piece_weight)
-        if not stock.Address2:
-            stock.Address2 = stock.Address
+        if not stock.Standard_address:
+            stock.Standard_address = stock.Address
         if stock.Priority == "客户催货":
             stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
         else:
@@ -235,7 +235,7 @@ def rename_pd(dataframe):
                          "实际可发件数": "Actual_number",
                          "件重": "Piece_weight",
                          "入库仓库": "Warehouse_in",
-                         "卸货地址2": "Address2"
+                         "卸货地址2": "Standard_address"
 
                      },
                      inplace=True)

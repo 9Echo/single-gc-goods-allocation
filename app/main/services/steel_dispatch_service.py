@@ -363,6 +363,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.receive_address = i.Address
         load_task.remark = ",".join(remark)
         load_task.parent_load_task_id = i.Parent_stock_id
+        # 得到翻转优先级的字典
         dic_priority = dict([val, key] for key, val in ModelConfig.RG_PRIORITY.items())
         if i.Priority == 4:
             load_task.priority = ""
@@ -417,9 +418,15 @@ def merge_result(load_task_list: list):
     """
     result_dic = {}
     last_result = []
+    priority_dic = {}
     for task in load_task_list:
+        priority_dic.setdefault(task.load_task_id, set()).add(
+            4 if not task.priority else ModelConfig.RG_PRIORITY[task.priority])
         result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
+
     for res in result_dic:
+        # 得到车次号
+        load_task_id = res[0]
         # 同一个(load_task_id,parent_load_task_id)的load_task列表
         res_list = result_dic[res]
         if len(res_list) > 1:
@@ -428,6 +435,7 @@ def merge_result(load_task_list: list):
             sum_count = sum(i[1] for i in sum_list)
             res_list[0].weight = sum_weight
             res_list[0].count = sum_count
+        res_list[0].priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_dic[load_task_id])]
         last_result.append(res_list[0])
     return last_result
 

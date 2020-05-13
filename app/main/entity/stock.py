@@ -34,7 +34,7 @@ class Stock(BaseEntity):
         self.Warehouse_in = None  # 入库仓库
         self.longitude = None   # 经度
         self.latitude = None   # 纬度
-        self.Address2 = None    # 合并卸货地址
+        self.Standard_address = None    # 合并卸货地址
         self.Parent_stock_id = None     # 父Id
 
         if stock:
