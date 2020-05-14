@@ -24,7 +24,7 @@ def get_stock():
     1 读取Excel，省内1  0点库存明细和省内2、3及连云港库存两个sheet页
     2 数据合并
     """
-    data_path = get_path("sheet1.xls")
+    data_path = get_path("5月6日库存明细.xls")
     df_stock1 = pd.read_excel(data_path)
     return df_stock1
     # sql_old = """
@@ -163,11 +163,11 @@ def deal_stock():
         if stock.Priority == "客户催货":
             stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
         else:
-            if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
-                    datetime.datetime.now() + datetime.timedelta(days=-2)):
-                stock.Priority = "超期清理"
-            if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
-                stock.Priority = "合同逾期"
+            # if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
+            #         datetime.datetime.now() + datetime.timedelta(days=-2)):
+            #     stock.Priority = "超期清理"
+            # if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
+            #     stock.Priority = "合同逾期"
             if stock.Priority:
                 stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
             else:
