@@ -143,6 +143,7 @@ def deal_stock():
     df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
+    df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["Standard_address"].isnull(), ["Standard_address"]] = result["Address"]
