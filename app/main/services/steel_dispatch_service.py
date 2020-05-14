@@ -363,8 +363,9 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.receive_address = i.Address
         load_task.remark = ",".join(remark)
         load_task.parent_load_task_id = i.Parent_stock_id
+        load_task.latest_order_time = i.Latest_order_time
         # 得到翻转优先级的字典
-        dic_priority = dict([val, key] for key, val in ModelConfig.RG_PRIORITY.items())
+        dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
         if i.Priority == 4:
             load_task.priority = ""
         else:
@@ -417,13 +418,17 @@ def merge_result(load_task_list: list):
 
     """
     result_dic = {}
-    last_result = []
     priority_dic = {}
+    latest_order_time_dic = {}
+    last_result = []
     for task in load_task_list:
+        # 整理每个车次的所有最新挂单时间
+        latest_order_time_dic.setdefault(task.load_task_id, set()).add(task.latest_order_time)
+        # 整理每个车次的所有优先级
         priority_dic.setdefault(task.load_task_id, set()).add(
             4 if not task.priority else ModelConfig.RG_PRIORITY[task.priority])
+        # 按（车次ID，车次父ID）整理车次
         result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
-
     for res in result_dic:
         # 得到车次号
         load_task_id = res[0]
@@ -435,8 +440,10 @@ def merge_result(load_task_list: list):
             sum_count = sum(i[1] for i in sum_list)
             res_list[0].weight = sum_weight
             res_list[0].count = sum_count
+        res_list[0].latest_order_time = min(latest_order_time_dic[load_task_id])
         res_list[0].priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_dic[load_task_id])]
         last_result.append(res_list[0])
+    last_result.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
     return last_result
 
 

@@ -248,15 +248,5 @@ def rename_pd(dataframe):
 
 if __name__ == "__main__":
     a = deal_stock()
-    # k = False
-    # for i in a:
-    #     if i.Delivery == "F2003310270" and i.Actual_weight > 30000:
-    #         i.Actual_weight = 1
-    #         for j in a:
-    #             if j.Delivery == "F2003310270":
-    #                 print(j.Actual_weight)
-    #         k = True
-    #     if k:
-    #         break
     for i in a:
         print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)

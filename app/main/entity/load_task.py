@@ -51,4 +51,6 @@ class LoadTask(BaseEntity):
         self.parent_load_task_id = None
         # 优先级对应的ABCD等级
         self.priority_grade = None
+        # 最新挂单时间
+        self.latest_order_time = None
 
