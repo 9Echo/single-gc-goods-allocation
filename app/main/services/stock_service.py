@@ -4,12 +4,10 @@
 
 
 import copy
-import os
-import datetime
 from model_config import ModelConfig
 from app.main.entity.stock import Stock
 import pandas as pd
-from app.main.db_pool import db_pool_db_sys, db_pool_ods
+from app.main.db_pool import db_pool_db_sys
 from app.utils.get_static_path import get_path
 
 
