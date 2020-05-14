@@ -65,11 +65,12 @@ def rename_load_result(dataframe):
         "notice_num": "发货通知单号",
         "oritem_num": "订单号",
         "standard": "规格",
+        "priority_grade": "车次急发等级",
         "sgsign": "材质",
         "outstock_code": "出库仓库",
         "instock_code": "入库仓库",
         "receive_address": "卸货地址",
-        "price_per_ton": "吨公里/价格",
+        "price_per_ton": "吨单价",
         "total_price": "总价格",
         "remark": "备注(配件)",
     })

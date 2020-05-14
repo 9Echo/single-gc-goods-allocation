@@ -51,6 +51,8 @@ def dispatch() -> List[LoadTask]:
         # 如果有，按照surplus_weight为约束进行匹配
         if filter_list:
             compose_list, value = goods_filter(filter_list, surplus_weight)
+            for stock in compose_list:
+                general_stock_list.remove(stock)
         # 生成车次数据
         load_task_list.extend(
             create_load_task(compose_list + [standard_stock], TrainId.get_id(), LoadTaskType.TYPE_1.value))
@@ -243,7 +245,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         if dispatch_type is DispatchType.FIRST:
             general_stock_dict.pop(stock_id)
         filter_dict = {k: v for k, v in general_stock_dict.items() if
-                       v.Warehouse_out == temp_stock.Warehouse_out and v.End_point == temp_stock.End_point
+                       v.Warehouse_out == temp_stock.Warehouse_out and v.Actual_end_point == temp_stock.Actual_end_point
                        and v.Piece_weight <= surplus_weight
                        and v.Big_product_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.Big_product_name)}
         if filter_dict:

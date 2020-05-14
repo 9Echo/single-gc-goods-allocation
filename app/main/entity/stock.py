@@ -36,6 +36,6 @@ class Stock(BaseEntity):
         self.latitude = None   # 纬度
         self.Standard_address = None    # 合并卸货地址
         self.Parent_stock_id = None     # 父Id
-        self.Actual_end_point = None     # 实际城市
+        self.Actual_end_point = None     # 实际区县
         if stock:
             self.set_attr(stock)
