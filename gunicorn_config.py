@@ -11,7 +11,7 @@ monkey.patch_all()
 
 import multiprocessing
 
-from app.utils.file_handlers import MultiProcessSafeTimedRotatingFileHandler
+from app.util.file_handlers import MultiProcessSafeTimedRotatingFileHandler
 
 # 应用参数
 from config import Config
@@ -77,7 +77,7 @@ logconfig_dict = {
     },
     'handlers': {
         "error_file": {
-            "class": "app.utils.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
+            "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
             "when": "midnight",
             "interval": 1,
             "backupCount": 14,  # 备份多少份
@@ -87,7 +87,7 @@ logconfig_dict = {
             'encoding': 'utf-8'  # 日志文件编码
         },
         "access_file": {
-            "class": "app.utils.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
+            "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
             "when": "midnight",
             "interval": 1,
             "backupCount": 14,

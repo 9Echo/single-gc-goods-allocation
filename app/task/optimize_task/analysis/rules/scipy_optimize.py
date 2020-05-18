@@ -5,7 +5,7 @@ import math
 
 from scipy.optimize import minimize
 
-from app.utils import weight_calculator
+from app.util import weight_calculator
 import numpy as np
 
 

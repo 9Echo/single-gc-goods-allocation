@@ -5,7 +5,7 @@ import json
 from flask import request
 from flask_restful import Resource
 from app.main.services import sheet_service
-from app.utils.result import Result
+from app.util.result import Result
 from app.main.services.loading_sequence_service import loading
 
 

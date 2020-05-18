@@ -9,8 +9,8 @@ from app.main.entity.delivery_item import DeliveryItem
 from app.main.entity.delivery_sheet import DeliverySheet
 from app.main.services import redis_service
 from app.task.pulp_task.analysis.rules import pulp_solve
-from app.utils import weight_calculator
-from app.utils.uuid_util import UUIDUtil
+from app.util import weight_calculator
+from app.util.uuid_util import UUIDUtil
 from model_config import ModelConfig
 
 

@@ -5,8 +5,8 @@ import copy
 from flask import g, current_app
 from app.analysis.rules import weight_rule, package_solution
 from app.main.entity.delivery_sheet import DeliverySheet
-from app.utils.code import ResponseCode
-from app.utils.my_exception import MyException
+from app.util.code import ResponseCode
+from app.util.my_exception import MyException
 from model_config import ModelConfig
 
 

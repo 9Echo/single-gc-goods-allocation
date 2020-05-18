@@ -1,6 +1,6 @@
 from app.analysis.rules import package_solution
 from app.main.dao.base_dao import BaseDao
-from app.utils.uuid_util import UUIDUtil
+from app.util.uuid_util import UUIDUtil
 
 
 class Sheet:

@@ -4,7 +4,7 @@
 from flask import request
 from flask_restful import Resource
 from app.main.services.compose_service import compose
-from app.utils.result import Result
+from app.util.result import Result
 
 
 class ComposeRoute(Resource):

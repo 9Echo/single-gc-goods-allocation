@@ -4,8 +4,8 @@
 import copy
 import math
 from flask import g
-from app.utils import weight_calculator
-from app.utils.uuid_util import UUIDUtil
+from app.util import weight_calculator
+from app.util.uuid_util import UUIDUtil
 from model_config import ModelConfig
 
 

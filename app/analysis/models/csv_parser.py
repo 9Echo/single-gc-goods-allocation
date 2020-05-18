@@ -1,6 +1,6 @@
 import csv
 
-from app.utils import weight_calculator
+from app.util import weight_calculator
 
 if __name__ == '__main__':
     input = open('source.csv', 'r', encoding='utf-8')

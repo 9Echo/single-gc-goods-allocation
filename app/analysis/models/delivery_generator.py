@@ -3,7 +3,7 @@ import csv
 from app.analysis.rules import dispatch_filter
 from app.main.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.entity.delivery_item import DeliveryItem
-from app.utils.uuid_util import UUIDUtil
+from app.util.uuid_util import UUIDUtil
 
 if __name__ == '__main__':
     file = open('output.csv', 'r', encoding='utf-8')

@@ -3,8 +3,8 @@
 # @Author  : shaoluyu
 from app.analysis.rules import compose_weight_rule
 from app.main.dao.compose_dao import compose_dao
-from app.utils.code import ResponseCode
-from app.utils.my_exception import MyException
+from app.util.code import ResponseCode
+from app.util.my_exception import MyException
 from model_config import ModelConfig
 import pandas as pd
 

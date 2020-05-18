@@ -7,10 +7,10 @@ import atexit
 from flask import Flask
 from flask_apscheduler import APScheduler
 import platform
-from app.utils.aspect import *
+from app.util.aspect import *
 from config import config, Config
-from app.utils.core import JSONEncoder
-from app.utils.actuator import Actuator
+from app.util.core import JSONEncoder
+from app.util.actuator import Actuator
 
 # SQLAlchemy数据库访问实例
 # db = SQLAlchemy()
