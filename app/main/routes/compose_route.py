@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 from flask import request
 from flask_restful import Resource
-from app.main.services.compose_service import compose
+from app.main.pipe_factory.service.compose_service import compose
 from app.util.result import Result
 
 

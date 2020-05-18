@@ -4,7 +4,7 @@
 import json
 from flask import request
 from flask_restful import Resource
-from app.main.services import vehicle_service, steel_dispatch_service
+from app.main.pipe_factory.service import vehicle_service, steel_dispatch_service
 from app.util.result import Result
 
 

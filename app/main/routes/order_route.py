@@ -5,7 +5,7 @@
 import json
 from flask import request
 from flask_restful import Resource
-from app.main.services import order_service, dispatch_service as dispatch_service_spec
+from app.main.pipe_factory.service import order_service, dispatch_service as dispatch_service_spec
 from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
 from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
 from app.util.result import Result

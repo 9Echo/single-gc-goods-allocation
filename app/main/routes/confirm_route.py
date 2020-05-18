@@ -4,8 +4,8 @@
 # Modified: shaoluyu 2019/11/13
 from flask import request
 from flask_restful import Resource
-from app.main.services.confirm_delivery_service import confirm
-from app.main.services.confirm_delivery_service import generate_delivery
+from app.main.pipe_factory.service.confirm_delivery_service import confirm
+from app.main.pipe_factory.service.confirm_delivery_service import generate_delivery
 from app.util.result import Result
 
 

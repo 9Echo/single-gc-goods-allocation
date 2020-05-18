@@ -4,7 +4,7 @@
 import copy
 from flask import g, current_app
 from app.main.pipe_factory.rule import weight_rule, package_solution
-from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.steel_factory.entity.delivery_sheet import DeliverySheet
 from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from model_config import ModelConfig

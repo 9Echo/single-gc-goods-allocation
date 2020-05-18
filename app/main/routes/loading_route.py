@@ -4,9 +4,9 @@
 import json
 from flask import request
 from flask_restful import Resource
-from app.main.services import sheet_service
+from app.main.pipe_factory.service import sheet_service
 from app.util.result import Result
-from app.main.services.loading_sequence_service import loading
+from app.main.pipe_factory.service.loading_sequence_service import loading
 
 
 class LoadingRoute(Resource):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/25
 # @Author  : biyushuang
-from app.main.dao.weight_calculator_dao import weight_calculator_dao
+from app.main.pipe_factory.dao.weight_calculator_dao import weight_calculator_dao
 from flask import g
 
 

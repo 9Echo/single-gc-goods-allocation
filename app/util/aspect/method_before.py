@@ -3,7 +3,7 @@
 # Created: shaoluyu 2019/03/05
 import functools
 
-from app.main.entity.order import Order
+from app.main.pipe_factory.entity.order import Order
 from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from app.util.weight_calculator import get_item_a_dict_list
