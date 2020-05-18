@@ -2,18 +2,24 @@
 
 ## 智能配载项目结构
 
-- app/analysis 建模和分析包 
-  - models 模型包
-  - rules 规则包
-- app/main 业务包
-  - entity 数据库实体包
-  - dao 数据访问对象包
-  - routes 路由包
-  - services 业务逻辑包
-- app/task 计划任务包
-- app/utils 工具类包
+- app 应用包
+    - analysis 离线分析包
+    - util 工具类包
+    - main 业务程序包
+        - routes 路由包
+        - steel_factory 钢厂业务包
+            - entity 业务实体包
+            - dao 数据库访问对象包
+            - service 业务逻辑包
+            - task 定时任务包
+        - pipe_factory 管厂业务包
+            - entity 业务实体包
+            - dao 数据库访问对象包
+            - service 业务逻辑包
+            - task 定时任务包
 - config.py 项目配置信息
 - model_config.py 模型配置信息
 - manage.py 项目入口，启动文件
-- tests 测试包
+- test 测试包
+    - statics 测试数据包
 - document 文档包
