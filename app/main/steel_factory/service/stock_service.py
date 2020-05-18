@@ -22,7 +22,7 @@ def get_stock():
     1 读取Excel，省内1  0点库存明细和省内2、3及连云港库存两个sheet页
     2 数据合并
     """
-    data_path = get_path("5月6日库存明细.xls")
+    data_path = get_path("sheet1.xls")
     df_stock1 = pd.read_excel(data_path)
     return df_stock1
     # sql_old = """
