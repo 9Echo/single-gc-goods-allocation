@@ -5,9 +5,9 @@ import copy
 from threading import Thread
 from flask import g
 from app.main.pipe_factory.rule import product_type_rule
-from app.main.steel_factory.entity.delivery_item import DeliveryItem
-from app.main.steel_factory.entity.delivery_sheet import DeliverySheet
-from app.main.steel_factory.service import redis_service
+from app.main.pipe_factory.entity.delivery_item import DeliveryItem
+from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.service import redis_service
 from app.task.pulp_task.analysis.rules import pulp_solve
 from app.util import weight_calculator
 from app.util.uuid_util import UUIDUtil

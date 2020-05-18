@@ -8,7 +8,7 @@
     - main 业务程序包
         - routes 路由包
         - steel_factory 钢厂业务包
-            - entity 业务实体包
+            - entity 业务实体包w
             - dao 数据库访问对象包
             - service 业务逻辑包
             - task 定时任务包

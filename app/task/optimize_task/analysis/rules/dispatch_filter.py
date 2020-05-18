@@ -4,7 +4,7 @@
 import copy
 from flask import g
 from app.main.pipe_factory.rule import package_solution
-from app.main.steel_factory.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.task.optimize_task.analysis.rules import weight_rule
 from model_config import ModelConfig
 

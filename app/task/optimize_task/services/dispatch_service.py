@@ -5,9 +5,9 @@
 import copy
 import math
 from threading import Thread
-from app.main.steel_factory.entity.delivery_item import DeliveryItem
-from app.main.steel_factory.entity.delivery_sheet import DeliverySheet
-from app.main.steel_factory.service import redis_service
+from app.main.pipe_factory.entity.delivery_item import DeliveryItem
+from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.service import redis_service
 from app.task.optimize_task.analysis.rules import dispatch_filter, product_type_rule, weight_rule
 from app.util import weight_calculator
 from app.util.uuid_util import UUIDUtil
