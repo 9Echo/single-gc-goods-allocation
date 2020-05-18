@@ -11,7 +11,7 @@ from app.main.routes.compose_route import ComposeRoute
 from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.order_route import OrderRoute
 from app.main.routes.loading_route import LoadingRoute
-from test.main.routes.order_route_test import OrderRouteTest
+from app.test.main.routes.order_route_test import OrderRouteTest
 
 blueprint = Blueprint('main', __name__)
 api = Api(blueprint)
