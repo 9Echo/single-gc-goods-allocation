@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/11 16:25
 # @Author  : Zihao.Liu
-from app.main.entity.base_entity import BaseEntity
+from app.main.steel_factory.entity.base_entity import BaseEntity
 
 
 class DeliveryItem(BaseEntity):

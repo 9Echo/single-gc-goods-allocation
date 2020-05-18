@@ -1,8 +1,7 @@
-from app.main.db_pool import db_pool_ods, db_pool_trans_plan
+from app.util.db_pool import db_pool_ods, db_pool_trans_plan
 import traceback
 import pandas as pd
 from datetime import datetime
-import time
 
 
 def get_commodity(start_date="2019-10-12"):

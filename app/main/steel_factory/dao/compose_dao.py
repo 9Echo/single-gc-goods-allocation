@@ -1,4 +1,4 @@
-from app.main.dao.base_dao import BaseDao
+from app.main.steel_factory.dao.base_dao import BaseDao
 
 
 class ComposeDao(BaseDao):

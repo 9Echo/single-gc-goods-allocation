@@ -1,5 +1,5 @@
 import pandas as pd
-from app.main.db_pool import db_pool_trans_plan, db_pool_ods
+from app.util.db_pool import db_pool_trans_plan, db_pool_ods
 import traceback
 from datetime import datetime
 

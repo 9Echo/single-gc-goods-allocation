@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/20 13:39
 # @Author  : Zihao.Liu
-from app.main.entity.base_entity import BaseEntity
+from app.main.pipe_factory.entity.base_entity import BaseEntity
 
 
 class DeliveryLog(BaseEntity):

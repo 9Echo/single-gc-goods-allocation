@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/13
 # @Author  : shaoluyu
-from app.main.entity.base_entity import BaseEntity
+from app.main.pipe_factory.entity.base_entity import BaseEntity
 
 
 class OrderItem(BaseEntity):

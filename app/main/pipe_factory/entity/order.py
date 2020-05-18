@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
 
-from app.main.entity.base_entity import BaseEntity
+from app.main.pipe_factory.entity.base_entity import BaseEntity
 
 
 class Order(BaseEntity):

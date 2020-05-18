@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/25
 # @Author  : biyushuang
-from app.main.dao.base_dao import BaseDao
+from app.main.pipe_factory.dao.base_dao import BaseDao
 
 
 class WeightCalculatorDao(BaseDao):

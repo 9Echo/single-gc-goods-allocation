@@ -2,12 +2,12 @@
 # @Time    : 2019/11/11 17:12
 # @Author  : Zihao.Liu
 
-from app.main.dao.base_dao import BaseDao
-from app.main.entity.delivery_item import DeliveryItem
-from app.main.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.dao.base_dao import BaseDao
+from app.main.pipe_factory.entity.delivery_item import DeliveryItem
+from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.util.date_util import get_now_str
 from app.util.uuid_util import UUIDUtil
-from app.main.dao.delivery_item_dao import delivery_item_dao
+from app.main.pipe_factory.dao.delivery_item_dao import delivery_item_dao
 
 
 class DeliverySheetDao(BaseDao):
@@ -44,7 +44,7 @@ class DeliverySheetDao(BaseDao):
         self.execute(sql, values)
         # 保存发货单项
         if sheet.items:
-            from app.main.dao.delivery_item_dao import delivery_item_dao
+            from app.main.pipe_factory.dao.delivery_item_dao import delivery_item_dao
             delivery_item_dao.batch_insert(sheet.items)
 
     def update(self, delivery):

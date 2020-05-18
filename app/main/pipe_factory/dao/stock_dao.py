@@ -1,8 +1,7 @@
-from app.main.db_pool import db_pool_ods
+from app.util.db_pool import db_pool_ods
 import pymysql
 from datetime import datetime
 import datetime as dt
-import time
 
 
 def select_stock():

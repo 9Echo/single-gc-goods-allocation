@@ -1,4 +1,4 @@
-from app.main.db_pool import db_pool_ods
+from app.util.db_pool import db_pool_ods
 from app.main.services import order_service, dispatch_service
 import csv
 

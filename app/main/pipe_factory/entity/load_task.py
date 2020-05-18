@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    :
 # @Author  : shaoluyu
-from app.main.entity.base_entity import BaseEntity
+from app.main.pipe_factory.entity.base_entity import BaseEntity
 
 
 class LoadTask(BaseEntity):
