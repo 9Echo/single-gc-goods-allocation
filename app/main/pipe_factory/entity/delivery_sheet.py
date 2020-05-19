@@ -2,7 +2,7 @@
 # @Time    : 2019/11/11 16:23
 # @Author  : Zihao.Liu
 
-from app.main.pipe_factory.entity.base_entity import BaseEntity
+from app.util.base.base_entity import BaseEntity
 
 
 class DeliverySheet(BaseEntity):

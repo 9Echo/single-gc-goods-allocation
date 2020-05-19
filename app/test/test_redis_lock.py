@@ -12,7 +12,7 @@ sys.path.append(rootPath)
 print(curPath)
 print(rootPath)
 
-from app.util.reids_lock import RedisLock
+from app.util.redis.reids_lock import RedisLock
 
 redis_pool = redis.ConnectionPool(
     host='47.99.118.183', port=6379, password="wobugaoxing", max_connections=50,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/03/12
 # @Author  : shaoluyu
-from app.main.pipe_factory.entity.base_entity import BaseEntity
+from app.util.base.base_entity import BaseEntity
 
 
 class Vehicle(BaseEntity):

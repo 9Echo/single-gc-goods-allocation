@@ -2,11 +2,10 @@
 # @Time    : 2019/11/11 17:12
 # @Author  : Zihao.Liu
 
-from app.main.pipe_factory.dao.base_dao import BaseDao
+from app.util.base.base_dao import BaseDao
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.util.date_util import get_now_str
-from app.util.uuid_util import UUIDUtil
 from app.main.pipe_factory.dao.delivery_item_dao import delivery_item_dao
 
 

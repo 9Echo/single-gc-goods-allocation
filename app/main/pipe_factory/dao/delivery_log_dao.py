@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2019/11/19 14:12
 # @Author  : shaoluyu
-import traceback
-from flask import current_app
 
-from app.main.pipe_factory.dao.base_dao import BaseDao
+from app.util.base.base_dao import BaseDao
 from app.util.date_util import get_now_str
 
 

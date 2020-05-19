@@ -4,7 +4,7 @@
 import json
 import redis
 from flask import current_app
-from app.util.redis_pool import redis_pool
+from app.util.redis.redis_pool import redis_pool
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.util.result import Result
 
@@ -21,7 +21,7 @@ def set_delivery_list(delivery_list):
             return Result.error("无数据！")
         batch_no = getattr(delivery_list[0], "batch_no", None)
         if batch_no:
-            dict_list = Result.print_entity(delivery_list).data
+            dict_list = Result.from_entity(delivery_list).data
             json_data = json.dumps(dict_list)
             redis_conn.set(batch_no, json_data, ex=300)
             return Result.info(msg="保存成功")

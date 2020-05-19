@@ -3,7 +3,7 @@
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
 
-from app.main.pipe_factory.dao.base_dao import BaseDao
+from app.util.base.base_dao import BaseDao
 from app.main.pipe_factory.entity.order import Order
 from app.main.pipe_factory.entity.order_item import OrderItem
 from app.util.date_util import get_now_str

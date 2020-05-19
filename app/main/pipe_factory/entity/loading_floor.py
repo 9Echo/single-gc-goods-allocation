@@ -2,7 +2,7 @@
 # @Time    : 2020/03/19 15:32
 # @Author  : zhouwentao
 
-from app.main.pipe_factory.entity.base_entity import BaseEntity
+from app.util.base.base_entity import BaseEntity
 
 
 class LoadingFloor(BaseEntity):

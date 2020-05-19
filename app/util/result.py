@@ -2,7 +2,7 @@ import json
 
 from flask import jsonify, Response
 
-from app.main.pipe_factory.entity.base_entity import BaseEntity
+from app.util.base.base_entity import BaseEntity
 from app.util.code import ResponseCode
 
 
@@ -16,7 +16,7 @@ class Result:
         self.tag = True
 
     @staticmethod
-    def print_entity(obj):
+    def from_entity(obj):
         """封装成功返回的实体类"""
 
         if isinstance(obj, Result):
@@ -72,7 +72,7 @@ class Result:
     @staticmethod
     def success_response(obj):
         """返回成功信息"""
-        result = Result.print_entity(obj)
+        result = Result.from_entity(obj)
         return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
                         mimetype='application/json')
         # return {"code": result.code, "msg": result.msg, "data": result.data}
