@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/03/31
 # @Author  : shaoluyu
-from app.main.steel_factory.entity.base_entity import BaseEntity
+from app.util.base.base_entity import BaseEntity
 
 
 class Stock(BaseEntity):
@@ -32,10 +32,10 @@ class Stock(BaseEntity):
         self.Actual_number: int = 0  # 实际可发件数
         self.Piece_weight: int = 0  # 件重
         self.Warehouse_in = None  # 入库仓库
-        self.longitude = None   # 经度
-        self.latitude = None   # 纬度
-        self.Standard_address = None    # 合并卸货地址
-        self.Parent_stock_id = None     # 父Id
-        self.Actual_end_point = None     # 实际区县
+        self.longitude = None  # 经度
+        self.latitude = None  # 纬度
+        self.Standard_address = None  # 合并卸货地址
+        self.Parent_stock_id = None  # 父Id
+        self.Actual_end_point = None  # 实际区县
         if stock:
             self.set_attr(stock)
