@@ -7,6 +7,15 @@ class ComposeDao(BaseDao):
     """
 
     def get_compose_delivery(self, company_id, customer_id_list, delivery_no_list):
+        """根据公司id， 客户条件，提货单号条件 查找预留提货单
+
+        Args:
+
+        Returns:
+                data:发货单子单列表
+        Raise:
+
+        """
         sql = """
         SELECT 
         item.delivery_no,

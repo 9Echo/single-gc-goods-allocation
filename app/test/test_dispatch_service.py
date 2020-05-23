@@ -1,17 +1,19 @@
 def get_json_before(order):
+    """
+    处理json数据 得到开单前的件数和散根
+    :param order: 传入的json数据
+    :return: product_info: 存放货物的件数和散根数
         """
-        处理json数据 得到开单前的件数和散根
-        :param order: 传入的json数据
-        :return: product_info: 存放货物的件数和散根数
-        """
-        items = order.items
-        product_info = {}
-        for i in items:
-            if (i.product_type, i.item_id) not in product_info:
-                product_info[(i.product_type, i.item_id)] = {}
-            product_info[(i.product_type, i.item_id)]["quantity"] = product_info[(i.product_type, i.item_id)].get("quantity", 0) + i.quantity
-            product_info[(i.product_type, i.item_id)]["free_pcs"] = product_info[(i.product_type, i.item_id)].get("free_pcs", 0) + i.free_pcs
-        return product_info
+    items = order.items
+    product_info = {}
+    for i in items:
+        if (i.product_type, i.item_id) not in product_info:
+            product_info[(i.product_type, i.item_id)] = {}
+        product_info[(i.product_type, i.item_id)]["quantity"] = product_info[(i.product_type, i.item_id)].get(
+            "quantity", 0) + i.quantity
+        product_info[(i.product_type, i.item_id)]["free_pcs"] = product_info[(i.product_type, i.item_id)].get(
+            "free_pcs", 0) + i.free_pcs
+    return product_info
 
 
 def get_product_info_after(sheets):
@@ -36,9 +38,15 @@ def get_product_info_after(sheets):
             if (item.product_type, item.item_id) not in product_info:
                 product_info[(item.product_type, item.item_id)] = {}
             car_info[sheet.load_task_id]["volume"] = car_info[sheet.load_task_id].get("volume", 0) + float(item.volume)
-            product_info[(item.product_type, item.item_id)]["quantity"] = product_info[(item.product_type, item.item_id)].get("quantity", 0) + int(item.quantity)
-            product_info[(item.product_type, item.item_id)]["free_pcs"] = product_info[(item.product_type, item.item_id)].get("free_pcs", 0) + int(item.free_pcs)
-            product_info[(item.product_type, item.item_id)]["weight"] = product_info[(item.product_type, item.item_id)].get("weight", 0) + int(item.weight)
+            product_info[(item.product_type, item.item_id)]["quantity"] = product_info[
+                                                                              (item.product_type, item.item_id)].get(
+                "quantity", 0) + int(item.quantity)
+            product_info[(item.product_type, item.item_id)]["free_pcs"] = product_info[
+                                                                              (item.product_type, item.item_id)].get(
+                "free_pcs", 0) + int(item.free_pcs)
+            product_info[(item.product_type, item.item_id)]["weight"] = product_info[
+                                                                            (item.product_type, item.item_id)].get(
+                "weight", 0) + int(item.weight)
     for key in car_info:
         car_info[key]["include_ReDu_And_LuoXuan"] = temp_boolean
     return product_info, car_info
@@ -80,7 +88,7 @@ def judge_info(dict1, dict2, dict3, sum_weight_before, weight):
     for i in dict3:
         if float(dict3[i]["volume"]) > 1.18:
             error["car_volume_error"] = [i, dict3[i]["volume"]]
-        if float(dict3[i]["weight"]) > weight+1:
+        if float(dict3[i]["weight"]) > weight + 1:
             error["car_weight_error"] = [i, dict3[i]["weight"], weight]
         if max_car_weight < dict3[i]["weight"]:
             max_car_weight = dict3[i]["weight"]

@@ -83,8 +83,11 @@ def dispatch_load_task(sheets: list, task_id):
                 new_max_weight = min(g.RD_LX_MAX_WEIGHT, new_max_weight)
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
+                # 按照体积比例计算，在最新的最大重量限制下还可以放多少重量
                 limit_volume_weight = (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
+                # 在最新的最大重量限制下还可以放多少重量
                 limit_weight_weight = new_max_weight - (total_weight - sheet.weight)
+                # 取较小的
                 limit_weight = min(limit_weight_weight, limit_volume_weight)
                 sheet, new_sheet = split_sheet(sheet, limit_weight)
                 if new_sheet:
@@ -199,7 +202,7 @@ def split_sheet(sheet, limit_weight):
 
 
 def combine_sheets(sheets):
-    """合并因拼单被打散的发货单
+    """合并因拼单被s
     合并场景1：品类和物资代码相同的子发货单合并为1个子发货单
     合并场景2：品类相同物资代码不同的子发货单合并为1个发货单
     合并场景3：品类不同但是同属于一个similar group内的子发货单合并为1个发货单

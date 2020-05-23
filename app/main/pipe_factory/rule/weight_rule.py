@@ -16,12 +16,15 @@ def compose(filtered_item, left_items: list):
     :param left_items:超重子单列表
     :return:
     """
+    # 如待拆分子单的存在或者它的品名在配置中，就选择螺旋、热镀的重量上限值，否则拿最大上限值
     new_max_weight = g.RD_LX_MAX_WEIGHT if filtered_item and filtered_item.product_type in ModelConfig.RD_LX_GROUP \
         else g.MAX_WEIGHT
+    # 如果他的重量小于等于 **上限值， 就把他从列表中拿出来（原列表中删去）。
     if filtered_item.weight <= new_max_weight:
         left_items.remove(filtered_item)
         return filtered_item, left_items
     # 依次将子发货单装入发货单中
+    # 否则使用split_item拆分此处的item一定是一个饱和的子单
     else:
         item, new_item = split_item(filtered_item, filtered_item.weight - new_max_weight)
         if new_item:
@@ -32,13 +35,19 @@ def compose(filtered_item, left_items: list):
 
 
 def split_item(item, delta_weight):
-    """拆分超重的订单，将子项全部转为散根计算"""
+    """
+    拆分超重的订单，将子项全部转为散根计算
+
+    """
+    # 计算不超重部分的根数
     left_pcs = item.total_pcs - math.ceil(item.total_pcs * (delta_weight / item.weight))
     if left_pcs > 0:
         # 根据转化倍数将散根转为整根
+        # 查询此规格一件多少根
         times = weight_calculator.get_quantity_pcs(item.product_type, item.item_id)
-        # 计算分单后的子单数量
+        # 计算分单后的子单件数
         quantity = int(left_pcs / times)
+        # 计算分单后的子单散根数
         free_pcs = left_pcs % times
         if free_pcs > item.free_pcs:
             free_pcs = item.free_pcs

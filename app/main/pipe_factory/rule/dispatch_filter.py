@@ -23,7 +23,9 @@ def model_filter(delivery_items: list):
     # 剩余的发货子单
     left_items = delivery_items
     for i in copy.copy(delivery_items):
+        # 如果是热镀或者是螺旋取对应的重量上限
         new_max_weight = g.RD_LX_MAX_WEIGHT if i.product_type in ModelConfig.RD_LX_GROUP else g.MAX_WEIGHT
+        # 如果发货子单重量比上限小，直接添加，
         if i.weight <= new_max_weight:
             item_list.append(i)
             left_items.remove(i)
@@ -35,6 +37,7 @@ def model_filter(delivery_items: list):
     # 上一步filtered_item中可能含有weight为0的子项，为无效子项
     item_list = list(filter(lambda x: x.weight > 0, item_list))
     # 组装子单数据
+    # 就是将item_list中的所有货物都使用背包分成发货通知单明细
     while item_list:
         # 是否满载标记
         is_full = False
