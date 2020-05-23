@@ -23,10 +23,8 @@ def dispatch(order):
         sheet.weight = '0'
         sheet.items = delivery_items
         return sheet
-    weight_list, volume_list, value_list, obj_dict, obj_index_list, free_pcs_weight_dict = create_variable_list(
-        delivery_items)
-    sheets = call_pulp_solve(weight_list, volume_list, value_list, obj_dict, obj_index_list, free_pcs_weight_dict,
-                             order, new_max_weight)
+    weight_list, volume_list, value_list = create_variable_list(delivery_items)
+    sheets = call_pulp_solve(weight_list, volume_list, value_list, delivery_items, order, new_max_weight)
     # 归类合并
     combine_sheets(sheets)
     # 将推荐发货通知单暂存redis
@@ -102,34 +100,42 @@ def create_sheet_item(order):
     delivery_items = []
     new_max_weight = 0
     for item in order.items:
-        di = DeliveryItem()
         if not product_type:
             product_type = item.product_type
             if product_type in ModelConfig.RD_LX_GROUP:
                 new_max_weight = g.RD_LX_MAX_WEIGHT
-        di.product_type = item.product_type
-        di.spec = item.spec
-        di.quantity = item.quantity
-        di.free_pcs = item.free_pcs
-        di.item_id = item.item_id
-        di.material = item.material
-        di.f_whs = item.f_whs
-        di.f_loc = item.f_loc
-        di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
-        # 修改成了一件的体积占比
-        di.volume = 1 / di.max_quantity if di.max_quantity else 0
-        di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        di.one_quantity_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 1, 0)
-        di.one_free_pcs_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, 0, 1)
-        # di.one_quantity_weight = weight_calculator.get_one_weight(di.item_id, 1, 0)
-        # di.one_free_pcs_weight = weight_calculator.get_one_weight( di.item_id, 0, 1)
-        di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        # 如果遇到计算不出来的明细，返回0停止计算
-        if di.weight == 0:
+        for _ in range(item.quantity):
+            di = DeliveryItem()
+            di.product_type = item.product_type
+            di.spec = item.spec
+            di.quantity = 1
+            di.free_pcs = 0
+            di.item_id = item.item_id
+            di.material = item.material
+            di.f_whs = item.f_whs
+            di.f_loc = item.f_loc
+            di.volume = 1 / di.max_quantity if di.max_quantity else 0.001
+            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            # 如果遇到计算不出来的明细，返回0停止计算
             if di.weight == 0:
-                return [di], new_max_weight, False
-        # 如果该明细有件数上限并且单规格件数超出，进行切单
-        delivery_items.append(di)
+                if di.weight == 0:
+                    return [di], new_max_weight, False
+            delivery_items.append(di)
+        for _ in range(item.free_pcs):
+            di = DeliveryItem()
+            di.product_type = item.product_type
+            di.spec = item.spec
+            di.quantity = 0
+            di.free_pcs = 1
+            di.item_id = item.item_id
+            di.material = item.material
+            di.f_whs = item.f_whs
+            di.f_loc = item.f_loc
+            di.volume = 0
+            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
+            delivery_items.append(di)
     return delivery_items, new_max_weight, True
 
 
@@ -138,77 +144,39 @@ def create_variable_list(delivery_items):
 
     :return:
     """
-    # 提货单子项信息字典
-    obj_dict = {}
-    # 每件对应的子项索引
-    obj_index_list = []
-    # 每件对应的重量
     weight_list = []
     # 每件对应的体积占比
     volume_list = []
-    # 散根单件重量查询字典
-    free_pcs_weight_dict = {}
-    # 构建信息字典,k  下标  v   子项对象
-    for i in range(len(delivery_items)):
-        obj_dict[i] = delivery_items[i]
-    # 构建索引、重量、体积序列
-    for k, v in obj_dict.items():
-        for i in range(v.quantity):
-            obj_index_list.append(k)
-            weight_list.append(v.one_quantity_weight)
-            volume_list.append(v.volume)
-        for i in range(v.free_pcs):
-            obj_index_list.append(k)
-            weight_list.append(v.one_free_pcs_weight)
-            volume_list.append(0)
-            free_pcs_weight_dict['{},{},{}'.format(v.item_id, v.material, v.f_loc)] = v.one_free_pcs_weight
+    for i in delivery_items:
+        weight_list.append(i.weight)
+        volume_list.append(i.volume)
     # 构建目标序列
     value_list = copy.deepcopy(weight_list)
-    return weight_list, volume_list, value_list, obj_dict, obj_index_list, free_pcs_weight_dict
+    return weight_list, volume_list, value_list
 
 
-def call_pulp_solve(weight_list, volume_list, value_list, obj_dict, obj_index_list, free_pcs_weight_dict, order,
-                    new_max_weight):
+def call_pulp_solve(weight_list, volume_list, value_list, delivery_items, order, new_max_weight):
     """
 
+    :param delivery_items:
+    :param order:
     :param weight_list:
     :param volume_list:
     :param new_max_weight:
     :param value_list:
-    :param obj_dict:
-    :param obj_index_list:
-    :param free_pcs_weight_dict:
     :return:
     """
     load_task_id = 0
     batch_no = UUIDUtil.create_id("ba")
     # 结果集
     sheets = []
-
-    while weight_list:
+    while delivery_items:
         load_task_id += 1
         # plup求解，得到选中的下标序列
         result_index_list, value = pulp_solve.pulp_pack(weight_list, volume_list, value_list, new_max_weight)
-        # 下标减少量
-        temp = 0
-        for i in result_index_list:
+        for i in sorted(result_index_list, reverse=True):
             sheet = DeliverySheet()
-            i -= temp
-            # item = DeliveryItem()
-            item = copy.deepcopy(obj_dict.get(obj_index_list[i]))
-            item.weight = weight_list[i]
-            item.volume = volume_list[i]
-
-            if free_pcs_weight_dict.get('{},{},{}'.format(item.item_id, item.material, item.f_loc)) \
-                    and weight_list[i] \
-                    == free_pcs_weight_dict.get('{},{},{}'.format(item.item_id, item.material, item.f_loc)):
-                item.quantity = 0
-                item.free_pcs = 1
-                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 0, 1)
-            else:
-                item.quantity = 1
-                item.free_pcs = 0
-                item.total_pcs = weight_calculator.calculate_pcs(item.product_type, item.item_id, 1, 0)
+            item = delivery_items[i]
             sheet.items.append(item)
             # 3、补充发货单的属性
             sheet.batch_no = batch_no
@@ -223,6 +191,5 @@ def call_pulp_solve(weight_list, volume_list, value_list, obj_dict, obj_index_li
             weight_list.pop(i)
             volume_list.pop(i)
             value_list.pop(i)
-            obj_index_list.pop(i)
-            temp += 1
+            delivery_items.pop(i)
     return sheets
