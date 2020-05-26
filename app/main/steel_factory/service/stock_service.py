@@ -51,7 +51,7 @@ def get_stock():
     #         stock_id as id,
     #         product_name as '品名',
     #         actual_number as '实际可发件数',
-    #         Actual_weight as '实际可发重量',
+    #         actual_weight as '实际可发重量',
     #         piece_weight as '件重'
     #     FROM
     #         db_dev.dwd_rgsd_warehouse_amount_20200509
@@ -144,27 +144,27 @@ def deal_stock():
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     result.to_excel("3.xls")
-    # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
+    # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
     count_parent = 0
     for record in dic:
         count_parent += 1
         stock = Stock(record)
-        stock.Parent_stock_id = count_parent
-        stock.Actual_number = int(stock.actual_number)
-        stock.Actual_weight = int(stock.actual_weight)
-        stock.Piece_weight = int(stock.piece_weight)
+        stock.parent_stock_id = count_parent
+        stock.actual_number = int(stock.actual_number)
+        stock.actual_weight = int(stock.actual_weight)
+        stock.piece_weight = int(stock.piece_weight)
         if not stock.standard_address:
             stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         else:
-            # if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
+            # if datetime.datetime.strptime(str(stock.latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
             #         datetime.datetime.now() + datetime.timedelta(days=-2)):
-            #     stock.Priority = "超期清理"
-            # if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
-            #     stock.Priority = "合同逾期"
+            #     stock.priority = "超期清理"
+            # if datetime.datetime.strptime(str(stock.devperiod), "%Y%m%d") <= (datetime.datetime.now()):
+            #     stock.priority = "合同逾期"
             if stock.priority in ModelConfig.RG_PRIORITY:
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
@@ -246,5 +246,5 @@ def rename_pd(dataframe):
 if __name__ == "__main__":
     a = deal_stock()
     for i in a:
-        if i.Priority not in (1, 2, 3):
-            print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)
+        if i.priority not in (1, 2, 3):
+            print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)

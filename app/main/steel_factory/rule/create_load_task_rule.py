@@ -13,8 +13,8 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     :param load_task_type:
     :return:
     """
-    total_weight = sum(i.Actual_weight for i in stock_list)
-    all_product = set([i.Big_product_name for i in stock_list])
+    total_weight = sum(i.actual_weight for i in stock_list)
+    all_product = set([i.big_commodity_name for i in stock_list])
     remark = []
     for product in all_product:
         remark += ModelConfig.RG_VARIETY_VEHICLE[product]
@@ -24,28 +24,28 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task = LoadTask()
         load_task.load_task_id = load_task_id
         load_task.total_weight = total_weight / 1000
-        load_task.weight = i.Actual_weight / 1000
-        load_task.count = i.Actual_number
-        load_task.city = i.City
-        load_task.end_point = i.End_point
-        load_task.commodity = i.Small_product_name
-        load_task.notice_num = i.Delivery
-        load_task.oritem_num = i.Order
+        load_task.weight = i.actual_weight / 1000
+        load_task.count = i.actual_number
+        load_task.city = i.city
+        load_task.end_point = i.dlv_spot_name_end
+        load_task.commodity = i.commodity_name
+        load_task.notice_num = i.notice_num
+        load_task.oritem_num = i.oritem_num
         load_task.standard = i.specs
         load_task.sgsign = i.mark
-        load_task.outstock_code = i.Warehouse_out
-        load_task.instock_code = i.Warehouse_in
+        load_task.outstock_code = i.deliware_house
+        load_task.instock_code = i.deliware
         load_task.load_task_type = load_task_type
-        load_task.big_commodity = i.Big_product_name
-        load_task.receive_address = i.Address
+        load_task.big_commodity = i.big_commodity_name
+        load_task.receive_address = i.detail_address
         load_task.remark = ",".join(remark)
-        load_task.parent_load_task_id = i.Parent_stock_id
-        load_task.latest_order_time = i.Latest_order_time
+        load_task.parent_load_task_id = i.parent_stock_id
+        load_task.latest_order_time = i.latest_order_time
         # 得到翻转优先级的字典
         dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
-        if i.Priority not in dic_priority:
+        if i.priority not in dic_priority:
             load_task.priority = ""
         else:
-            load_task.priority = dic_priority[i.Priority]
+            load_task.priority = dic_priority[i.priority]
         load_task_list.append(load_task)
     return load_task_list

@@ -20,7 +20,7 @@ def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], l
     temp_dict = dict()
     # 选中的stock按照stock_id分类
     for compose_stock in compose_list:
-        temp_dict.setdefault(compose_stock.Stock_id, []).append(compose_stock)
+        temp_dict.setdefault(compose_stock.stock_id, []).append(compose_stock)
     new_compose_list = list()
     if temp_stock:
         new_compose_list.append(temp_stock)
@@ -28,12 +28,12 @@ def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], l
         # 获取被选中的原始stock
         general_stock = general_stock_dict.get(k)
         stock = v[0]
-        stock.Actual_number = len(v)
-        stock.Actual_weight = len(v) * stock.Piece_weight
+        stock.actual_number = len(v)
+        stock.actual_weight = len(v) * stock.piece_weight
         new_compose_list.append(stock)
-        general_stock.Actual_number -= len(v)
-        general_stock.Actual_weight = general_stock.Actual_number * general_stock.Piece_weight
-        if general_stock.Actual_number == 0:
+        general_stock.actual_number -= len(v)
+        general_stock.actual_weight = general_stock.actual_number * general_stock.piece_weight
+        if general_stock.actual_number == 0:
             general_stock_dict.pop(k)
     # 生成车次数据
     load_task_list.extend(
