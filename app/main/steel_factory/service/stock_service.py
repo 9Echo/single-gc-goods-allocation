@@ -118,7 +118,7 @@ def deal_stock():
     df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
     df_stock["需短溢重量"] = df_stock["需短溢重量"] * 1000
     # 窄带按捆包数计算，实际可发件数 = 捆包数
-    df_stock.loc[df_stock["品名"] == "窄带", ["实际可发件数"]] = df_stock["窄带捆包数"]
+    df_stock.loc[(df_stock["品名"] == "窄带") & (df_stock["窄带捆包数"] > 0), ["实际可发件数"]] = df_stock["窄带捆包数"]
     # 根据公式计算件重
     df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
     df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
@@ -143,7 +143,7 @@ def deal_stock():
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["Standard_address"].isnull(), ["Standard_address"]] = result["Address"]
-    # result.to_excel("3.xls")
+    result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
@@ -165,10 +165,10 @@ def deal_stock():
             #     stock.Priority = "超期清理"
             # if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
             #     stock.Priority = "合同逾期"
-            if stock.Priority:
+            if stock.Priority in ModelConfig.RG_PRIORITY:
                 stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
             else:
-                stock.Priority = 4
+                stock.Priority = 3
         # 按33000将货物分成若干份
         num = 33000 // stock.Piece_weight
         # 首先去除 件重大于33000的货物
@@ -246,4 +246,5 @@ def rename_pd(dataframe):
 if __name__ == "__main__":
     a = deal_stock()
     for i in a:
-        print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)
+        if i.Priority not in (1, 2, 3):
+            print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)
