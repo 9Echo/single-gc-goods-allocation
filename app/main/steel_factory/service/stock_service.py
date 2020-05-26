@@ -142,7 +142,7 @@ def deal_stock():
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     result = result.append(df_stock)
     result = rename_pd(result)
-    result.loc[result["Standard_address"].isnull(), ["Standard_address"]] = result["Address"]
+    result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
@@ -152,51 +152,51 @@ def deal_stock():
         count_parent += 1
         stock = Stock(record)
         stock.Parent_stock_id = count_parent
-        stock.Actual_number = int(stock.Actual_number)
-        stock.Actual_weight = int(stock.Actual_weight)
-        stock.Piece_weight = int(stock.Piece_weight)
-        if not stock.Standard_address:
-            stock.Standard_address = stock.Address
-        if stock.Priority == "客户催货":
-            stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
+        stock.Actual_number = int(stock.actual_number)
+        stock.Actual_weight = int(stock.actual_weight)
+        stock.Piece_weight = int(stock.piece_weight)
+        if not stock.standard_address:
+            stock.standard_address = stock.detail_address
+        if stock.priority == "客户催货":
+            stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         else:
             # if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
             #         datetime.datetime.now() + datetime.timedelta(days=-2)):
             #     stock.Priority = "超期清理"
             # if datetime.datetime.strptime(str(stock.Delivery_date), "%Y%m%d") <= (datetime.datetime.now()):
             #     stock.Priority = "合同逾期"
-            if stock.Priority in ModelConfig.RG_PRIORITY:
-                stock.Priority = ModelConfig.RG_PRIORITY[stock.Priority]
+            if stock.priority in ModelConfig.RG_PRIORITY:
+                stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
-                stock.Priority = 3
+                stock.priority = 3
         # 按33000将货物分成若干份
-        num = 33000 // stock.Piece_weight
+        num = 33000 // stock.piece_weight
         # 首先去除 件重大于33000的货物
         if num < 1:
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
-        elif num > stock.Actual_number:
+        elif num > stock.actual_number:
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
-            group_num = stock.Actual_number // num
-            left_num = stock.Actual_number % num
+            group_num = stock.actual_number // num
+            left_num = stock.actual_number % num
             copy_1 = copy.deepcopy(stock)
-            copy_1.Actual_number = int(left_num)
-            copy_1.Actual_weight = left_num * stock.Piece_weight
+            copy_1.actual_number = int(left_num)
+            copy_1.actual_weight = left_num * stock.piece_weight
             if left_num:
                 stock_list.append(copy_1)
             for q in range(int(group_num)):
                 copy_2 = copy.deepcopy(stock)
-                copy_2.Actual_weight = num * stock.Piece_weight
-                copy_2.Actual_number = int(num)
+                copy_2.actual_weight = num * stock.piece_weight
+                copy_2.actual_number = int(num)
                 stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.Priority, x.Latest_order_time), reverse=False)
+    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
     count = 1
     # 为排序的stock对象赋Id
     for num in stock_list:
-        num.Stock_id = count
+        num.stock_id = count
         count += 1
     return stock_list
 
@@ -214,29 +214,29 @@ def rename_pd(dataframe):
     """
     dataframe.rename(index=str,
                      columns={
-                         "发货通知单": "Delivery",
-                         "订单号": "Order",
-                         "优先发运": "Priority",
-                         "收货用户": "Consumer",
-                         "品名名称": "Small_product_name",
-                         "品名": "Big_product_name",
+                         "发货通知单": "notice_num",
+                         "订单号": "oritem_num",
+                         "优先发运": "priority",
+                         "收货用户": "consumer",
+                         "品名名称": "commodity_name",
+                         "品名": "big_commodity_name",
                          "牌号": "mark",
                          "规格": "specs",
-                         "出库仓库": "Warehouse_out",
-                         "省份": "Province",
-                         "城市": "City",
-                         "终点": "End_point",
-                         "物流公司类型": "Logistics",
-                         "包装形式": "Pack_form",
-                         "卸货地址": "Address",
-                         "最新挂单时间": "Latest_order_time",
-                         "合同约定交货日期": "Delivery_date",
-                         "实际可发重量": "Actual_weight",
-                         "实际可发件数": "Actual_number",
-                         "件重": "Piece_weight",
-                         "入库仓库": "Warehouse_in",
-                         "卸货地址2": "Standard_address",
-                         "实际终点": "Actual_end_point"
+                         "出库仓库": "deliware_house",
+                         "省份": "province",
+                         "城市": "city",
+                         "终点": "dlv_spot_name_end",
+                         "物流公司类型": "logistics_company_type",
+                         "包装形式": "pack",
+                         "卸货地址": "detail_address",
+                         "最新挂单时间": "latest_order_time",
+                         "合同约定交货日期": "devperiod",
+                         "实际可发重量": "actual_weight",
+                         "实际可发件数": "actual_number",
+                         "件重": "piece_weight",
+                         "入库仓库": "deliware",
+                         "卸货地址2": "standard_address",
+                         "实际终点": "actual_end_point"
 
                      },
                      inplace=True)
