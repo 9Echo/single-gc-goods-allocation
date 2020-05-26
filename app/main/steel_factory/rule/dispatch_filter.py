@@ -2,10 +2,8 @@
 # @Time    : 2019/11/15 14:03
 # @Author  : Zihao.Liu
 import copy
-from typing import Dict, List, Any
-from app.main.steel_factory.entity.load_task import LoadTask
+from typing import Dict, List
 from app.main.steel_factory.entity.stock import Stock
-from app.main.steel_factory.rule import pulp_solve
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.goods_filter_rule import goods_filter
 from app.main.steel_factory.rule.layer_filter_rule import layer_filter
@@ -17,12 +15,21 @@ from model_config import ModelConfig
 def dispatch_filter(load_task_list, stock_list):
     # 甩货列表
     surplus_stock_dict = dict()
+    # 优先考虑的货物列表
+    prioritize_list: List[Stock] = list()
+    # 剩余货物列表
+    surplus_list: List[Stock] = list()
+    # 分类
+    for i in stock_list:
+        if i.Piece_weight >= ModelConfig.RG_SECOND_MIN_WEIGHT and i.Priority in [1, 2]:
+            prioritize_list.append(i)
+        else:
+            surplus_list.append(i)
+
     # 标载车次列表
-    standard_stock_list = list(
-        filter(lambda x: x.Actual_weight >= ModelConfig.RG_MIN_WEIGHT, stock_list))
+    standard_stock_list = list(filter(lambda x: x.Actual_weight >= ModelConfig.RG_MIN_WEIGHT, stock_list))
     # 普通车次列表
-    general_stock_list = list(
-        filter(lambda x: x.Actual_weight < ModelConfig.RG_MIN_WEIGHT, stock_list))
+    general_stock_list = list(filter(lambda x: x.Actual_weight < ModelConfig.RG_MIN_WEIGHT, stock_list))
     # 标载车次拼凑一装一卸小件货物
     for standard_stock in standard_stock_list:
         # 可拼车列表
@@ -50,11 +57,5 @@ def dispatch_filter(load_task_list, stock_list):
         first_surplus_stock_dict = layer_filter(general_stock_dict, load_task_list, DispatchType.FIRST,
                                                 ModelConfig.RG_MIN_WEIGHT)
         surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.SECOND,
-                                          ModelConfig.SECOND_RG_MIN_WEIGHT)
+                                          ModelConfig.RG_MIN_WEIGHT)
     return surplus_stock_dict
-
-
-
-
-
-
