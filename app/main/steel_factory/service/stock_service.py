@@ -140,6 +140,9 @@ def deal_stock():
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
+    df_stock["sort"] = 3
+    df_stock.loc[(df_stock["件重"] >= ModelConfig.RG_SECOND_MIN_WEIGHT) & (df_stock["件重"] < ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 1
+    df_stock.loc[(df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["件重"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
@@ -163,8 +166,6 @@ def deal_stock():
             # if datetime.datetime.strptime(str(stock.latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
             #         datetime.datetime.now() + datetime.timedelta(days=-2)):
             #     stock.priority = "超期清理"
-            # if datetime.datetime.strptime(str(stock.devperiod), "%Y%m%d") <= (datetime.datetime.now()):
-            #     stock.priority = "合同逾期"
             if stock.priority in ModelConfig.RG_PRIORITY:
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
@@ -192,7 +193,7 @@ def deal_stock():
                 copy_2.actual_number = int(num)
                 stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
+    stock_list.sort(key=lambda x: (x.sort, x.priority, x.latest_order_time), reverse=False)
     count = 1
     # 为排序的stock对象赋Id
     for num in stock_list:
@@ -246,5 +247,6 @@ def rename_pd(dataframe):
 if __name__ == "__main__":
     a = deal_stock()
     for i in a:
-        if i.priority not in (1, 2, 3):
-            print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)
+        print(i.sort, i.priority, i.latest_order_time)
+        # if i.priority not in (1, 2, 3):
+        #     print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)
