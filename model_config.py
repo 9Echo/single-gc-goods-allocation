@@ -4,7 +4,7 @@ class ModelConfig:
     # 日钢标载
     RG_MAX_WEIGHT = 33000
     RG_MIN_WEIGHT = 31000
-    SECOND_RG_MIN_WEIGHT = 29000
+    RG_SECOND_MIN_WEIGHT = 24000
     RG_PRIORITY = {'客户催货': 1, '超期清理': 2}
     RG_PRIORITY_GRADE = {1: "A", 2: "B", 3: "C", 4: "D"}
     RG_COMMODITY_GROUP = {'型钢': ['型钢'],
