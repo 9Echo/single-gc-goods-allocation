@@ -40,6 +40,9 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         # 取第一个
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
+        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
+            result_dict = {**result_dict, **general_stock_dict}
+            break
         # 约束
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight \
             if dispatch_type is DispatchType.FIRST else ModelConfig.RG_MAX_WEIGHT
@@ -53,7 +56,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             temp_list = split(filter_dict)
             # 选中的列表
             compose_list, value = goods_filter(temp_list, surplus_weight)
-            if dispatch_type is DispatchType.FIRST:
+            if dispatch_type is DispatchType.FIRST or dispatch_type is DispatchType.SECOND:
                 if (value + temp_stock.actual_weight) >= min_weight:
                     calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                     continue
@@ -81,6 +84,9 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         # 取第一个
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
+        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
+            result_dict = {**result_dict, **general_stock_dict}
+            break
         is_error = True
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight \
             if dispatch_type is DispatchType.FIRST else ModelConfig.RG_MAX_WEIGHT
@@ -106,7 +112,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                     temp_list = split(temp_dict)
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
-                    if dispatch_type is DispatchType.FIRST:
+                    if dispatch_type is DispatchType.FIRST or dispatch_type is DispatchType.SECOND:
                         if (value + temp_stock.actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_2.value)
@@ -139,8 +145,10 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         # 取第一个
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
+        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
+            result_dict = {**result_dict, **general_stock_dict}
+            break
         # 拆分成件的stock列表
-
         is_error = True
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight \
             if dispatch_type is DispatchType.FIRST else ModelConfig.RG_MAX_WEIGHT
@@ -161,7 +169,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                     temp_list = split(temp_dict)
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
-                    if dispatch_type is DispatchType.FIRST:
+                    if dispatch_type is DispatchType.FIRST or dispatch_type is DispatchType.SECOND:
                         if (value + temp_stock.actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_3.value)
@@ -194,6 +202,9 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         # 取第一个
         stock_id = list(general_stock_dict.keys())[0]
         temp_stock = general_stock_dict.get(stock_id)
+        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
+            result_dict = {**result_dict, **general_stock_dict}
+            break
         is_error = True
         surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight \
             if dispatch_type is DispatchType.FIRST else ModelConfig.RG_MAX_WEIGHT
@@ -215,7 +226,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                     temp_list = split(temp_dict)
                     # 选中的列表
                     compose_list, value = goods_filter(temp_list, surplus_weight)
-                    if dispatch_type is DispatchType.FIRST:
+                    if dispatch_type is DispatchType.FIRST or dispatch_type is DispatchType.SECOND:
                         if (value + temp_stock.actual_weight) >= min_weight:
                             calculate(compose_list, general_stock_dict, load_task_list, temp_stock,
                                       LoadTaskType.TYPE_4.value)

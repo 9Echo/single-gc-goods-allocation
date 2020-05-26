@@ -14,8 +14,9 @@ class LoadTaskType(Enum):
 
 class DispatchType(Enum):
     """
-    两次筛选匹配
+    三次筛选匹配
     """
     FIRST = 1
     SECOND = 2
+    THIRD = 3
 
