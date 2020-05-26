@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
-
-
 import copy
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
