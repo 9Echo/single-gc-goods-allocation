@@ -326,7 +326,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.latest_order_time = i.Latest_order_time
         # 得到翻转优先级的字典
         dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
-        if i.Priority == 4:
+        if i.Priority not in dic_priority:
             load_task.priority = ""
         else:
             load_task.priority = dic_priority[i.Priority]

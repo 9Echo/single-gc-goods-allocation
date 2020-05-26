@@ -20,7 +20,7 @@ def model_filter(delivery_items: list):
     task_id = 0
     # 提货单明细列表
     item_list = []
-    # 剩余的发货子单
+    # 剩余超重的发货子单
     left_items = delivery_items
     for i in copy.copy(delivery_items):
         new_max_weight = g.RD_LX_MAX_WEIGHT if i.product_type in ModelConfig.RD_LX_GROUP else g.MAX_WEIGHT
