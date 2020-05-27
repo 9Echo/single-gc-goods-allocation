@@ -154,10 +154,10 @@ def deal_stock():
     for record in dic:
         count_parent += 1
         stock = Stock(record)
-        stock.Parent_stock_id = count_parent
-        stock.Actual_number = int(stock.actual_number)
-        stock.Actual_weight = int(stock.actual_weight)
-        stock.Piece_weight = int(stock.piece_weight)
+        stock.parent_stock_id = count_parent
+        stock.actual_number = int(stock.actual_number)
+        stock.actual_weight = int(stock.actual_weight)
+        stock.piece_weight = int(stock.piece_weight)
         if not stock.standard_address:
             stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
@@ -170,6 +170,7 @@ def deal_stock():
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
                 stock.priority = 3
+        stock.sort = 3 if stock.priority not in ModelConfig.RG_PRIORITY.values() else stock.sort
         # 按33000将货物分成若干份
         num = 33000 // stock.piece_weight
         # 首先去除 件重大于33000的货物
