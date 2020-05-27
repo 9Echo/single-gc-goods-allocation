@@ -3,9 +3,8 @@
 # @Author  : Zihao.Liu
 import copy
 from flask import g
-from app.main.pipe_factory.rule import package_solution
+from app.main.pipe_factory.rule import package_solution, weight_rule
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
-from app.task.optimize_task.analysis.rules import weight_rule
 from model_config import ModelConfig
 
 
@@ -32,7 +31,7 @@ def filter(delivery_items: list, task_id=0):
     # 如果有超重的子单，进行compose
     while left_items:
         # 每次取第一个元素进行compose,  filtered_items是得到的一个饱和(饱和即已达到重量上限)的子单
-        filtered_items, left_items = weight_rule.compose([left_items[0]], left_items)
+        filtered_items, left_items = weight_rule.compose_optimize([left_items[0]], left_items)
         # 如果过滤完后没有可用的发货子单则返回
         if not filtered_items:
             break

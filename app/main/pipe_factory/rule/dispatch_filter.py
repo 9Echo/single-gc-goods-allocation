@@ -32,7 +32,7 @@ def model_filter(delivery_items: list):
     # 如果有超重的子单，进行compose
     while left_items:
         # 每次取第一个元素进行compose,  filtered_item是得到的一个饱和(饱和即已达到重量上限)的子单
-        filtered_item, left_items = weight_rule.compose(left_items[0], left_items)
+        filtered_item, left_items = weight_rule.compose_spec(left_items[0], left_items)
         item_list.append(filtered_item)
     # 上一步filtered_item中可能含有weight为0的子项，为无效子项
     item_list = list(filter(lambda x: x.weight > 0, item_list))

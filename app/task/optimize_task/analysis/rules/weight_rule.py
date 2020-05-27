@@ -9,7 +9,7 @@ from app.util.uuid_util import UUIDUtil
 from model_config import ModelConfig
 
 
-def compose(filtered_items: list, left_items: list):
+def compose_optimize(filtered_items: list, left_items: list):
     """重量过滤规则：
     1.总重量不超过35吨
     2.对所有订单项排序，从大到小装到35吨的发货单中，如果总重量超过35吨，则把多出来的货切分为新的子发货单
@@ -36,7 +36,7 @@ def compose(filtered_items: list, left_items: list):
             left_items.remove(item)
         else:
             # 当总重量超过发货单最大重量时，对最后一个放入的子发货单进行分单
-            item, new_item = split_item(item, total_weight - (new_max_weight or g.MAX_WEIGHT))
+            item, new_item = split_item_optimize(item, total_weight - (new_max_weight or g.MAX_WEIGHT))
             if new_item:
                 candidate_items.append(item)
                 left_items.remove(item)
@@ -45,7 +45,7 @@ def compose(filtered_items: list, left_items: list):
     return candidate_items, left_items
 
 
-def split_item(item, delta_weight):
+def split_item_optimize(item, delta_weight):
     """拆分超重的订单，将子项全部转为散根计算"""
     left_pcs = item.total_pcs - math.ceil(item.total_pcs * (delta_weight / item.weight))
     if left_pcs > 0:
