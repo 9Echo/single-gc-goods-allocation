@@ -170,7 +170,7 @@ def deal_stock():
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
                 stock.priority = 3
-        stock.sort = 3 if stock.priority not in ModelConfig.RG_PRIORITY.values() else stock.sort
+        stock.sort = 3 if stock.sort == 1 and stock.priority not in ModelConfig.RG_PRIORITY.values() else stock.sort
         # 按33000将货物分成若干份
         num = 33000 // stock.piece_weight
         # 首先去除 件重大于33000的货物
