@@ -1,85 +1,98 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2019/11/11 17:20
-# @Author  : Zihao.Liu
-# Modified: shaoluyu 2019/11/13
 import copy
-import math
-from threading import Thread
 
-from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
-from app.main.pipe_factory.model.optimize_filter import optimize_filter_max, optimize_filter_min
-from app.main.pipe_factory.rule import weight_rule
-from app.main.pipe_factory.service import redis_service
-from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
-from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
-from app.main.pipe_factory.service.dispatch_load_task_service import dispatch_load_task_optimize
-from app.main.pipe_factory.service.replenish_property_service import replenish_property
-from app.task.optimize_task.analysis.rules import dispatch_filter
-from app.util.uuid_util import UUIDUtil
-from model_config import ModelConfig
 import pandas as pd
 from flask import g
+from app.main.pipe_factory.rule import weight_rule, package_solution
+from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.service.dispatch_load_task_service import dispatch_load_task_optimize
+from app.main.pipe_factory.service.replenish_property_service import replenish_property
+from app.util.uuid_util import UUIDUtil
 
+from model_config import ModelConfig
 
-def dispatch(order):
-    """根据订单执行分货
+def optimize_filter_max(delivery_items: list, task_id=0):
     """
-    # 1、将订单项转为发货通知单子单的list
-    delivery_item_list = CreateDeliveryItem(order)
-    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
-    if not delivery_item_list.success:
-        return delivery_item_list.failsheet()
-    else:
-        # 调用optimize()，即将大小管分开
-        max_delivery_items, min_delivery_items = delivery_item_list.optimize()
+    根据过滤规则将传入的发货子单划分到合适的发货单中
+    """
+    # 返回的提货单列表
+    sheets = []
+    # 提货单明细列表
+    item_list = []
+    # 剩余的发货子单
+    left_items = delivery_items
+    new_max_weight = 0
+    # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
+    for i in copy.copy(delivery_items):
+        if i.product_type in ModelConfig.RD_LX_GROUP:
+            new_max_weight = g.RD_LX_MAX_WEIGHT
+        if i.weight < (new_max_weight or g.MAX_WEIGHT):
+            item_list.append(i)
+            left_items.remove(i)
+    if left_items:
+        left_items.sort(key=lambda i: i.weight, reverse=True)
+    # 如果有超重的子单，进行compose
+    while left_items:
+        # 每次取第一个元素进行compose,  filtered_items是得到的一个饱和(饱和即已达到重量上限)的子单
+        filtered_items, left_items = weight_rule.compose_optimize([left_items[0]], left_items)
+        # 如果过滤完后没有可用的发货子单则返回
+        if not filtered_items:
+            break
+        item_list.extend(filtered_items)
 
-    if max_delivery_items:
-        # 2、使用模型过滤器生成发货通知单
-        sheets, task_id = optimize_filter_max(max_delivery_items)
-        # 3、补充发货单的属性
-        batch_no = UUIDUtil.create_id("ba") #batch_no 在后面的装车需要
-        replenish_property(sheets, order, batch_no)
-
-        # 4、为发货单分配车次
-        task_id = dispatch_load_task_optimize(sheets, task_id)
-    
-    #
-    if min_delivery_items:
-        # 小管装填大管车次,这个操作没整合到optimize_filter（只处理了大管）,中间还差了一步发配车次，
-        optimize_filter_min(sheets, min_delivery_items, task_id, order, batch_no)
-    # 车次提货单合并
-    combine_sheets(sheets)
-    sheets.sort(key=lambda i: i.load_task_id)
-    # 6、将推荐发货通知单暂存redis
-    Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
-    return sheets
-
-
-
-def sort_by_weight(sheets):
-    sheets_dict = [sheet.as_dict() for sheet in sheets]
-    new_sheets = []
-    if sheets_dict:
-        df = pd.DataFrame(sheets_dict)
-        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
-        task_id = 0
-        for k, v in series.items():
+    while item_list:
+        # 是否满载标记
+        is_full = False
+        weight_cost = []
+        for item in item_list:
+            weight_cost.append((int(item.weight), float(item.volume), int(item.weight)))
+        # 将所有子单进行背包选举
+        final_weight, result_list = \
+            package_solution.dynamic_programming(len(item_list),
+                                                 (new_max_weight or g.PACKAGE_MAX_WEIGHT),
+                                                 ModelConfig.MAX_VOLUME, weight_cost)
+        if final_weight == 0:
+            break
+        # temp_item_list = copy.copy(item_list)
+        # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
+        if ((new_max_weight or g.PACKAGE_MAX_WEIGHT) - ModelConfig.PACKAGE_LOWER_WEIGHT) < \
+                final_weight < (new_max_weight or g.PACKAGE_MAX_WEIGHT):
+            is_full = True
+        # 记录体积之和
+        # volume = 0
+        # 临时明细存放
+        temp_item_list = []
+        # 临时提货单存放
+        temp_sheet_list = []
+        for i in range(len(result_list)):
+            if result_list[i] == 1:
+                sheet = DeliverySheet()
+                # 取出明细列表对应下标的明细
+                sheet.items = [item_list[i]]
+                # 设置提货单总体积占比
+                sheet.volume = item_list[i].volume
+                sheet.type = 'recommend_first'
+                # 累加明细体积占比
+                # volume += item_list[i].volume
+                # 分别加入临时提货单和明细
+                temp_item_list.append(item_list[i])
+                temp_sheet_list.append(sheet)
+        # 体积占比满足限制赋车次号
+        if is_full:
             task_id += 1
-            doc_type = '提货单'
-            no = 0
-            current_sheets = list(filter(lambda i: i.load_task_id == k, sheets))
-            for sheet in current_sheets:
-                no += 1
-                sheet.load_task_id = task_id
-                sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
-                for item in sheet.items: item.delivery_no = sheet.delivery_no
-                new_sheets.append(sheet)
-                sheets.remove(sheet)
-    return new_sheets
+            # 批量赋车次号
+            for i in temp_sheet_list:
+                i.load_task_id = task_id
+        sheets.extend(temp_sheet_list)
+        # 整体移除被开走的明细
+        for i in temp_item_list:
+            item_list.remove(i)
 
+    return sheets, task_id
 
-def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
+#原load_task_fill()
+def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
     """
+
     小管装填大管车次，将小管按照件数从小到大排序
     若小管不够，分完结束
     若小管装填完所有车次后有剩余，进行背包和遍历
@@ -92,7 +105,7 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
     """
     if not sheets:
         # 2、使用模型过滤器生成发货通知单
-        min_sheets, task_id = dispatch_filter.optimize_filter(min_delivery_item)
+        min_sheets, task_id = optimize_filter_max(min_delivery_item)
         # 3、补充发货单的属性
         replenish_property(sheets, order, batch_no)
         # 为发货单分配车次
@@ -156,7 +169,7 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
         # 装填完如果小管还有剩余，进行单独分货
         if min_delivery_item:
             # 2、使用模型过滤器生成发货通知单
-            min_sheets, task_id = dispatch_filter.optimize_filter(min_delivery_item, task_id)
+            min_sheets, task_id = optimize_filter_max(min_delivery_item, task_id)
             # 3、补充发货单的属性
             for sheet in min_sheets:
                 sheet.batch_no = batch_no
@@ -171,3 +184,6 @@ def load_task_fill(sheets, min_delivery_item, task_id, order, batch_no):
             # 为发货单分配车次
             dispatch_load_task_optimize(min_sheets, task_id)
             sheets.extend(min_sheets)
+
+if __name__ == '__main__':
+    pass

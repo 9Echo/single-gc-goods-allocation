@@ -8,7 +8,7 @@ from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from model_config import ModelConfig
 
 
-def filter(delivery_items: list, task_id=0):
+def optimize_filter(delivery_items: list, task_id=0):
     """
     根据过滤规则将传入的发货子单划分到合适的发货单中
     """

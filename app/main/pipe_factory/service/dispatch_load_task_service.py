@@ -1,4 +1,4 @@
-#1
+
 import copy
 
 from flask import g

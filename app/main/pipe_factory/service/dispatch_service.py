@@ -6,6 +6,8 @@ import copy
 import math
 import pandas as pd
 from threading import Thread
+
+from app.main.pipe_factory.model.spec_filter import spec_filter
 from app.main.pipe_factory.rule import dispatch_filter, weight_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
@@ -33,7 +35,7 @@ def dispatch(order):
     else:
         delivery_item_spec_list=delivery_item_list.spec()#调用spec()，即规格优先来处理
     # 2、使用模型过滤器生成发货通知单
-    sheets, task_id = dispatch_filter.model_filter(delivery_item_spec_list)
+    sheets, task_id = spec_filter(delivery_item_spec_list)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
     replenish_property(sheets, order, batch_no)
@@ -46,31 +48,4 @@ def dispatch(order):
     return sheets
 
 
-
-
-def sort_by_weight(sheets):
-    """
-    车次按重量排序
-    :param sheets:
-    :return:
-    """
-    sheets_dict = [sheet.as_dict() for sheet in sheets]
-    new_sheets = []
-    if sheets_dict:
-        df = pd.DataFrame(sheets_dict)
-        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
-        task_id = 0
-        for k, v in series.items():
-            task_id += 1
-            doc_type = '提货单'
-            no = 0
-            current_sheets = list(filter(lambda i: i.load_task_id == k, sheets))
-            for sheet in current_sheets:
-                no += 1
-                sheet.load_task_id = task_id
-                sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
-                for item in sheet.items: item.delivery_no = sheet.delivery_no
-            new_sheets.append(sheet)
-            sheets.remove(sheet)
-    return new_sheets
 
