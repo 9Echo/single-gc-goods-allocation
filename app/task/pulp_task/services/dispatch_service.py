@@ -8,6 +8,7 @@ from app.main.pipe_factory.rule import product_type_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.main.pipe_factory.service import redis_service
+from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.task.pulp_task.analysis.rules import pulp_solve
 from app.util import weight_calculator
 from app.util.uuid_util import UUIDUtil
@@ -17,14 +18,16 @@ from model_config import ModelConfig
 def dispatch(order):
     """根据订单执行分货
     """
-    delivery_items, new_max_weight, is_success = create_sheet_item(order)
-    if not is_success:
-        sheet = DeliverySheet()
-        sheet.weight = '0'
-        sheet.items = delivery_items
-        return sheet
-    weight_list, volume_list, value_list = create_variable_list(delivery_items)
-    sheets = call_pulp_solve(weight_list, volume_list, value_list, delivery_items, order, new_max_weight)
+    # 1、将订单项转为发货通知单子单的list
+    delivery_item_list= CreateDeliveryItem(order)
+    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
+    if not delivery_item_list.success:
+        return delivery_item_list.failsheet()
+    else:
+        delivery_item_weight_list,new_max_weight = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
+
+    weight_list, volume_list, value_list = create_variable_list(delivery_item_weight_list)
+    sheets = call_pulp_solve(weight_list, volume_list, value_list, delivery_item_weight_list, order, new_max_weight)
     # 归类合并
     combine_sheets(sheets)
     # 将推荐发货通知单暂存redis
@@ -104,6 +107,7 @@ def create_sheet_item(order):
             product_type = item.product_type
             if product_type in ModelConfig.RD_LX_GROUP:
                 new_max_weight = g.RD_LX_MAX_WEIGHT
+
         for _ in range(item.quantity):
             di = DeliveryItem()
             di.product_type = item.product_type

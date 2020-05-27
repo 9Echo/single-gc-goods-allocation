@@ -17,10 +17,11 @@ class OrderRoute(Resource):
     def post():
         """输入订单，返回开单结果
         """
+        print("yes")
         if request.get_data():
-            json_data = json.loads(request.get_data().decode("utf-8"))
+            order_data = json.loads(request.get_data().decode("utf-8"))
             # 数据初始化
-            order = order_service.generate_order(json_data['data'])
+            order = order_service.generate_order(order_data['data'])
             # 规格优先
             sheets_1 = dispatch_service_spec.dispatch(order)
             # 重量优先
@@ -28,5 +29,5 @@ class OrderRoute(Resource):
             # 综合
             sheets_3 = dispatch_service_optimize.dispatch(order)
 
-            return Result.success_response(sheets_2)
+            return Result.success_response(sheets_1+sheets_2+sheets_3)
 

@@ -9,6 +9,7 @@ from threading import Thread
 from app.main.pipe_factory.rule import dispatch_filter, weight_rule, product_type_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
+from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.main.pipe_factory.service import redis_service
 from app.util import weight_calculator
 from app.util.aspect.method_before import get_item_a, set_weight
@@ -22,16 +23,15 @@ from flask import g
 def dispatch(order):
     """根据订单执行分货
     """
-    # 1、将订单项转为发货通知单子单
-    delivery_items, is_success = create_sheet_item(order)
-    # 计算异常，找不到基础信息
-    if not is_success:
-        sheet = DeliverySheet()
-        sheet.weight = '0'
-        sheet.items = delivery_items
-        return [sheet]
+    # 1、将订单项转为发货通知单子单的list
+    delivery_item_list= CreateDeliveryItem(order)
+    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
+    if not delivery_item_list.success:
+        return delivery_item_list.failsheet()
+    else:
+        delivery_item_spec_list=delivery_item_list.spec()#调用spec()，即规格优先来处理
     # 2、使用模型过滤器生成发货通知单
-    sheets, task_id = dispatch_filter.model_filter(delivery_items)
+    sheets, task_id = dispatch_filter.model_filter(delivery_item_spec_list)
     # 3、补充发货单的属性
     replenish_property(sheets, order)
     # 4、为发货单分配车次
