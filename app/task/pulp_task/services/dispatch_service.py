@@ -8,6 +8,7 @@ from app.main.pipe_factory.rule import product_type_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.main.pipe_factory.service import redis_service
+from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
 from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.main.pipe_factory.service.replenish_property_service import replenish_property
 from app.task.pulp_task.analysis.rules import pulp_solve
@@ -35,13 +36,13 @@ def dispatch(order):
     replenish_property(sheets, order,batch_no)
 
     # 归类合并
-    combine_sheets(sheets)
+    combine_sheets(sheets,type='weight')
     # 将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
 
 
-def combine_sheets(sheets):
+def combine_sheets1(sheets):
     """合并因拼单被打散的发货单
     合并场景1：品类和物资代码相同的子发货单合并为1个子发货单
     合并场景2：品类相同物资代码不同的子发货单合并为1个发货单

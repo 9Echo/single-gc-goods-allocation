@@ -8,6 +8,7 @@ import pandas as pd
 from threading import Thread
 from app.main.pipe_factory.rule import dispatch_filter, weight_rule, product_type_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
+from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
 from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.main.pipe_factory.service import redis_service
 from app.main.pipe_factory.service.replenish_property_service import replenish_property
@@ -202,62 +203,6 @@ def split_sheet(sheet, limit_weight):
         return sheet, None
 
 
-def combine_sheets(sheets):
-    """合并因拼单被s
-    合并场景1：品类和物资代码相同的子发货单合并为1个子发货单
-    合并场景2：品类相同物资代码不同的子发货单合并为1个发货单
-    合并场景3：品类不同但是同属于一个similar group内的子发货单合并为1个发货单
-    合并后如果被合并的发货单中没有剩余子单则删除该发货单
-    """
-    # 先根据车次号将发货单分组，然后对每组内发货单进行合并
-    load_task_dict = {}
-    for sheet in sheets:
-        load_task_dict.setdefault(sheet.load_task_id, []).append(sheet)
-    for load_task_id, sheet_group in load_task_dict.items():
-        product_dict = {}
-        for current in sheet_group:
-            source = None
-            # 取出当前组内的发货单，根据发货单中第一个子单的品类映射到product_dict上，每个品类对应的发货单作为合并的母体
-            product_type = product_type_rule.get_product_type(current.items[0])
-            if not product_dict.__contains__(product_type):
-                product_dict[product_type] = current
-                source = current
-            else:
-                source = product_dict[product_type]
-                # 先将current的所有子单合并到source中，然后从sheets中删除被合并的发货单
-                source.items.extend(current.items)
-                source.weight += current.weight
-                source.total_pcs += current.total_pcs
-                source.volume += current.volume
-                sheets.remove(current)
-            # 再判断物资代码是否相同，如果相同则认为同一种产品，将子单合并
-            item_id_dict = {}
-            # 如果发现重量为0的明细，移除
-            for citem in copy.copy(source.items):
-                if citem.weight == 0:
-                    source.items.remove(citem)
-                    continue
-                if not item_id_dict.__contains__('{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)):
-                    item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)] = citem
-                else:
-                    sitem = item_id_dict['{},{},{}'.format(citem.item_id, citem.material, citem.f_loc)]
-                    sitem.quantity += citem.quantity
-                    sitem.free_pcs += citem.free_pcs
-                    sitem.total_pcs += citem.total_pcs
-                    sitem.weight += citem.weight
-                    sitem.volume += citem.volume
-                    source.items.remove(citem)
-        # 对当前车次做完合并后，重新对单号赋值
-        current_sheets = list(filter(lambda i: i.load_task_id == load_task_id, sheets))
-        doc_type = '提货单'
-        no = 0
-        for sheet in current_sheets:
-            no += 1
-            sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
-            for j in sheet.items:
-                j.delivery_no = sheet.delivery_no
-
-
 def sort_by_weight(sheets):
     """
     车次按重量排序
@@ -284,55 +229,3 @@ def sort_by_weight(sheets):
             sheets.remove(sheet)
     return new_sheets
 
-
-def create_sheet_item(order):
-    """
-    创建提货单子项
-    :param order:
-    :return:
-    """
-    delivery_items = []
-    for item in order.items:
-        di = DeliveryItem()
-        di.product_type = item.product_type
-        di.spec = item.spec
-        di.quantity = item.quantity
-        di.free_pcs = item.free_pcs
-        di.item_id = item.item_id
-        di.material = item.material
-        di.f_whs = item.f_whs
-        di.f_loc = item.f_loc
-        di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
-        di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
-        di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
-        # 如果遇到计算不出来的明细，返回0停止计算
-        if di.weight == 0:
-            return [di], False
-        # 如果该明细有件数上限并且单规格件数超出，进行切单
-        if di.max_quantity and di.quantity > di.max_quantity:
-            # copy次数
-            count = math.floor(di.quantity / di.max_quantity)
-            # 最后一个件数余量
-            surplus = di.quantity % di.max_quantity
-            # 标准件数的重量和总根数
-            new_weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.max_quantity, 0)
-            new_total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.max_quantity, 0)
-            # 创建出count个拷贝的新明细，散根数为0，件数为标准件数，总根数为标准总根数，体积占比近似为1
-            for i in range(0, count):
-                copy_di = copy.deepcopy(di)
-                copy_di.free_pcs = 0
-                copy_di.quantity = di.max_quantity
-                copy_di.volume = 1
-                copy_di.weight = new_weight
-                copy_di.total_pcs = new_total_pcs
-                # 将新明细放入明细列表
-                delivery_items.append(copy_di)
-            # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
-            di.quantity = surplus
-            di.volume = di.quantity / di.max_quantity if di.max_quantity else 0
-            di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
-            di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
-
-        delivery_items.append(di)
-    return delivery_items, True
