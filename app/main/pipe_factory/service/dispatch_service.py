@@ -8,9 +8,9 @@ import pandas as pd
 from threading import Thread
 from app.main.pipe_factory.rule import dispatch_filter, weight_rule, product_type_rule
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
-from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.main.pipe_factory.service import redis_service
+from app.main.pipe_factory.service.replenish_property_service import replenish_property
 from app.util import weight_calculator
 from app.util.aspect.method_before import get_item_a, set_weight
 from app.util.uuid_util import UUIDUtil
@@ -33,7 +33,8 @@ def dispatch(order):
     # 2、使用模型过滤器生成发货通知单
     sheets, task_id = dispatch_filter.model_filter(delivery_item_spec_list)
     # 3、补充发货单的属性
-    replenish_property(sheets, order)
+    batch_no = UUIDUtil.create_id("ba")
+    replenish_property(sheets, order, batch_no)
     # 4、为发货单分配车次
     dispatch_load_task(sheets, task_id)
     # 5、车次提货单按类合并
@@ -335,23 +336,3 @@ def create_sheet_item(order):
 
         delivery_items.append(di)
     return delivery_items, True
-
-
-def replenish_property(sheets, order):
-    """
-
-    :param order:
-    :param sheets:
-    :return:
-    """
-    batch_no = UUIDUtil.create_id("ba")
-    for sheet in sheets:
-        sheet.batch_no = batch_no
-        sheet.customer_id = order.customer_id
-        sheet.salesman_id = order.salesman_id
-        sheet.weight = 0
-        sheet.total_pcs = 0
-        for di in sheet.items:
-            di.delivery_item_no = UUIDUtil.create_id("di")
-            sheet.weight += di.weight
-            sheet.total_pcs += di.total_pcs

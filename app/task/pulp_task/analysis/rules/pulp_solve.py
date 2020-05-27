@@ -19,7 +19,19 @@ def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
         prob += lpDot(volume_list, x) <= ModelConfig.MAX_VOLUME
     # 解题
     prob.solve()
-    # print(int(value(prob.objective)))
-    # print(len([i for i in r if value(x[i]) > 0.5]))
-    # print(len(result_index_list))
+    #print(int(value(prob.objective)))
+    #print([i for i in r if value(x[i]) > 0.5])
+
     return [i for i in r if value(x[i]) > 0.5], int(value(prob.objective))
+
+if __name__ == '__main__':
+
+    weight_list=[16,6,3,1,8,9]
+    volume_list=[0.4,0.4,0.2,0.2,0.2,0.4]
+    value_list=[16,6,3,1,8,9]
+    new_max_weight=33
+    L,weight=pulp_pack(weight_list, volume_list, value_list, new_max_weight)
+    for i in sorted(L, reverse=True):
+        print(i)
+
+    print(L,weight)
