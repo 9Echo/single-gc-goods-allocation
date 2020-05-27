@@ -36,5 +36,5 @@ def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], l
         if general_stock.actual_number == 0:
             general_stock_dict.pop(k)
     # 生成车次数据
-    load_task_list.extend(
+    load_task_list.append(
         create_load_task(new_compose_list, TrainId.get_id(), load_task_type))

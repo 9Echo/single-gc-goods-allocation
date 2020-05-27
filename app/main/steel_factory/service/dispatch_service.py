@@ -33,7 +33,7 @@ def dispatch() -> List[LoadTask]:
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
-        load_task_list.extend(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
+        load_task_list.append(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
     return merge_result(load_task_list)
 
 
@@ -48,35 +48,38 @@ def merge_result(load_task_list: list):
 
     """
     result_dic = {}
-    priority_dic = {}
-    latest_order_time_dic = {}
     last_result = []
-    for task in load_task_list:
-        # 整理每个车次的所有最新挂单时间
-        latest_order_time_dic.setdefault(task.load_task_id, set()).add(task.latest_order_time)
-        # 整理每个车次的所有优先级
-        priority_dic.setdefault(task.load_task_id, set()).add(
-            4 if not task.priority else ModelConfig.RG_PRIORITY[task.priority])
-        # 按（车次ID，车次父ID）整理车次
-        result_dic.setdefault((task.load_task_id, task.parent_load_task_id), []).append(task)
-    for res in result_dic:
-        # 得到车次号
-        load_task_id = res[0]
-        # 同一个(load_task_id,parent_load_task_id)的load_task列表
-        res_list = result_dic[res]
-        if len(res_list) > 1:
-            sum_list = [(i.weight, i.count) for i in res_list]
-            sum_weight = sum(i[0] for i in sum_list)
-            sum_count = sum(i[1] for i in sum_list)
-            res_list[0].weight = sum_weight
-            res_list[0].count = sum_count
-        res_list[0].latest_order_time = min(latest_order_time_dic[load_task_id])
-        res_list[0].priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_dic[load_task_id])]
-        last_result.append(res_list[0])
+    load_task_dic = {}
+    latest_order_time = set()
+    priority_set = set()
+    for load_task in load_task_list:
+        load_task_last = copy.deepcopy(load_task)
+        load_task_last.items = []
+        load_task_dic.setdefault(load_task.load_task_id, load_task)
+        for item in load_task.items:
+            # 整理每个车次的所有最新挂单时间
+            latest_order_time.add(item.latest_order_time)
+            # 整理每个车次的所有优先级
+            priority_set.add(4 if not item.priority else ModelConfig.RG_PRIORITY[item.priority])
+            # 按（车次ID，车次父ID）整理车次
+            result_dic.setdefault(item.parent_load_task_id, []).append(item)
+        for res in result_dic:
+            res_list = result_dic[res]
+            if len(res_list) > 1:
+                sum_list = [(i.weight, i.count) for i in res_list]
+                sum_weight = sum(i[0] for i in sum_list)
+                sum_count = sum(i[1] for i in sum_list)
+                res_list[0].weight = sum_weight
+                res_list[0].count = sum_count
+        load_task_last.latest_order_time = min(latest_order_time)
+        load_task_last.priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_set)]
+        load_task_last.items.append(res_list[0])
+        last_result.append(load_task_last)
     last_result.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
     return last_result
 
 
 if __name__ == '__main__':
     result = dispatch()
-    generate_excel_service.generate_excel(result)
+    print("success")
+    # generate_excel_service.generate_excel(result)
