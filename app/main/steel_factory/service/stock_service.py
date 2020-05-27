@@ -51,7 +51,7 @@ def get_stock():
     #         stock_id as id,
     #         product_name as '品名',
     #         actual_number as '实际可发件数',
-    #         Actual_weight as '实际可发重量',
+    #         actual_weight as '实际可发重量',
     #         piece_weight as '件重'
     #     FROM
     #         db_dev.dwd_rgsd_warehouse_amount_20200509
@@ -147,7 +147,7 @@ def deal_stock():
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     result.to_excel("3.xls")
-    # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
+    # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
     count_parent = 0
@@ -163,9 +163,9 @@ def deal_stock():
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         else:
-            # if datetime.datetime.strptime(str(stock.Latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
+            # if datetime.datetime.strptime(str(stock.latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
             #         datetime.datetime.now() + datetime.timedelta(days=-2)):
-            #     stock.Priority = "超期清理"
+            #     stock.priority = "超期清理"
             if stock.priority in ModelConfig.RG_PRIORITY:
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
