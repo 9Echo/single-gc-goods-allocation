@@ -141,7 +141,6 @@ def deal_stock():
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
-    df_stock.loc[(df_stock["件重"] >= ModelConfig.RG_SECOND_MIN_WEIGHT) & (df_stock["件重"] < ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 1
     df_stock.loc[(df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["件重"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
@@ -170,7 +169,9 @@ def deal_stock():
                 stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
             else:
                 stock.priority = 3
-        stock.sort = 3 if stock.priority not in ModelConfig.RG_PRIORITY.values() else stock.sort
+        if (stock.priority in ModelConfig.RG_PRIORITY.values()
+                and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT):
+            stock.sort = 1
         # 按33000将货物分成若干份
         num = 33000 // stock.piece_weight
         # 首先去除 件重大于33000的货物
