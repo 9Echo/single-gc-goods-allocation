@@ -89,10 +89,9 @@ def optimize_filter_max(delivery_items: list, task_id=0):
 
     return sheets, task_id
 
-#原load_task_fill()
+
 def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
     """
-
     小管装填大管车次，将小管按照件数从小到大排序
     若小管不够，分完结束
     若小管装填完所有车次后有剩余，进行背包和遍历
