@@ -19,7 +19,7 @@ def dispatch_filter(load_task_list, stock_list):
     # 优先考虑急发特殊货物
     general_stock_dict = layer_filter(stock_dict, load_task_list, DispatchType.FIRST, ModelConfig.RG_MIN_WEIGHT)
     # 剩余优先考虑急发特殊货物生成车次，走29吨包车运输
-    for k, v in copy.copy(general_stock_dict.items()):
+    for k, v in copy.copy(general_stock_dict).items():
         if v.sort == 1:
             load_task_list.append(create_load_task([v], TrainId.get_id(), LoadTaskType.TYPE_1))
             general_stock_dict.pop(k)
