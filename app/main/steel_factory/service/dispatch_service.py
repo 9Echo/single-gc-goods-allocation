@@ -5,11 +5,9 @@ import copy
 from typing import List, Dict
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.entity.stock import Stock
-from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task, goods_filter
+from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task
 from app.main.steel_factory.service import stock_service
-from app.main.steel_factory.service import generate_excel_service
-from app.util.enum_util import LoadTaskType, DispatchType
-from app.util.generate_id import TrainId
+from app.util.enum_util import LoadTaskType
 from model_config import ModelConfig
 from datetime import datetime
 from app.main.steel_factory.dao.load_task_dao import load_task_dao
@@ -38,8 +36,11 @@ def dispatch(id_list: List) -> List[LoadTask]:
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
         load_task_list.append(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
-    save_load_task(merge_result(load_task_list), id_list)
-    return merge_result(load_task_list)
+    # 合并
+    res_list = merge_result(load_task_list)
+    # 写库
+    save_load_task(res_list, id_list)
+    return res_list
 
 
 def merge_result(load_task_list: list):
