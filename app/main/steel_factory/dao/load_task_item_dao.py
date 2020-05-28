@@ -37,7 +37,7 @@ class LoadTaskItemDao(BaseDao):
             receive_address,
             latest_order_time,
             create_id,
-            create_date,
+            `create_date`
             )
             value(%s, %s, %s, %s, %s, 
                    %s, %s, %s, %s, %s, 
