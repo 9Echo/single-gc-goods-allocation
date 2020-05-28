@@ -150,7 +150,7 @@ def deal_stock():
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
-    result.to_excel("3.xls")
+    # result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
