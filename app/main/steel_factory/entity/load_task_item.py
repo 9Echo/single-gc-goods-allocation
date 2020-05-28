@@ -27,6 +27,8 @@ class LoadTaskItem(BaseEntity):
         self.notice_num = None
         # 订单项次号
         self.oritem_num = None
+        # 收货用户
+        self.consumer = None
         # 规格
         self.standard = None
         # 材质

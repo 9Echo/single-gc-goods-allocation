@@ -9,6 +9,7 @@ from flask_restful import Api
 from app.main.routes import compose_route
 from app.main.routes.compose_route import ComposeRoute
 from app.main.routes.confirm_route import ConfirmRoute
+from app.main.routes.goods_allocation_route import GoodsAllocationRoute
 from app.main.routes.order_route import OrderRoute
 from app.main.routes.loading_route import LoadingRoute
 from app.test.main.routes.order_route_test import OrderRouteTest
@@ -27,6 +28,8 @@ api.add_resource(ConfirmRoute, '/confirm')
 api.add_resource(ComposeRoute, '/compose')
 # 配载图请求
 api.add_resource(LoadingRoute, '/loading')
+# 钢厂智能分货请求
+api.add_resource(GoodsAllocationRoute, '/goodsAllocation')
 
 
 @blueprint.route('/demo', methods=['GET'])
