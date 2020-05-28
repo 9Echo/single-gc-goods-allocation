@@ -37,7 +37,6 @@ nosetests.xml
 
 # SQLite databases
 *.sqlite
-
 # Virtual environment
 venv
 
@@ -57,3 +56,9 @@ venv
 celerybeat-schedule.bak
 celerybeat-schedule.dat
 celerybeat-schedule.dir
+
+#pulp file
+*.map
+#excel
+*.xls
+*.xlsx
