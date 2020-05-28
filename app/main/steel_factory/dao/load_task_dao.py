@@ -1,4 +1,5 @@
 from app.util.base.base_dao import BaseDao
+import datetime
 
 
 class LoadTaskDao(BaseDao):
@@ -27,9 +28,11 @@ class LoadTaskDao(BaseDao):
             remark,
             priority_grade,
             create_id,
-            create_date,
+            `create_date`
             ) 
-            values('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s')
+            value(%s, %s, %s, %s, %s,
+                   %s, %s, %s, %s, %s, 
+                   %s, %s)
         """
         self.executemany(sql, values)
 
@@ -81,3 +84,7 @@ class LoadTaskDao(BaseDao):
 
 
 load_task_dao = LoadTaskDao()
+if __name__ == "__main__":
+    # ('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct', datetime.datetime(2020, 5, 28, 15, 35, 51, 453957)
+    load_task_dao.insert_load_task(
+        [('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct', datetime.datetime(2020, 5, 28, 15, 35, 51, 453957))])

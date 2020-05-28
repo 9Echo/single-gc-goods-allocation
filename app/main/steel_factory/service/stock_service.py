@@ -5,7 +5,7 @@ import copy
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
 import pandas as pd
-from app.util.db_pool import db_pool_db_sys
+from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 
 
@@ -74,17 +74,17 @@ def address_latitude_and_longitude():
     """
     sql1 = """
             select address as '卸货地址',longitude, latitude
-            from t_point
+            from ods_db_sys_t_point
         """
     sql2 = """
             select address as '卸货地址2',longitude, latitude 
-            from t_point
+            from ods_db_sys_t_point
             where longitude is not null
             And latitude is not null
             GROUP BY longitude, latitude
         """
-    result_1 = pd.read_sql(sql1, db_pool_db_sys.connection())
-    result_2 = pd.read_sql(sql2, db_pool_db_sys.connection())
+    result_1 = pd.read_sql(sql1, db_pool_ods.connection())
+    result_2 = pd.read_sql(sql2, db_pool_ods.connection())
     return result_1, result_2
 
 

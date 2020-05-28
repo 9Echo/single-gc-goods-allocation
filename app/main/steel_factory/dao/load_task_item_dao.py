@@ -39,10 +39,10 @@ class LoadTaskItemDao(BaseDao):
             create_id,
             create_date,
             )
-            values('%s', '%s', '%s', '%s', '%s', 
-                   '%s', '%s', '%s', '%s', '%s', 
-                   '%s', '%s', '%s', '%s', '%s', 
-                   '%s', '%s', '%s', '%s', '%s',)
+            value(%s, %s, %s, %s, %s, 
+                   %s, %s, %s, %s, %s, 
+                   %s, %s, %s, %s, %s, 
+                   %s, %s, %s, %s, %s)
         """
         self.executemany(sql, values)
 
