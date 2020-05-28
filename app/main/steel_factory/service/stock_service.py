@@ -239,8 +239,9 @@ def rename_pd(dataframe):
                          "件重": "piece_weight",
                          "入库仓库": "deliware",
                          "卸货地址2": "standard_address",
-                         "实际终点": "actual_end_point"
-
+                         "实际终点": "actual_end_point",
+                         "待发件数": "waint_fordel_number",
+                         "待发重量": "waint_fordel_weight"
                      },
                      inplace=True)
     return dataframe

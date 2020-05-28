@@ -37,6 +37,8 @@ class Stock(BaseEntity):
         self.standard_address = None  # 合并卸货地址
         self.parent_stock_id = None  # 父Id
         self.actual_end_point = None  # 实际区县
-        self.sort = None    # 排序用字段
+        self.sort = None  # 排序用字段
+        self.waint_fordel_number = None  # 待发件数
+        self.waint_fordel_weight = None  # 待发重量
         if stock:
             self.set_attr(stock)

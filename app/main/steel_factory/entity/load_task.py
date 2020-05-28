@@ -18,8 +18,6 @@ class LoadTask(BaseEntity):
         self.city = None
         # 区县
         self.end_point = None
-        # 收货地址
-        self.receive_address = None
         # 车次吨单价
         self.price_per_ton = 0
         # 车次总价
@@ -32,3 +30,7 @@ class LoadTask(BaseEntity):
         self.items = []
         # 最新挂单时间
         self.latest_order_time = None
+        # 创建人id
+        self.create_id
+        # 公司id
+        self.company_id

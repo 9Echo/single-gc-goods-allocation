@@ -11,6 +11,9 @@ from app.main.steel_factory.service import generate_excel_service
 from app.util.enum_util import LoadTaskType, DispatchType
 from app.util.generate_id import TrainId
 from model_config import ModelConfig
+from datetime import datetime
+from app.main.steel_factory.dao.load_task_dao import LoadTaskDao
+from app.main.steel_factory.dao.load_task_item_dao import LoadTaskItemDao
 
 
 def dispatch() -> List[LoadTask]:
@@ -79,7 +82,62 @@ def merge_result(load_task_list: list):
     return last_result
 
 
+def save_load_task(load_task_list: List[LoadTask]):
+    """将load_task对象的信息写入数据库
+    分load_task和load_task_item
+    Args:
+
+    Returns:
+
+    Raise:
+
+    """
+    load_task_values = []
+    load_task_item_values = []
+    create_date = datetime.now()
+    for task in load_task_list:
+        task_tup = (task.company_id,
+                    task.load_task_id,
+                    task.load_task_type,
+                    task.total_weight,
+                    task.city,
+                    task.end_point,
+                    task.price_per_ton,
+                    task.total_price,
+                    task.remark,
+                    task.priority_grade,
+                    task.create_id,
+                    create_date
+                    )
+        load_task_values.append(task_tup)
+        for item in task.items:
+            item_tup = (task.company_id,
+                        item.load_task_id,
+                        item.priority,
+                        item.weight,
+                        item.count,
+                        item.city,
+                        item.end_point,
+                        item.big_commodity,
+                        item.commodity,
+                        item.notice_num,
+                        item.oritem_num,
+                        item.consumer,
+                        item.standard,
+                        item.sgsign,
+                        item.outstock_code,
+                        item.instock_code,
+                        item.receive_address,
+                        item.latest_order_time,
+                        task.create_id,
+                        create_date)
+            load_task_item_values.append(item_tup)
+    LoadTaskDao.insert_load_task(load_task_values)
+    LoadTaskItemDao.insert_load_task_item(load_task_item_values)
+
+
 if __name__ == '__main__':
-    result = dispatch()
-    print("success")
+    print(datetime.now()[0:19])
+    # result = dispatch()
+    # print("success")
     # generate_excel_service.generate_excel(result)

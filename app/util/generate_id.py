@@ -33,4 +33,5 @@ class TrainId:
 
 
 if __name__ == "__main__":
-    print(TrainId.get_overall_time())
+    for i in range(10):
+        print(TrainId.get_id())

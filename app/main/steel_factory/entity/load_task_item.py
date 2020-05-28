@@ -41,4 +41,6 @@ class LoadTaskItem(BaseEntity):
         self.parent_load_task_id = None
         # 最新挂单时间
         self.latest_order_time = None
+        # 收货用户
+        self.consumer = None
 
