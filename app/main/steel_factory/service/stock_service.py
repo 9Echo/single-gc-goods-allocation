@@ -142,6 +142,7 @@ def deal_stock():
             index=(df_stock.loc[(df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
             inplace=True)
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
+    df_stock.loc[(df_stock["到货码头"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (df_stock["品名"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
@@ -150,7 +151,7 @@ def deal_stock():
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
-    # result.to_excel("3.xls")
+    result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")

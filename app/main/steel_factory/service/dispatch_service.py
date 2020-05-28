@@ -115,7 +115,7 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
         load_task_values.append(task_tup)
         for item in task.items:
             item_tup = (id_list[0],
-                        item.load_task_id,
+                        task.load_task_id,
                         item.priority,
                         item.weight,
                         item.count,
