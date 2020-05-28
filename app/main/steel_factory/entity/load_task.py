@@ -30,7 +30,3 @@ class LoadTask(BaseEntity):
         self.items = []
         # 最新挂单时间
         self.latest_order_time = None
-        # 创建人id
-        self.create_id
-        # 公司id
-        self.company_id

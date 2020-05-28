@@ -16,10 +16,11 @@ from app.main.steel_factory.dao.load_task_dao import LoadTaskDao
 from app.main.steel_factory.dao.load_task_item_dao import LoadTaskItemDao
 
 
-def dispatch() -> List[LoadTask]:
+def dispatch(id_list: List) -> List[LoadTask]:
     """
     车辆配货
     :param :
+            id:
     :return:
     """
     """
@@ -37,6 +38,7 @@ def dispatch() -> List[LoadTask]:
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
         load_task_list.append(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
+    save_load_task(merge_result(load_task_list), id_list)
     return merge_result(load_task_list)
 
 
@@ -82,7 +84,7 @@ def merge_result(load_task_list: list):
     return last_result
 
 
-def save_load_task(load_task_list: List[LoadTask]):
+def save_load_task(load_task_list: List[LoadTask], id_list):
     """将load_task对象的信息写入数据库
     分load_task和load_task_item
     Args:
@@ -96,7 +98,7 @@ def save_load_task(load_task_list: List[LoadTask]):
     load_task_item_values = []
     create_date = datetime.now()
     for task in load_task_list:
-        task_tup = (task.company_id,
+        task_tup = (id_list[0],
                     task.load_task_id,
                     task.load_task_type,
                     task.total_weight,
@@ -106,12 +108,12 @@ def save_load_task(load_task_list: List[LoadTask]):
                     task.total_price,
                     task.remark,
                     task.priority_grade,
-                    task.create_id,
+                    id_list[1],
                     create_date
                     )
         load_task_values.append(task_tup)
         for item in task.items:
-            item_tup = (task.company_id,
+            item_tup = (id_list[0],
                         item.load_task_id,
                         item.priority,
                         item.weight,
@@ -129,7 +131,7 @@ def save_load_task(load_task_list: List[LoadTask]):
                         item.instock_code,
                         item.receive_address,
                         item.latest_order_time,
-                        task.create_id,
+                        id_list[1],
                         create_date)
             load_task_item_values.append(item_tup)
     LoadTaskDao.insert_load_task(load_task_values)
@@ -137,7 +139,7 @@ def save_load_task(load_task_list: List[LoadTask]):
 
 
 if __name__ == '__main__':
-    print(datetime.now()[0:19])
-    # result = dispatch()
-    # print("success")
+    # print(datetime.now()[0:19])
+    result = dispatch(["C000000882", "ct"])
+    print("success")
     # generate_excel_service.generate_excel(result)
