@@ -10,8 +10,8 @@ from app.main.steel_factory.service import stock_service
 from app.util.enum_util import LoadTaskType
 from model_config import ModelConfig
 from datetime import datetime
-from app.main.steel_factory.dao.load_task_dao import LoadTaskDao
-from app.main.steel_factory.dao.load_task_item_dao import LoadTaskItemDao
+from app.main.steel_factory.dao.load_task_dao import load_task_dao
+from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
 
 
 def dispatch(id_list: List) -> List[LoadTask]:
@@ -135,8 +135,8 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
                         id_list[1],
                         create_date)
             load_task_item_values.append(item_tup)
-    LoadTaskDao.insert_load_task(load_task_values)
-    LoadTaskItemDao.insert_load_task_item(load_task_item_values)
+    load_task_dao.insert_load_task(load_task_values)
+    load_task_item_dao.insert_load_task_item(load_task_item_values)
 
 
 if __name__ == '__main__':

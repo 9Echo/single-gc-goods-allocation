@@ -29,7 +29,7 @@ class LoadTaskDao(BaseDao):
             create_id,
             create_date,
             ) 
-            values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            values('%s', '%s', '%s', '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s')
         """
         self.executemany(sql, values)
 
@@ -78,3 +78,6 @@ class LoadTaskDao(BaseDao):
             from {}
             where 
         """
+
+
+load_task_dao = LoadTaskDao()
