@@ -137,11 +137,16 @@ def deal_stock():
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
     # 筛选出不为0的数据
     df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
+    # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
+    df_stock.drop(
+            index=(df_stock.loc[(df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
+            inplace=True)
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
-    df_stock.loc[(df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["件重"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
+    df_stock.loc[
+        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["件重"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
