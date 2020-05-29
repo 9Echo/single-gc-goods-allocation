@@ -119,8 +119,7 @@ def create_sheet_item(order):
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)
             # 如果遇到计算不出来的明细，返回0停止计算
             if di.weight == 0:
-                if di.weight == 0:
-                    return [di], new_max_weight, False
+                return [di], new_max_weight, False
             delivery_items.append(di)
         for _ in range(item.free_pcs):
             di = DeliveryItem()
