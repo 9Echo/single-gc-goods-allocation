@@ -17,7 +17,7 @@ class TrainId:
     @staticmethod
     def get_id():
         # 前缀
-        suffix = TrainId.get_overall_time()
+        suffix = TrainId.overall_time if TrainId.overall_time else datetime.now().strftime("%Y%m%d%H%M")
         TrainId.train_id += 1
         return suffix + str(TrainId.train_id)
 
@@ -25,12 +25,6 @@ class TrainId:
     def set_id():
         TrainId.train_id = 0
         TrainId.overall_time = None
-
-    @staticmethod
-    def get_overall_time():
-        if not TrainId.overall_time:
-            TrainId.overall_time = datetime.now().strftime("%Y%m%d%H%M")
-        return TrainId.overall_time
 
 
 if __name__ == "__main__":

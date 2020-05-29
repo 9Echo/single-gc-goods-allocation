@@ -149,11 +149,11 @@ def deal_stock():
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
     df_stock.loc[
-        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["件重"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
+        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
-    result.to_excel("3.xls")
+    # result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
