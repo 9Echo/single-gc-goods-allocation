@@ -15,6 +15,7 @@ from model_config import ModelConfig
 def dispatch_filter(load_task_list, stock_list):
     # 甩货列表
     surplus_stock_dict = dict()
+    # 转换字典
     stock_dict = {i.stock_id: i for i in stock_list}
     # 优先考虑急发特殊货物
     general_stock_dict = layer_filter(stock_dict, load_task_list, DispatchType.FIRST, ModelConfig.RG_MIN_WEIGHT)

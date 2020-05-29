@@ -21,14 +21,6 @@ def dispatch(id_list: List) -> List[LoadTask]:
             id:
     :return:
     """
-    """
-    步骤：
-    1 将单条库存数据满足标载条件[31,33]的数据直接生成车次，并搜索满足一装一卸的可拼的其他货物，拼到该车次，其中包含超期或催货标为急发车次，并且类型为一装一卸
-    2 按照优先发运、最新挂单时间进行正序排序
-    3 选择第一条作为目标数据，将除第一条其余数据中出库仓库和区县与其相同或卸货地址与其相同的数据筛选出来作为待选集
-    4 按照优先级将待选集与目标数据利用背包进行匹配，使重量最大化，匹配成功（总量在[31,33]）生成车次，标注是否急发和类型，匹配不成功放入甩货列表，
-    优先级依次为：一装一卸，两装一卸（同区仓库），两装一卸(不同区仓库),一装两卸
-    """
     load_task_list = list()
     # 库存信息获取
     stock_list: List[Stock] = stock_service.deal_stock()
@@ -39,10 +31,11 @@ def dispatch(id_list: List) -> List[LoadTask]:
             create_load_task(list(surplus_stock_dict.values()), datetime.now().strftime("%Y%m%d%H%M") + '0',
                              LoadTaskType.TYPE_5.value))
     # 合并
-    res_list = merge_result(load_task_list)
+    merge_result(load_task_list)
+    load_task_list.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
     # 写库
-    save_load_task(res_list, id_list)
-    return res_list
+    save_load_task(load_task_list, id_list)
+    return load_task_list
 
 
 def merge_result(load_task_list: list):
@@ -55,36 +48,22 @@ def merge_result(load_task_list: list):
     Raise:
 
     """
-    result_dic = {}
-    last_result = []
-    load_task_dic = {}
-    latest_order_time = set()
-    priority_set = set()
+
     for load_task in load_task_list:
-        load_task_last = copy.deepcopy(load_task)
-        load_task_last.items = []
-        load_task_dic.setdefault(load_task.load_task_id, load_task)
+        result_dic = {}
         for item in load_task.items:
-            # 整理每个车次的所有最新挂单时间
-            latest_order_time.add(item.latest_order_time)
-            # 整理每个车次的所有优先级
-            priority_set.add(4 if not item.priority else ModelConfig.RG_PRIORITY[item.priority])
             # 按（车次ID，车次父ID）整理车次
             result_dic.setdefault(item.parent_load_task_id, []).append(item)
-        for res in result_dic:
-            res_list = result_dic[res]
-            if len(res_list) > 1:
-                sum_list = [(i.weight, i.count) for i in res_list]
-                sum_weight = sum(i[0] for i in sum_list)
-                sum_count = sum(i[1] for i in sum_list)
-                res_list[0].weight = sum_weight
-                res_list[0].count = sum_count
-        load_task_last.latest_order_time = min(latest_order_time)
-        load_task_last.priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_set)]
-        load_task_last.items.append(res_list[0])
-        last_result.append(load_task_last)
-    last_result.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
-    return last_result
+        # 暂时清空items
+        load_task.items = []
+        for res_list in result_dic.values():
+            sum_list = [(i.weight, i.count) for i in res_list]
+            sum_weight = sum(i[0] for i in sum_list)
+            sum_count = sum(i[1] for i in sum_list)
+            res_list[0].weight = sum_weight
+            res_list[0].count = sum_count
+            load_task.items.append(res_list[0])
+        del result_dic
 
 
 def save_load_task(load_task_list: List[LoadTask], id_list):

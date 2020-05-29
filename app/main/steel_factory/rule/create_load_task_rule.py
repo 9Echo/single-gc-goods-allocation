@@ -14,18 +14,16 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     :param load_task_type:
     :return:
     """
-    total_weight = sum(i.actual_weight for i in stock_list)
-    all_product = set([i.big_commodity_name for i in stock_list])
-    remark = []
-    for product in all_product:
-        remark += ModelConfig.RG_VARIETY_VEHICLE[product]
-    remark = set(remark)
-    load_task_list = list()
+    # 车次总重量
+    total_weight: float = 0
+    # 车次中所有优先级
+    priority_set = set()
+    # 车次中所有最新挂单时间
+    latest_order_time_set = set()
+    # 备注列表
+    remark_list = []
+    # 创建车次对象
     load_task = LoadTask()
-    load_task.load_task_id = load_task_id
-    load_task.total_weight = total_weight / 1000
-    load_task.load_task_type = load_task_type
-    load_task.remark = ",".join(remark)
     for i in stock_list:
         load_task_item = LoadTaskItem()
         load_task_item.weight = i.actual_weight / 1000
@@ -44,6 +42,10 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task_item.parent_load_task_id = i.parent_stock_id
         load_task_item.latest_order_time = i.latest_order_time
         load_task_item.consumer = i.consumer
+        total_weight += load_task_item.weight
+        priority_set.add(i.priority)
+        latest_order_time_set.add(load_task_item.latest_order_time)
+        remark_list.extend(ModelConfig.RG_VARIETY_VEHICLE[load_task_item.big_commodity])
         # 得到翻转优先级的字典
         dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
         if i.priority not in dic_priority:
@@ -51,4 +53,11 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         else:
             load_task_item.priority = dic_priority[i.priority]
         load_task.items.append(load_task_item)
+    remark_set = set(remark_list)
+    load_task.load_task_id = load_task_id
+    load_task.total_weight = total_weight
+    load_task.load_task_type = load_task_type
+    load_task.priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_set)]
+    load_task.latest_order_time = min(latest_order_time_set)
+    load_task.remark = ",".join(remark_set)
     return load_task

@@ -18,7 +18,7 @@ class LoadTaskItemDao(BaseDao):
 
         """
         sql = """
-            insert into db_model_dev.t_load_task_item(
+            insert into db_model.t_load_task_item(
             company_id,
             load_task_id,
             priority,
