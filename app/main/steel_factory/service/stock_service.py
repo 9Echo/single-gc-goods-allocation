@@ -104,8 +104,10 @@ def deal_stock():
         6 得到新的库存列表，返回
         """
     data1, data2 = address_latitude_and_longitude()
-    # 存放stock的结果
+    # 存放除型钢外的stock的结果
     stock_list = []
+    # 存放型钢的stock的结果
+    xg_stock_dic = {}
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
@@ -209,7 +211,14 @@ def deal_stock():
     for num in stock_list:
         num.stock_id = count
         count += 1
-    return stock_list
+        if num.big_commodity_name == "型钢":
+            weight = num.actual_weight if num.priority != 3 else 0
+            xg_stock_dic.setdefault(num.specs, dict()).setdefault("result", []).append(num)
+            xg_stock_dic[num.specs]["weight"] = xg_stock_dic[num.specs].get("weight", 0) + weight
+            stock_list.remove(num)
+    xg_stock_dic = sorted(xg_stock_dic.items(), key=lambda x: x[1]["weight"], reverse=True)
+    xg_stock_dic2 = {x[0]: x[1]["result"] for x in xg_stock_dic}
+    return stock_list, xg_stock_dic2
 
 
 def rename_pd(dataframe):
@@ -256,8 +265,11 @@ def rename_pd(dataframe):
 
 
 if __name__ == "__main__":
-    a = deal_stock()
-    for i in a:
-        print(i.sort, i.priority, i.latest_order_time)
+    a, b = deal_stock()
+    for i, j in b.items():
+        for k in j:
+            print(i, k.priority, k.actual_weight)
+    # for i in a:
+    #     print(i.sort, i.priority, i.latest_order_time)
         # if i.priority not in (1, 2, 3):
         #     print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)

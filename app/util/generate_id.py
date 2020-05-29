@@ -19,7 +19,7 @@ class TrainId:
         # 前缀
         suffix = TrainId.overall_time if TrainId.overall_time else datetime.now().strftime("%Y%m%d%H%M")
         TrainId.train_id += 1
-        return suffix + str(TrainId.train_id)
+        return suffix + str(TrainId.train_id).zfill(4)
 
     @staticmethod
     def set_id():
