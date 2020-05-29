@@ -63,7 +63,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             # 选中的列表
             compose_list, value = goods_filter(temp_list, surplus_weight)
             if value >= new_min_weight:
-                temp_stock = temp_stock if DispatchType is not DispatchType.THIRD else None
+                temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
                 calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                 continue
         general_stock_dict.pop(stock_id, 404)
@@ -126,7 +126,7 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                             temp_max_weight = value
                             target_compose_list = compose_list
         if temp_max_weight:
-            temp_stock = temp_stock if DispatchType is not DispatchType.THIRD else None
+            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
             calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_2.value)
         else:
             general_stock_dict.pop(stock_id, 404)
@@ -184,7 +184,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                             temp_max_weight = value
                             target_compose_list = compose_list
         if temp_max_weight:
-            temp_stock = temp_stock if DispatchType is not DispatchType.THIRD else None
+            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
             calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_3.value)
         else:
             general_stock_dict.pop(stock_id, 404)
@@ -241,7 +241,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
                             temp_max_weight = value
                             target_compose_list = compose_list
         if temp_max_weight:
-            temp_stock = temp_stock if DispatchType is not DispatchType.THIRD else None
+            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
             calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_4.value)
         else:
             general_stock_dict.pop(stock_id, 404)

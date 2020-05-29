@@ -24,6 +24,7 @@ class TrainId:
     @staticmethod
     def set_id():
         TrainId.train_id = 0
+        TrainId.overall_time = None
 
     @staticmethod
     def get_overall_time():

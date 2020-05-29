@@ -35,7 +35,9 @@ def dispatch(id_list: List) -> List[LoadTask]:
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
-        load_task_list.append(create_load_task(list(surplus_stock_dict.values()), -1, LoadTaskType.TYPE_5.value))
+        load_task_list.append(
+            create_load_task(list(surplus_stock_dict.values()), datetime.now().strftime("%Y%m%d%H%M") + '0',
+                             LoadTaskType.TYPE_5.value))
     # 合并
     res_list = merge_result(load_task_list)
     # 写库

@@ -139,10 +139,12 @@ def deal_stock():
     df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
     df_stock.drop(
-            index=(df_stock.loc[(df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
-            inplace=True)
+        index=(df_stock.loc[
+                   (df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
+        inplace=True)
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
-    df_stock.loc[(df_stock["到货码头"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (df_stock["品名"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
+    df_stock.loc[(df_stock["到货码头"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
+        df_stock["品名"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
