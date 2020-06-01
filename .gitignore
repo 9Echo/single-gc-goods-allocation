@@ -58,7 +58,7 @@ celerybeat-schedule.dat
 celerybeat-schedule.dir
 
 #pulp file
-*.map
+*.mps
 #excel
 *.xls
 *.xlsx
