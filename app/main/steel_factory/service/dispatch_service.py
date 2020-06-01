@@ -10,6 +10,7 @@ from app.util.enum_util import LoadTaskType
 from datetime import datetime
 from app.main.steel_factory.dao.load_task_dao import load_task_dao
 from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
+from app.util.generate_id import TrainId
 
 
 def dispatch(id_list: List) -> List[LoadTask]:
@@ -26,8 +27,7 @@ def dispatch(id_list: List) -> List[LoadTask]:
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
         load_task_list.append(
-            create_load_task(list(surplus_stock_dict.values()), datetime.now().strftime("%Y%m%d%H%M0000") + '0000',
-                             LoadTaskType.TYPE_5.value))
+            create_load_task(list(surplus_stock_dict.values()), TrainId.get_surplus_id(), LoadTaskType.TYPE_5.value))
     # 合并
     merge_result(load_task_list)
     load_task_list.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)

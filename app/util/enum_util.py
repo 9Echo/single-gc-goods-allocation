@@ -16,7 +16,10 @@ class DispatchType(Enum):
     """
     三次筛选匹配
     """
+    # 急发卷类优先分货类型
     FIRST = 1
+    # 目标货物整体分货类型
     SECOND = 2
+    # 目标货物拆散分货类型
     THIRD = 3
 
