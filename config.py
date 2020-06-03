@@ -41,13 +41,6 @@ class Config:
     ODS_MYSQL_DB = 'db_dw'
     ODS_MYSQL_CHARSET = 'utf8'
 
-    # 生成数据库连接
-    PRO_MYSQL_HOST = "rm-bp105ft9dy0qc53y8.mysql.rds.aliyuncs.com"
-    PRO_MYSQL_PORT = 3306
-    PRO_MYSQL_USER = "v3read"
-    PRO_MYSQL_PASSWD = "SamE57@7583jgpck"
-    PRO_MYSQL_DB = "db_sys"
-    PRO_MYSQL_CHARSET = "utf8"
 
     # 开单参数配置
     # 车载最大重量

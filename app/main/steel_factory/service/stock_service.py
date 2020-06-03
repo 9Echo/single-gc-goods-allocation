@@ -208,7 +208,7 @@ def deal_stock():
     stock_list.sort(key=lambda x: (x.sort, x.priority, x.latest_order_time), reverse=False)
     count = 1
     # 为排序的stock对象赋Id
-    for num in stock_list:
+    for num in copy.copy(stock_list):
         num.stock_id = count
         count += 1
         if num.big_commodity_name == "型钢":
@@ -266,9 +266,9 @@ def rename_pd(dataframe):
 
 if __name__ == "__main__":
     a, b = deal_stock()
-    for i, j in b.items():
-        for k in j:
-            print(i, k.priority, k.actual_weight)
+    # for i, j in b.items():
+    #     for k in j:
+    #         print(i, k.priority, k.actual_weight)
     # for i in a:
     #     print(i.sort, i.priority, i.latest_order_time)
         # if i.priority not in (1, 2, 3):
