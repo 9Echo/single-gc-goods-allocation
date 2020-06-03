@@ -39,12 +39,12 @@ def dispatch(order):
         # 2、使用模型过滤器生成发货通知单
         sheets, task_id = optimize_filter_max(max_delivery_items)
         # 3、补充发货单的属性
-        batch_no = UUIDUtil.create_id("ba") #batch_no 在后面的装车需要
+        batch_no = UUIDUtil.create_id("ba")  # batch_no 在后面的装车需要
         replenish_property(sheets, order, batch_no)
 
         # 4、为发货单分配车次
         task_id = dispatch_load_task_optimize(sheets, task_id)
-    
+
     #
     if min_delivery_items:
         # 小管装填大管车次,这个操作没整合到optimize_filter（只处理了大管）,中间还差了一步发配车次，
@@ -461,4 +461,3 @@ def replenish_property(sheets, order, batch_no):
             di.delivery_item_no = UUIDUtil.create_id("di")
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
-
