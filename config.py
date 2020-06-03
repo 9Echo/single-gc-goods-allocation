@@ -78,9 +78,9 @@ class DevelopmentConfig(Config):
 
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '172.16.122.240'
-    REDIS_PORT = '6389'
+    REDIS_PORT = '6379'
     REDIS_PASSWD = 'JCdev@56zh'
-    REDIS_MAX_CONNECTIONS = 10
+    REDIS_MAX_CONNECTIONS = 2
 
     # APScheduler定时任务配置，可选（不使用时可删除）
     SCHEDULER_OPEN = False
