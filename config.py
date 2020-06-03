@@ -70,7 +70,7 @@ class DevelopmentConfig(Config):
         MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
 
     # Redis配置，可选（不使用时可删除）
-    REDIS_HOST = '172.16.122.240'
+    REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
     REDIS_PASSWD = 'JCdev@56zh'
     REDIS_MAX_CONNECTIONS = 2
@@ -142,7 +142,7 @@ class TestConfig(Config):
         MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
 
     # Redis配置，可选（不使用时可删除）
-    REDIS_HOST = '47.99.118.183'
+    REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
     REDIS_PASSWD = 'JCdev@56zh'
     REDIS_MAX_CONNECTIONS = 2
