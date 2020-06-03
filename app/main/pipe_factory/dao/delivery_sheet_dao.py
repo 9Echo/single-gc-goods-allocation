@@ -11,17 +11,6 @@ from app.main.pipe_factory.dao.delivery_item_dao import delivery_item_dao
 
 class DeliverySheetDao(BaseDao):
 
-    def get_one(self, sheet_id):
-        """根据delivery_no查询发货单"""
-        sql = "select * from t_ga_delivery_sheet where delivery_no=%s"
-        values = (sheet_id,)
-        delivery_sheet = DeliverySheet(self.select_one(sql, values))
-        # 查询发货单的子发货单
-        sql = "select * from t_ga_delivery_item where delivery_no=%s"
-        results = self.select_all(sql, values)
-        delivery_sheet.items = [DeliveryItem(row) for row in results]
-        return delivery_sheet
-
     def insert(self, sheet):
         """保存发货单"""
         sql = """insert into db_trans_plan.t_ga_delivery_sheet(

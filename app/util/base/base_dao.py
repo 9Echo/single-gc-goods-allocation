@@ -6,7 +6,7 @@ import traceback
 import pymysql
 from pymysql import MySQLError
 
-from app.util.db_pool import db_pool_trans_plan
+from app.util.db_pool import db_pool_ods
 
 
 class BaseDao:
@@ -14,7 +14,7 @@ class BaseDao:
 
     def select_one(self, sql, values=None):
         try:
-            conn = db_pool_trans_plan.connection()
+            conn = db_pool_ods.connection()
             cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
             if values:
                 cursor.execute(sql, values)
@@ -30,7 +30,7 @@ class BaseDao:
 
     def select_all(self, sql, values=None):
         try:
-            conn = db_pool_trans_plan.connection()
+            conn = db_pool_ods.connection()
             cursor = conn.cursor(cursor=pymysql.cursors.DictCursor)
             if values:
                 cursor.execute(sql, values)
@@ -46,7 +46,7 @@ class BaseDao:
 
     def execute(self, sql, values=None):
         try:
-            conn = db_pool_trans_plan.connection()
+            conn = db_pool_ods.connection()
             cursor = conn.cursor()
             if values:
                 cursor.execute(sql, values)
@@ -63,7 +63,7 @@ class BaseDao:
 
     def executemany(self, sql, values=None):
         try:
-            conn = db_pool_trans_plan.connection()
+            conn = db_pool_ods.connection()
             cursor = conn.cursor()
             if values:
                 cursor.executemany(sql, values)
