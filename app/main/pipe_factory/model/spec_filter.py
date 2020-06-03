@@ -1,15 +1,11 @@
-# -*- coding: utf-8 -*-
-# @Time    : 2019/11/15 14:03
-# @Author  : Zihao.Liu
 import copy
-from flask import g, current_app
+
+from flask import g
 from app.main.pipe_factory.rule import weight_rule, package_solution
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from model_config import ModelConfig
-
-
 def spec_filter(delivery_items: list):
     """
     根据过滤规则将传入的发货子单划分到合适的发货单中
