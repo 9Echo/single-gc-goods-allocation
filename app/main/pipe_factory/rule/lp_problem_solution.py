@@ -1,8 +1,11 @@
 import copy
 
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
-from app.task.pulp_task.analysis.rules import pulp_solve
 from app.util.uuid_util import UUIDUtil
+from pulp import *
+from flask import g
+from model_config import ModelConfig
+
 
 
 def create_variable_list(delivery_items):
@@ -38,7 +41,7 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items, new_ma
     while delivery_items:
         load_task_id += 1
         # plup求解，得到选中的下标序列
-        result_index_list, value = pulp_solve.pulp_pack(weight_list, volume_list, value_list, new_max_weight)
+        result_index_list, value = pulp_solve(weight_list, volume_list, value_list, new_max_weight)
 
         #理这里分出来的result_index_list的物资应该合起来是一车上的物品，但是由于可能有不同品类的货，所以不能合并在一张发货单上
         for i in sorted(result_index_list, reverse=True):
@@ -57,3 +60,33 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items, new_ma
             value_list.pop(i)
             delivery_items.pop(i)
     return sheets
+
+def pulp_solve(weight_list, volume_list, value_list, new_max_weight):
+    capacity = new_max_weight or g.MAX_WEIGHT
+    r = range(len(weight_list))
+    prob = LpProblem(sense=LpMaximize)
+    x = [LpVariable('x%d' % i, cat=LpBinary) for i in r]  # 変数
+    prob += lpDot(value_list, x)  # 目标函数
+    # 约束
+    prob += lpDot(weight_list, x) <= capacity
+    if volume_list:
+        prob += lpDot(volume_list, x) <= ModelConfig.MAX_VOLUME
+    # 解题
+    prob.solve()
+    #print(int(value(prob.objective)))
+    #print([i for i in r if value(x[i]) > 0.5])
+
+    return [i for i in r if value(x[i]) > 0.5], int(value(prob.objective))
+
+#测试
+if __name__ == '__main__':
+
+    weight_list=[9,6,3,1,8,16]
+    volume_list=[0.4,0.4,0.2,0.2,0.2,0.4]
+    value_list=[9,6,3,1,8,16]
+    new_max_weight=33
+    L,weight=pulp_solve(weight_list, volume_list, value_list, new_max_weight)
+    for i in sorted(L, reverse=True):
+        print(i)
+
+    print(L,weight)

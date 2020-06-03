@@ -29,4 +29,4 @@ if __name__ == '__main__':
     app.logger.info('active config name = {} '.format(active_config_name))
     # 启动flask应用app
     server_port = app.config.get('SERVER_PORT')
-    app.run(host='0.0.0.0', port=server_port, debug=True)
+    app.run(host='127.0.0.1', port=server_port, debug=True)

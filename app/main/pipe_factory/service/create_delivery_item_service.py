@@ -116,6 +116,7 @@ class CreateDeliveryItem():
                 item.spec = delivery_item.spec
                 item.quantity = 1
                 item.free_pcs = 0
+                item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
                 item.item_id = delivery_item.item_id
                 item.material = delivery_item.material
                 item.f_whs = delivery_item.f_whs
