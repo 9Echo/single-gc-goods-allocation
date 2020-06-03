@@ -23,11 +23,6 @@ def dispatch(id_list: List) -> bool:
     load_task_list = list()
     # 库存信息获取
     stock_list, xg_dict = stock_service.deal_stock()
-    total_weight = sum([i.actual_weight for i in stock_list if i.sort in [1]])
-    # for i in xg_dict.values():
-    #     for j in i:
-    #         total_weight += j.actual_weight
-    print(total_weight)
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list, xg_dict)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
@@ -37,8 +32,6 @@ def dispatch(id_list: List) -> bool:
     merge_result(load_task_list)
     # 车次优先级排序
     # load_task_list.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
-    end_weight = sum([i.total_weight for i in load_task_list])
-    print(end_weight)
     # 写库
     save_load_task(load_task_list, id_list)
     return True
