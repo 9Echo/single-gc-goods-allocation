@@ -77,6 +77,7 @@ def dispatch_optimize(order):
     """
     sheets = []
     task_id = 0
+    batch_no = UUIDUtil.create_id("ba")
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
     # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
