@@ -114,6 +114,7 @@ def create_sheet_item(order):
             di.material = item.material
             di.f_whs = item.f_whs
             di.f_loc = item.f_loc
+            di.max_quantity = ModelConfig.ITEM_ID_DICT.get(di.item_id[:3])
             di.volume = 1 / di.max_quantity if di.max_quantity else 0.001
             di.weight = weight_calculator.calculate_weight(di.product_type, di.item_id, di.quantity, di.free_pcs)
             di.total_pcs = weight_calculator.calculate_pcs(di.product_type, di.item_id, di.quantity, di.free_pcs)

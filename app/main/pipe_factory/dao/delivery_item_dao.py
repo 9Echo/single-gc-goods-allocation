@@ -9,13 +9,6 @@ from app.util.date_util import get_now_str
 
 class DeliveryItemDao(BaseDao):
 
-    def get_by_sheet(self, sheet_id):
-        """根据发货单号获取所有的子发货单"""
-        sql = "select * from t_ga_delivery_item where delivery_no = %s"
-        values = (sheet_id,)
-        results = self.select_all(sql, values)
-        return [DeliveryItem(row) for row in results]
-
     def batch_insert(self, items):
         """批量插入子发货单"""
         sql = """insert into t_ga_delivery_item(
