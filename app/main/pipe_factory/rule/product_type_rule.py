@@ -4,6 +4,12 @@
 
 # 将产品品类分组，属于一个group的可以分到同一单，其余的每个品类各一单
 similar_groups = [('热镀', '热度', '热镀1'), ('焊管', '焊管 ', '焊管1')]
+similar = {"热镀": "热镀",
+           "热度": "热镀",
+           "热镀1": "热镀",
+           "焊管": "焊管",
+           "焊管 ": "焊管",
+           "焊管1": "焊管", }
 
 
 def filter(delivery_items: list):
@@ -35,11 +41,11 @@ def filter(delivery_items: list):
 
 def get_product_type(sheet):
     """输出产品品类，如果属于同一品类组则返回第一个品类"""
-    product_type = sheet.product_type
-    for group in similar_groups:
-        if group.__contains__(product_type):
-            product_type = group[0]
-    return product_type
-
+    # product_type = sheet.product_type
+    # for group in similar_groups:
+    #     if group.__contains__(product_type):
+    #         product_type = group[0]
+    # return product_type
+    return similar[sheet.product_type] if sheet.product_type in similar else sheet.product_type
 
 
