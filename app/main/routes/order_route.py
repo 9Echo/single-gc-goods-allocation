@@ -16,7 +16,6 @@ class OrderRoute(Resource):
     def post():
         """输入订单，返回开单结果
         """
-        print("yes")
         if request.get_data():
             order_data = json.loads(request.get_data().decode("utf-8"))
             # 数据初始化
