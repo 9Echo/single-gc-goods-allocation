@@ -59,6 +59,8 @@ def dispatch_filter(load_task_list, stock_list, xg_dict):
         if v.sort == 1:
             load_task_list.append(create_load_task([v], TrainId.get_id(), LoadTaskType.TYPE_1.value))
             general_stock_dict.pop(k)
+    end_weight = sum([i.total_weight for i in load_task_list])
+    print(end_weight)
     # 剩余货物走正常流程
     if general_stock_dict:
         # 目标货物整体分

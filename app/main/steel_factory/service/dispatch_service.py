@@ -23,7 +23,7 @@ def dispatch(id_list: List) -> bool:
     load_task_list = list()
     # 库存信息获取
     stock_list, xg_dict = stock_service.deal_stock()
-    total_weight = sum([i.actual_weight for i in stock_list])
+    total_weight = sum([i.actual_weight for i in stock_list if i.sort in [1]])
     # for i in xg_dict.values():
     #     for j in i:
     #         total_weight += j.actual_weight

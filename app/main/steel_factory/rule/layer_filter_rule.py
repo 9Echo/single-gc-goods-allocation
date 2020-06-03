@@ -50,9 +50,8 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
-        # 目标货物从待匹配列表移除
-        if dispatch_type is not DispatchType.THIRD:
             general_stock_dict.pop(stock_id)
+
         # 得到待匹配列表
         filter_list = [v for v in general_stock_dict.values() if
                        v.deliware_house == temp_stock.deliware_house and v.standard_address == temp_stock.standard_address
@@ -66,6 +65,10 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                 temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
                 calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                 continue
+        # 一单在[31-33]并且无货可拼的情况生成车次
+        elif temp_stock.actual_weight >= ModelConfig.RG_MIN_WEIGHT:
+            calculate([], general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
+            continue
         general_stock_dict.pop(stock_id, 404)
         result_dict[stock_id] = temp_stock
     return result_dict
@@ -98,11 +101,9 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
+            general_stock_dict.pop(stock_id)
         # 获取可拼货同区仓库
         warehouse_out_group = get_warehouse_out_group(temp_stock)
-        # 目标货物从待匹配列表移除
-        if dispatch_type is not DispatchType.THIRD:
-            general_stock_dict.pop(stock_id)
         # 条件筛选
         filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
                        and v.deliware_house in warehouse_out_group
@@ -160,7 +161,6 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
-        if dispatch_type is not DispatchType.THIRD:
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
@@ -218,7 +218,6 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
-        if dispatch_type is not DispatchType.THIRD:
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if
                        v.deliware_house == temp_stock.deliware_house and v.actual_end_point == temp_stock.actual_end_point
