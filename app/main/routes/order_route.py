@@ -5,9 +5,8 @@
 import json
 from flask import request
 from flask_restful import Resource
-from app.main.pipe_factory.service import order_service, dispatch_service as dispatch_service_spec
-from app.task.pulp_task.services import dispatch_service as dispatch_service_weight
-from app.task.optimize_task.services import dispatch_service as dispatch_service_optimize
+from app.main.pipe_factory.service import order_service
+from app.main.pipe_factory.service.dispatch_service import dispatch_spec,dispatch_weight,dispatch_optimize
 from app.util.result import Result
 
 
@@ -23,11 +22,11 @@ class OrderRoute(Resource):
             # 数据初始化
             order = order_service.generate_order(order_data['data'])
             # 规格优先
-            sheets_1 = dispatch_service_spec.dispatch(order)
+            sheets_1 = dispatch_spec(order)
             # 重量优先
-            sheets_2 = dispatch_service_weight.dispatch(order)
+            sheets_2 = dispatch_weight(order)
             # 综合
-            sheets_3 = dispatch_service_optimize.dispatch(order)
+            sheets_3 = dispatch_optimize(order)
 
             return Result.success_response(sheets_1+sheets_2+sheets_3)
 

@@ -27,7 +27,7 @@ class OrderRouteTest(Resource):
                 json_data = json.loads(request.get_data().decode("utf-8"))
                 order = order_service.generate_order(json_data['data'])
 
-                sheets_1,weight1 = dispatch_service_spec.dispatch(order)
+                sheets_1,weight1 = dispatch_service_spec.dispatch_spec(order)
                 sheets_2,weight1 = dispatch_service_weight.dispatch(order)
                 sheets_3,weight1 = dispatch_service_optimize.dispatch(order)
                 spec_results_dict= dispatch_result_test.collect_difference("spec_sheets", sheets_1)

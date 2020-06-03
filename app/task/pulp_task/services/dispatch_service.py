@@ -1,22 +1,13 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/02/01
 # @Author  : shaoluyu
-import copy
 from threading import Thread
-from flask import g
-from app.main.pipe_factory.entity.delivery_item import DeliveryItem
-from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
-from app.main.pipe_factory.model import dispatch_filter
 from app.main.pipe_factory.model.weight_filter import weight_filter
-from app.main.pipe_factory.rule.lp_problem_solution import create_variable_list, call_pulp_solve
 from app.main.pipe_factory.service import redis_service
 from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
 from app.main.pipe_factory.service.create_delivery_item_service import CreateDeliveryItem
 from app.main.pipe_factory.service.replenish_property_service import replenish_property
-from app.task.pulp_task.analysis.rules import pulp_solve
-from app.util import weight_calculator
 from app.util.uuid_util import UUIDUtil
-from model_config import ModelConfig
 
 
 def dispatch(order):
@@ -41,4 +32,3 @@ def dispatch(order):
     # 将推荐发货通知单暂存redis
     Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
-
