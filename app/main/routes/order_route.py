@@ -6,7 +6,7 @@ import json
 from flask import request
 from flask_restful import Resource
 from app.main.pipe_factory.service import order_service
-from app.main.pipe_factory.service.dispatch_service import dispatch_spec,dispatch_weight,dispatch_optimize
+from app.main.pipe_factory.service.dispatch_service import dispatch_spec, dispatch_weight, dispatch_optimize
 from app.util.result import Result
 
 
@@ -27,4 +27,4 @@ class OrderRoute(Resource):
             # 综合
             sheets_3 = dispatch_optimize(order)
 
-            return Result.success_response(sheets_1 + sheets_2)
+            return Result.success_response(sheets_1 + sheets_2 + sheets_3)

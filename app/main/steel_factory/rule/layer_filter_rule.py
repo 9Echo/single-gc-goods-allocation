@@ -42,8 +42,6 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
             result_dict = {**result_dict, **general_stock_dict}
             break
-        surplus_weight: int = 0
-        new_min_weight: int = 0
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
             new_min_weight = min_weight
@@ -51,7 +49,6 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
-
         # 得到待匹配列表
         filter_list = [v for v in general_stock_dict.values() if
                        v.deliware_house == temp_stock.deliware_house and v.standard_address == temp_stock.standard_address
@@ -93,8 +90,6 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
             result_dict = {**result_dict, **general_stock_dict}
             break
-        surplus_weight: int = 0
-        new_min_weight: int = 0
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
             new_min_weight = min_weight
@@ -153,8 +148,6 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
         if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
             result_dict = {**result_dict, **general_stock_dict}
             break
-        surplus_weight: int = 0
-        new_min_weight: int = 0
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
             new_min_weight = min_weight
@@ -210,8 +203,6 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
             result_dict = {**result_dict, **general_stock_dict}
             break
-        surplus_weight: int = 0
-        new_min_weight: int = 0
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
             new_min_weight = min_weight
