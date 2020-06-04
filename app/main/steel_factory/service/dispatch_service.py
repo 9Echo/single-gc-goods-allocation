@@ -120,7 +120,7 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
 
 
 if __name__ == '__main__':
-    # print(datetime.now()[0:19])
+    print(datetime.now())
     result = dispatch(["C000000882", "ct"])
     print("success")
-    # generate_excel_service.generate_excel(result)
+    print(datetime.now())
