@@ -151,7 +151,8 @@ def deal_stock():
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock["sort"] = 3
     df_stock.loc[
-        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
+        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
+            "sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
@@ -198,11 +199,15 @@ def deal_stock():
             copy_1.actual_number = int(left_num)
             copy_1.actual_weight = left_num * stock.piece_weight
             if left_num:
+                if ModelConfig.RG_MIN_WEIGHT <= copy_1.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
+                    copy_1.sort = 2
                 stock_list.append(copy_1)
             for q in range(int(group_num)):
                 copy_2 = copy.deepcopy(stock)
                 copy_2.actual_weight = num * stock.piece_weight
                 copy_2.actual_number = int(num)
+                if ModelConfig.RG_MIN_WEIGHT <= copy_2.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
+                    copy_2.sort = 2
                 stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
     stock_list.sort(key=lambda x: (x.sort, x.priority, x.latest_order_time), reverse=False)
@@ -271,5 +276,5 @@ if __name__ == "__main__":
     #         print(i, k.priority, k.actual_weight)
     # for i in a:
     #     print(i.sort, i.priority, i.latest_order_time)
-        # if i.priority not in (1, 2, 3):
-        #     print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)
+    # if i.priority not in (1, 2, 3):
+    #     print(i.stock_id, i.priority, i.latest_order_time, i.actual_weight, i.piece_weight, i.actual_number)
