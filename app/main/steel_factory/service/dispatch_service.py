@@ -23,9 +23,9 @@ def dispatch(id_list: List) -> bool:
     load_task_list = list()
     # 库存信息获取
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '获取库存开始')
-    stock_list, xg_dict = stock_service.deal_stock()
+    stock_list = stock_service.deal_stock()
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '获取库存结束，分货开始')
-    surplus_stock_dict = dispatch_filter(load_task_list, stock_list, xg_dict)
+    surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '分货结束')
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:

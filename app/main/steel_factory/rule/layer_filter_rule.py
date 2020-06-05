@@ -50,18 +50,38 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 得到待匹配列表
-        filter_list = [v for v in general_stock_dict.values() if
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock and
                        v.deliware_house == temp_stock.deliware_house and v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
                        and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
         if filter_list:
-            temp_list = split(filter_list)
-            # 选中的列表
-            compose_list, value = goods_filter(temp_list, surplus_weight)
-            if value >= new_min_weight:
-                temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-                calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
-                continue
+            if temp_stock.big_commodity_name == '型钢':
+                temp_max_weight: int = 0
+                # 目标拼货组合
+                target_compose_list: List[Stock] = list()
+                temp_set: set = set([i.specs for i in filter_list])
+                for i in temp_set:
+                    temp_list = [v for v in filter_list if v.specs == i or v.specs == temp_stock.specs]
+                    result_list = split(temp_list)
+                    # 选中的列表
+                    compose_list, value = goods_filter(result_list, surplus_weight)
+                    if value >= new_min_weight:
+                        if temp_max_weight < value:
+                            temp_max_weight = value
+                            target_compose_list = compose_list
+                if temp_max_weight:
+                    temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
+                    calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock,
+                              LoadTaskType.TYPE_1.value)
+                    continue
+            else:
+                temp_list = split(filter_list)
+                # 选中的列表
+                compose_list, value = goods_filter(temp_list, surplus_weight)
+                if value >= new_min_weight:
+                    temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
+                    calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
+                    continue
         # 一单在[31-33]并且无货可拼的情况生成车次
         elif temp_stock.actual_weight >= ModelConfig.RG_MIN_WEIGHT:
             calculate([], general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
@@ -100,7 +120,8 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         # 获取可拼货同区仓库
         warehouse_out_group = get_warehouse_out_group(temp_stock)
         # 条件筛选
-        filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
+        filter_list = [v for v in general_stock_dict.values() if
+                       v is not temp_stock and v.standard_address == temp_stock.standard_address
                        and v.deliware_house in warehouse_out_group
                        and v.piece_weight <= surplus_weight
                        and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
@@ -140,7 +161,8 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
+        filter_list = [v for v in general_stock_dict.values() if
+                       v is not temp_stock and v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
                        and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
         optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
@@ -179,7 +201,7 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock and
                        v.deliware_house == temp_stock.deliware_house and v.actual_end_point == temp_stock.actual_end_point
                        and v.piece_weight <= surplus_weight
                        and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
@@ -210,17 +232,36 @@ def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, a
     # 目标拼货组合
     target_compose_list: List[Stock] = list()
     temp_set: set = set([getattr(i, attr_name) for i in filter_list])
-    for i in temp_set:
-        if i != getattr(temp_stock, attr_name):
-            temp_list = [v for v in filter_list if
-                         getattr(v, attr_name) == i or getattr(v, attr_name) == getattr(temp_stock, attr_name)]
-            result_list = split(temp_list)
-            # 选中的列表
-            compose_list, value = goods_filter(result_list, surplus_weight)
-            if value >= new_min_weight:
-                if temp_max_weight < value:
-                    temp_max_weight = value
-                    target_compose_list = compose_list
+    # 如果目标货物品类为型钢
+    if temp_stock.big_commodity_name == '型钢':
+        for i in temp_set:
+            if i != getattr(temp_stock, attr_name):
+                temp_list = [v for v in filter_list if
+                             getattr(v, attr_name) == i or getattr(v, attr_name) == getattr(temp_stock, attr_name)]
+                # 获取规格信息
+                spec_set = set([j.specs for j in temp_list])
+                for spec in spec_set:
+                    xg_list = [v for v in temp_list if v.specs == temp_stock.specs or v.specs == spec]
+                    result_list = split(xg_list)
+                    # 选中的列表
+                    compose_list, value = goods_filter(result_list, surplus_weight)
+                    if value >= new_min_weight:
+                        if temp_max_weight < value:
+                            temp_max_weight = value
+                            target_compose_list = compose_list
+    else:
+        for i in temp_set:
+            if i != getattr(temp_stock, attr_name):
+                temp_list = [v for v in filter_list if
+                             getattr(v, attr_name) == i or getattr(v, attr_name) == getattr(temp_stock, attr_name)]
+
+                result_list = split(temp_list)
+                # 选中的列表
+                compose_list, value = goods_filter(result_list, surplus_weight)
+                if value >= new_min_weight:
+                    if temp_max_weight < value:
+                        temp_max_weight = value
+                        target_compose_list = compose_list
     return temp_max_weight, target_compose_list
 
 

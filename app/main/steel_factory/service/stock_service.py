@@ -211,14 +211,14 @@ def deal_stock():
     for num in copy.copy(stock_list):
         num.stock_id = count
         count += 1
-        if num.big_commodity_name == "型钢":
-            weight = num.actual_weight if num.priority != 3 else 0
-            xg_stock_dic.setdefault(num.specs, dict()).setdefault("result", []).append(num)
-            xg_stock_dic[num.specs]["weight"] = xg_stock_dic[num.specs].get("weight", 0) + weight
-            stock_list.remove(num)
-    xg_stock_dic = sorted(xg_stock_dic.items(), key=lambda x: x[1]["weight"], reverse=True)
-    xg_stock_dic2 = {x[0]: x[1]["result"] for x in xg_stock_dic}
-    return stock_list, xg_stock_dic2
+    #     if num.big_commodity_name == "型钢":
+    #         weight = num.actual_weight if num.priority != 3 else 0
+    #         xg_stock_dic.setdefault(num.specs, dict()).setdefault("result", []).append(num)
+    #         xg_stock_dic[num.specs]["weight"] = xg_stock_dic[num.specs].get("weight", 0) + weight
+    #         stock_list.remove(num)
+    # xg_stock_dic = sorted(xg_stock_dic.items(), key=lambda x: x[1]["weight"], reverse=True)
+    # xg_stock_dic2 = {x[0]: x[1]["result"] for x in xg_stock_dic}
+    return stock_list
 
 
 def rename_pd(dataframe):
