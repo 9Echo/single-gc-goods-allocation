@@ -6,7 +6,7 @@ import traceback
 import pymysql
 from pymysql import MySQLError
 
-from app.util.db_pool import db_pool_ods, db_pool_trans_plan
+from app.util.db_pool import db_pool_ods
 
 
 class BaseDao:
