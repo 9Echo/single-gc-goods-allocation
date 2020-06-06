@@ -3,12 +3,16 @@ from typing import List
 import requests
 import json
 
+from app.util.my_exception import MyException
+from app.util.rest_template import RestTemplate
 import config
 from app.main.steel_factory.entity.load_task import LoadTask
 from flask import current_app
 
+from app.util.result import Result
 
-def service(code, msg, result, id_list):
+
+def service(param: Result, id_list):
     """接收状态和结果
 
     Args:
@@ -18,21 +22,17 @@ def service(code, msg, result, id_list):
     Raise:
 
     """
-    data = {
-        "code": code,
-        "msg": msg,
-        "truckTasks": []
-    }
-    for res in result:
-        data["truckTasks"].append(data_format(res, id_list))
+    data_list = list()
+    for res in param.data:
+        data_list.append(data_format(res, id_list))
+    param.data = data_list
     url = config.get_active_config().DISPATCH_SERVICE_URL + "/truckTask/createTruckTasks"
-    headers = {
-        'Content-Type': 'application/json;charset=UTF-8'
-    }
     try:
-        response = requests.post(url=url, headers=headers, data=json.dumps(data))
-        if response.status_code != 200:
-            current_app.logger.error('调用反馈接口失败,状态码{}'.format(response.status_code))
+        result = RestTemplate.do_post(url, param.as_dict())
+        current_app.logger.info(result.get('msg'))
+    except MyException as me:
+        current_app.logger.exception(me)
+        current_app.logger.error(me.message)
     except Exception as e:
         current_app.logger.exception(e)
         current_app.logger.error('调用出错！')

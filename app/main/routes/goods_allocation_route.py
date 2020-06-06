@@ -28,10 +28,10 @@ class GoodsAllocationRoute(Resource):
             save_load_task(load_task_list, id_list)
         except Exception as e:
             # 调用反馈接口,模型错误
-            service(ResponseCode.Fail, ResponseMessage.Fail, [], [])
+            service(Result.error(), [])
             current_app.logger.exception(e)
             return Result.error_response()
         else:
             # 调用反馈接口，模型成功
-            service(ResponseCode.Success, ResponseMessage.Success, load_task_list, id_list)
+            service(Result.success(data=load_task_list), id_list)
             return Result.success_response()

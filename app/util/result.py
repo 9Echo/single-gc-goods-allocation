@@ -6,7 +6,7 @@ from app.util.base.base_entity import BaseEntity
 from app.util.code import ResponseCode, ResponseMessage
 
 
-class Result:
+class Result(BaseEntity):
     """将结果封装为定义好的json"""
 
     def __init__(self):
@@ -40,7 +40,7 @@ class Result:
         return result
 
     @staticmethod
-    def error(msg):
+    def error(msg=None):
         result = Result()
         result.code = ResponseCode.Error
         result.msg = ResponseMessage.Error if not msg else msg
