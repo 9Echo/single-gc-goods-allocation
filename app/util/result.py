@@ -70,7 +70,7 @@ class Result:
         return result
 
     @staticmethod
-    def success_response(obj):
+    def success_response(obj=None):
         """返回成功信息"""
         result = Result.from_entity(obj)
         return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),

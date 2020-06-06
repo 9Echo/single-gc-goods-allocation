@@ -13,7 +13,7 @@ from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
 from app.util.generate_id import TrainId
 
 
-def dispatch(id_list: List) -> bool:
+def dispatch(stock_list) -> List[LoadTask]:
     """
     车辆配货
     :param :
@@ -22,23 +22,15 @@ def dispatch(id_list: List) -> bool:
     """
     load_task_list = list()
     # 库存信息获取
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '获取库存开始')
     stock_list = stock_service.deal_stock()
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '获取库存结束，分货开始')
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '分货结束')
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:
         load_task_list.append(
             create_load_task(list(surplus_stock_dict.values()), TrainId.get_surplus_id(), LoadTaskType.TYPE_5.value))
     # 合并
     merge_result(load_task_list)
-    # 车次优先级排序
-    # load_task_list.sort(key=lambda x: (x.priority_grade, x.latest_order_time), reverse=False)
-    # 写库
-    save_load_task(load_task_list, id_list)
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '写库结束')
-    return True
+    return load_task_list
 
 
 def merge_result(load_task_list: list):

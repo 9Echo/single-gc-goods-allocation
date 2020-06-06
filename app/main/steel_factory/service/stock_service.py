@@ -2,6 +2,9 @@
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
 import copy
+
+from app.util.code import ResponseCode
+from app.util.my_exception import MyException
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
 import pandas as pd
@@ -103,6 +106,8 @@ def deal_stock():
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
+    # if not data:
+    #     raise MyException('输入输出为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
     # 存放除型钢外的stock的结果
     stock_list = []
