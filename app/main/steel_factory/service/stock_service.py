@@ -106,8 +106,8 @@ def deal_stock(data):
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
-    # if not data:
-    #     raise MyException('输入输出为空', ResponseCode.Error)
+    if not data:
+        raise MyException('输入输出为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
     # 存放除型钢外的stock的结果
     stock_list = []
