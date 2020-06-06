@@ -5,7 +5,6 @@ from flask_restful import Resource
 from app.main.steel_factory.service.dispatch_service import dispatch, save_load_task
 from app.main.steel_factory.service.feedback_service import service
 from app.main.steel_factory.service.stock_service import deal_stock
-from app.util.code import ResponseCode, ResponseMessage
 from app.util.result import Result
 
 
@@ -24,8 +23,6 @@ class GoodsAllocationRoute(Resource):
             stock_list = deal_stock(data)
             # 配载
             load_task_list = dispatch(stock_list)
-            # 写库
-            save_load_task(load_task_list, id_list)
         except Exception as e:
             # 调用反馈接口,模型错误
             service(Result.error(), [])
@@ -34,4 +31,6 @@ class GoodsAllocationRoute(Resource):
         else:
             # 调用反馈接口，模型成功
             service(Result.success(data=load_task_list), id_list)
+            # 写库
+            save_load_task(load_task_list, id_list)
             return Result.success_response()

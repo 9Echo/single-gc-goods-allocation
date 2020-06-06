@@ -29,7 +29,9 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task_item.weight = i.actual_weight / 1000
         load_task_item.count = i.actual_number
         load_task_item.city = i.city
+        load_task.city = i.city
         load_task_item.end_point = i.dlv_spot_name_end
+        load_task.end_point = i.dlv_spot_name_end
         load_task_item.commodity = i.commodity_name
         load_task_item.notice_num = i.notice_num
         load_task_item.oritem_num = i.oritem_num
@@ -42,6 +44,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task_item.parent_load_task_id = i.parent_stock_id
         load_task_item.latest_order_time = i.latest_order_time
         load_task_item.notice_stockinfo_id = i.notice_stockinfo_id
+        load_task_item.load_task_id = load_task_id
         load_task_item.consumer = i.consumer
         total_weight += load_task_item.weight
         priority_set.add(i.priority)

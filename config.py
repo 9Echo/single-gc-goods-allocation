@@ -76,7 +76,7 @@ class DevelopmentConfig(Config):
     REDIS_MAX_CONNECTIONS = 2
 
     # 微服务url
-    DISPATCH_SERVICE_URL = 'http://192.168.21.127:9078'
+    DISPATCH_SERVICE_URL = 'http://192.168.1.20:9078'
 
     # APScheduler定时任务配置，可选（不使用时可删除）
     SCHEDULER_OPEN = False

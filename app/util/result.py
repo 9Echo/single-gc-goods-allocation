@@ -13,7 +13,6 @@ class Result(BaseEntity):
         self.code = ""
         self.msg = ""
         self.data = None
-        self.tag = True
 
     @staticmethod
     def from_entity(obj):
@@ -65,7 +64,7 @@ class Result(BaseEntity):
     def success(msg="", data=None):
         result = Result()
         result.code = ResponseCode.Success
-        result.msg = msg
+        result.msg = ResponseMessage.Success if not msg else msg
         result.data = data
         return result
 

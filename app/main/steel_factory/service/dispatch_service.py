@@ -29,8 +29,6 @@ def dispatch(stock_list) -> List[LoadTask]:
             create_load_task(list(surplus_stock_dict.values()), TrainId.get_surplus_id(), LoadTaskType.TYPE_5.value))
     # 合并
     merge_result(load_task_list)
-    # 写库
-    save_load_task(load_task_list, ['', ''])
     return load_task_list
 
 
