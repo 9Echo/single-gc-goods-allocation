@@ -76,7 +76,7 @@ def address_latitude_and_longitude():
 
     """
     sql1 = """
-            select address as '卸货地址',longitude, latitude
+            select address as 'detail_address',longitude, latitude
             from ods_db_sys_t_point
         """
     sql2 = """
@@ -91,7 +91,7 @@ def address_latitude_and_longitude():
     return result_1, result_2
 
 
-def deal_stock():
+def deal_stock(data):
     """
 
     :return:
@@ -116,7 +116,58 @@ def deal_stock():
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
-    df_stock = get_stock()
+    df_stock = pd.DataFrame(data)
+    # df_stock = get_stock()
+    # ——————————————注释开始
+    # df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
+    # df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    # df_stock["实际终点"] = df_stock["dlv_spot_name_end"]
+    # # 根据公式，计算实际可发重量，实际可发件数
+    # df_stock["实际可发重量"] = (df_stock["can_send_weight"] + df_stock["need_lading_wt"]) * 1000
+    # df_stock["实际可发件数"] = df_stock["can_send_number"] + df_stock["need_lading_num"]
+    # df_stock["over_flow_wt"] = df_stock["over_flow_wt"] * 1000
+    # # 窄带按捆包数计算，实际可发件数 = 捆包数
+    # df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["pack_number"] > 0), ["实际可发件数"]] = df_stock[
+    #     "pack_number"]
+    # # 根据公式计算件重
+    # df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
+    # df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
+    # # print("分货前重量:{}".format(df_stock["实际可发重量"].sum()))
+    # # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
+    # # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
+    # # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
+    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (
+    #             -df_stock["over_flow_wt"] // df_stock["件重"])
+    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
+    #         -df_stock["over_flow_wt"] // df_stock["件重"])
+    # # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
+    # # 区分西老区的开平板
+    # df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
+    #     "big_commodity_name"]] = ["西区开平板"]
+    # df_stock.loc[
+    #     (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") == False), [
+    #         "big_commodity_name"]] = ["开平板"]
+    # # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
+    # # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
+    # # 筛选出不为0的数据
+    # df_stock = df_stock.loc[
+    #     (df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["latest_order_time"].notnull())]
+    # # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
+    # df_stock.drop(
+    #     index=(df_stock.loc[
+    #                (df_stock["can_send_number"] < df_stock["waint_fordel_number"]) & (
+    #                            31 <= df_stock["waint_fordel_weight"]) & (df_stock["waint_fordel_weight"] <= 33)].index),
+    #     inplace=True)
+    # df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
+    # df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
+    #     df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
+    # df_stock.loc[df_stock["deliware"].str.startswith("U"), ["卸货地址2"]] = df_stock["portnum"]
+    # df_stock.loc[df_stock["priority"].isnull(), ["priority"]] = ""
+    # df_stock["sort"] = 3
+    # df_stock.loc[
+    #     (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
+    #         "sort"]] = 2
+    # ——————————————注释结束
     df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
     df_stock["实际终点"] = df_stock["终点"]
@@ -244,38 +295,38 @@ def rename_pd(dataframe):
     """
     dataframe.rename(index=str,
                      columns={
-                         "发货通知单": "notice_num",
-                         "订单号": "oritem_num",
-                         "优先发运": "priority",
-                         "收货用户": "consumer",
-                         "品名名称": "commodity_name",
-                         "品名": "big_commodity_name",
-                         "牌号": "mark",
-                         "规格": "specs",
-                         "出库仓库": "deliware_house",
-                         "省份": "province",
-                         "城市": "city",
-                         "终点": "dlv_spot_name_end",
-                         "物流公司类型": "logistics_company_type",
-                         "包装形式": "pack",
-                         "卸货地址": "detail_address",
-                         "最新挂单时间": "latest_order_time",
-                         "合同约定交货日期": "devperiod",
+                         # "发货通知单": "notice_num",
+                         # "订单号": "oritem_num",
+                         # "优先发运": "priority",
+                         # "收货用户": "consumer",
+                         # "品名名称": "commodity_name",
+                         # "品名": "big_commodity_name",
+                         "material": "mark",
+                         "standard": "specs",
+                         # "出库仓库": "deliware_house",
+                         # "省份": "province",
+                         # "城市": "city",
+                         # "终点": "dlv_spot_name_end",
+                         # "物流公司类型": "logistics_company_type",
+                         # "包装形式": "pack",
+                         # "卸货地址": "detail_address",
+                         # "最新挂单时间": "latest_order_time",
+                         # "合同约定交货日期": "devperiod",
                          "实际可发重量": "actual_weight",
                          "实际可发件数": "actual_number",
                          "件重": "piece_weight",
-                         "入库仓库": "deliware",
+                         # "入库仓库": "deliware",
                          "卸货地址2": "standard_address",
                          "实际终点": "actual_end_point",
-                         "待发件数": "waint_fordel_number",
-                         "待发重量": "waint_fordel_weight"
+                         # "待发件数": "waint_fordel_number",
+                         # "待发重量": "waint_fordel_weight"
                      },
                      inplace=True)
     return dataframe
 
 
 if __name__ == "__main__":
-    a, b = deal_stock()
+    a = deal_stock()
     # for i, j in b.items():
     #     for k in j:
     #         print(i, k.priority, k.actual_weight)

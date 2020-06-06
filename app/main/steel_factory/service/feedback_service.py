@@ -1,7 +1,7 @@
 import requests
 import json
-
 from app.main.steel_factory.entity.load_task import LoadTask
+from flask import current_app
 
 
 def service(code, msg, result):
@@ -21,17 +21,18 @@ def service(code, msg, result):
     }
     for res in result:
         data["datas"].append(data_format(res))
+    url = ""
+    response = requests.post(url=url,
+                             data=json.dumps(data)
+                             )
     if code:
-        url = ""
-        request = requests.post(url=url,
-                                data=json.dumps(data)
-                                )
-        if request.status_code:
+        if response.status_code:
             # 调用接口失败
             print("调用接口失败！")
     else:
         # app日志输出？
         print("算法调用失败！{}".format(msg))
+        current_app.logger.infor("算法调用失败！{}".format(msg))
 
 
 def data_format(load_task: LoadTask):
