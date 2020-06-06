@@ -45,7 +45,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         total_weight += load_task_item.weight
         priority_set.add(i.priority)
         latest_order_time_set.add(load_task_item.latest_order_time)
-        remark_list.extend(ModelConfig.RG_VARIETY_VEHICLE[load_task_item.big_commodity])
+        remark_list.extend(ModelConfig.RG_VARIETY_VEHICLE.get(load_task_item.big_commodity, []))
         # 得到翻转优先级的字典
         dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
         if i.priority not in dic_priority:

@@ -50,10 +50,12 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 得到待匹配列表
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock and
-                       v.deliware_house == temp_stock.deliware_house and v.standard_address == temp_stock.standard_address
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
+                       and v.deliware_house == temp_stock.deliware_house
+                       and v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
+                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
+                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
         if filter_list:
             if temp_stock.big_commodity_name == '型钢':
                 temp_max_weight: int = 0
@@ -120,11 +122,12 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
         # 获取可拼货同区仓库
         warehouse_out_group = get_warehouse_out_group(temp_stock)
         # 条件筛选
-        filter_list = [v for v in general_stock_dict.values() if
-                       v is not temp_stock and v.standard_address == temp_stock.standard_address
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
+                       and v.standard_address == temp_stock.standard_address
                        and v.deliware_house in warehouse_out_group
                        and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
+                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
+                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
         optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
                                                                 'deliware_house')
         if optimal_weight:
@@ -161,10 +164,11 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if
-                       v is not temp_stock and v.standard_address == temp_stock.standard_address
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
+                       and v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
+                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
+                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
         optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
                                                                 'deliware_house')
         if optimal_weight:
@@ -201,10 +205,12 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock and
-                       v.deliware_house == temp_stock.deliware_house and v.actual_end_point == temp_stock.actual_end_point
+        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
+                       and v.deliware_house == temp_stock.deliware_house
+                       and v.actual_end_point == temp_stock.actual_end_point
                        and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(temp_stock.big_commodity_name)]
+                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
+                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
         optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
                                                                 'standard_address')
         if optimal_weight:
