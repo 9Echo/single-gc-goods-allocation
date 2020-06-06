@@ -2,6 +2,8 @@ from typing import List
 
 import requests
 import json
+
+import config
 from app.main.steel_factory.entity.load_task import LoadTask
 from flask import current_app
 
@@ -23,7 +25,7 @@ def service(code, msg, result, id_list):
     }
     for res in result:
         data["truckTasks"].append(data_format(res, id_list))
-    url = "http://192.168.21.127:9078/truckTask/createTruckTasks"
+    url = config.get_active_config().DISPATCH_SERVICE_URL + "/truckTask/createTruckTasks"
     headers = {
         'Content-Type': 'application/json;charset=UTF-8'
     }
