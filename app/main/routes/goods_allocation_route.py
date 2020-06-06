@@ -16,8 +16,10 @@ class GoodsAllocationRoute(Resource):
         """
         try:
             json_data = json.loads(request.get_data().decode("utf-8"))
+            # 业务id列表
             id_list = [json_data.get("company_id", ""), json_data.get("create_id", ""),
                        json_data.get("cargo_split_id", "")]
+            # 可发库存数据列表
             data = json_data["data"]
             # 库存处理
             stock_list = deal_stock(data)
@@ -29,6 +31,7 @@ class GoodsAllocationRoute(Resource):
             current_app.logger.exception(e)
             return Result.error_response()
         else:
+            current_app.logger.info('分货成功，准备调用进行反馈')
             # 调用反馈接口，模型成功
             service(Result.success(data=load_task_list), id_list)
             # 写库

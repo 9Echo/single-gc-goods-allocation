@@ -29,7 +29,7 @@ def service(param: Result, id_list):
         param.data = data_list
     url = config.get_active_config().DISPATCH_SERVICE_URL + "/truckTask/createTruckTasks"
     try:
-        current_app.logger.info('反馈结果，url：{}'.format(url))
+        current_app.logger.info('进行结果反馈，url：{}'.format(url))
         result = RestTemplate.do_post(url, param.as_dict())
         current_app.logger.info(result.get('msg'))
     except MyException as me:
