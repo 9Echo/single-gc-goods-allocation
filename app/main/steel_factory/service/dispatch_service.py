@@ -5,7 +5,6 @@ import copy
 from typing import List
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task
-from app.main.steel_factory.service import stock_service
 from app.util.enum_util import LoadTaskType
 from datetime import datetime
 from app.main.steel_factory.dao.load_task_dao import load_task_dao
@@ -22,7 +21,7 @@ def dispatch(stock_list) -> List[LoadTask]:
     """
     load_task_list = list()
     # 库存信息获取
-    stock_list = stock_service.deal_stock()
+    # stock_list = stock_service.deal_stock()
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:

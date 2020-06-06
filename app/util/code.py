@@ -24,7 +24,7 @@ class ResponseCode(object):
 class ResponseMessage(object):
     Fail = "失败"
     Success = "成功"
-    Error = "没有找到数据"
+    Error = "错误"
     Warn = "库存剩余不足"
     NoResourceFound = "未找到资源"
     InvalidParameter = "参数无效"

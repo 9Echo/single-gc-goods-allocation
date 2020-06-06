@@ -119,16 +119,64 @@ def deal_stock(data):
     df_stock = pd.DataFrame(data)
     # df_stock = get_stock()
     # ——————————————注释开始
-    # df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
+    df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
+    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    df_stock["实际终点"] = df_stock["dlv_spot_name_end"]
+    # 根据公式，计算实际可发重量，实际可发件数
+    df_stock["实际可发重量"] = (df_stock["can_send_weight"] + df_stock["need_lading_wt"]) * 1000
+    df_stock["实际可发件数"] = df_stock["can_send_number"] + df_stock["need_lading_num"]
+    df_stock["over_flow_wt"] = df_stock["over_flow_wt"] * 1000
+    # 窄带按捆包数计算，实际可发件数 = 捆包数
+    df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["pack_number"] > 0), ["实际可发件数"]] = df_stock[
+        "pack_number"]
+    # # 根据公式计算件重
+    df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
+    df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
+    # print("分货前重量:{}".format(df_stock["实际可发重量"].sum()))
+    # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
+    # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
+    # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
+    df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (
+                -df_stock["over_flow_wt"] // df_stock["件重"])
+    df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
+            -df_stock["over_flow_wt"] // df_stock["件重"])
+    # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
+    # 区分西老区的开平板
+    df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
+        "big_commodity_name"]] = ["西区开平板"]
+    df_stock.loc[
+        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") == False), [
+            "big_commodity_name"]] = ["开平板"]
+    # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
+    # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
+    # 筛选出不为0的数据
+    df_stock = df_stock.loc[
+        (df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["latest_order_time"].notnull())]
+    # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
+    df_stock.drop(
+        index=(df_stock.loc[
+                   (df_stock["can_send_number"] < df_stock["waint_fordel_number"]) & (
+                               31 <= df_stock["waint_fordel_weight"]) & (df_stock["waint_fordel_weight"] <= 33)].index),
+        inplace=True)
+    df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
+    df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
+        df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
+    df_stock.loc[df_stock["deliware"].str.startswith("U"), ["卸货地址2"]] = df_stock["portnum"]
+    df_stock.loc[df_stock["priority"].isnull(), ["priority"]] = ""
+    df_stock["sort"] = 3
+    df_stock.loc[
+        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
+            "sort"]] = 2
+    # ——————————————注释结束
+    # df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
     # df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    # df_stock["实际终点"] = df_stock["dlv_spot_name_end"]
+    # df_stock["实际终点"] = df_stock["终点"]
     # # 根据公式，计算实际可发重量，实际可发件数
-    # df_stock["实际可发重量"] = (df_stock["can_send_weight"] + df_stock["need_lading_wt"]) * 1000
-    # df_stock["实际可发件数"] = df_stock["can_send_number"] + df_stock["need_lading_num"]
-    # df_stock["over_flow_wt"] = df_stock["over_flow_wt"] * 1000
+    # df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
+    # df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
+    # df_stock["需短溢重量"] = df_stock["需短溢重量"] * 1000
     # # 窄带按捆包数计算，实际可发件数 = 捆包数
-    # df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["pack_number"] > 0), ["实际可发件数"]] = df_stock[
-    #     "pack_number"]
+    # df_stock.loc[(df_stock["品名"] == "窄带") & (df_stock["窄带捆包数"] > 0), ["实际可发件数"]] = df_stock["窄带捆包数"]
     # # 根据公式计算件重
     # df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
     # df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
@@ -136,79 +184,31 @@ def deal_stock(data):
     # # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
     # # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
     # # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
-    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (
-    #             -df_stock["over_flow_wt"] // df_stock["件重"])
-    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-    #         -df_stock["over_flow_wt"] // df_stock["件重"])
+    # df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
+    # df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
+    #         -df_stock["需短溢重量"] // df_stock["件重"])
     # # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
     # # 区分西老区的开平板
-    # df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
-    #     "big_commodity_name"]] = ["西区开平板"]
-    # df_stock.loc[
-    #     (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") == False), [
-    #         "big_commodity_name"]] = ["开平板"]
+    # df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
+    # df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["开平板"]
     # # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
     # # 筛选出不为0的数据
-    # df_stock = df_stock.loc[
-    #     (df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["latest_order_time"].notnull())]
+    # df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
     # # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
     # df_stock.drop(
     #     index=(df_stock.loc[
-    #                (df_stock["can_send_number"] < df_stock["waint_fordel_number"]) & (
-    #                            31 <= df_stock["waint_fordel_weight"]) & (df_stock["waint_fordel_weight"] <= 33)].index),
+    #                (df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
     #     inplace=True)
-    # df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
-    # df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
-    #     df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
-    # df_stock.loc[df_stock["deliware"].str.startswith("U"), ["卸货地址2"]] = df_stock["portnum"]
-    # df_stock.loc[df_stock["priority"].isnull(), ["priority"]] = ""
+    # df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
+    # df_stock.loc[(df_stock["到货码头"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
+    #     df_stock["品名"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
+    # df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
+    # df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     # df_stock["sort"] = 3
     # df_stock.loc[
     #     (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
     #         "sort"]] = 2
-    # ——————————————注释结束
-    df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
-    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    df_stock["实际终点"] = df_stock["终点"]
-    # 根据公式，计算实际可发重量，实际可发件数
-    df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
-    df_stock["实际可发件数"] = df_stock["可发件数"] + df_stock["需开单件数"]
-    df_stock["需短溢重量"] = df_stock["需短溢重量"] * 1000
-    # 窄带按捆包数计算，实际可发件数 = 捆包数
-    df_stock.loc[(df_stock["品名"] == "窄带") & (df_stock["窄带捆包数"] > 0), ["实际可发件数"]] = df_stock["窄带捆包数"]
-    # 根据公式计算件重
-    df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
-    df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
-    # print("分货前重量:{}".format(df_stock["实际可发重量"].sum()))
-    # print("段以重量:{}".format(df_stock["需短溢重量"].sum()))
-    # print("差值:{}".format(df_stock["实际可发重量"].sum() - df_stock["需短溢重量"].sum()))
-    # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
-    df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (-df_stock["需短溢重量"] // df_stock["件重"])
-    df_stock.loc[df_stock["需短溢重量"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-            -df_stock["需短溢重量"] // df_stock["件重"])
-    # print("除去短溢后:{}".format(df_stock["实际可发重量"].sum()))
-    # 区分西老区的开平板
-    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P")), ["品名"]] = ["西区开平板"]
-    df_stock.loc[(df_stock["品名"] == "开平板") & (df_stock["出库仓库"].str.startswith("P") == False), ["品名"]] = ["开平板"]
-    # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
-    # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
-    # 筛选出不为0的数据
-    df_stock = df_stock.loc[(df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["最新挂单时间"].notnull())]
-    # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
-    df_stock.drop(
-        index=(df_stock.loc[
-                   (df_stock["可发件数"] < df_stock["待发件数"]) & (31 <= df_stock["待发重量"]) & (df_stock["待发重量"] <= 33)].index),
-        inplace=True)
-    df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
-    df_stock.loc[(df_stock["到货码头"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
-        df_stock["品名"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
-    df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
-    df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
-    df_stock["sort"] = 3
-    df_stock.loc[
-        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
-            "sort"]] = 2
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
