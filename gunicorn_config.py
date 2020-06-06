@@ -58,54 +58,54 @@ loglevel = 'debug'
 # 错误日志文件
 errorlog = '/app/{}/logs/gunicorn_server.log'.format(APP_NAME)
 
-logconfig_dict = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'loggers': {
-        "gunicorn.error": {
-            "level": "DEBUG",  # 打日志的等级可以换的，下面的同理
-            "handlers": ["error_file"],  # 对应下面的键
-            "propagate": 1,
-            "qualname": "gunicorn.error"
-        },
-        "gunicorn.access": {
-            "level": "DEBUG",
-            "handlers": ["access_file"],
-            "propagate": 0,
-            "qualname": "gunicorn.access"
-        }
-    },
-    'handlers': {
-        "error_file": {
-            "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
-            "when": "midnight",
-            "interval": 1,
-            "backupCount": 14,  # 备份多少份
-            "formatter": "generic",  # 对应下面的键
-            # 'mode': 'w+',
-            "filename": '/app/{}/logs/gunicorn_server.log'.format(APP_NAME),  # 日志文件路径
-            'encoding': 'utf-8'  # 日志文件编码
-        },
-        "access_file": {
-            "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
-            "when": "midnight",
-            "interval": 1,
-            "backupCount": 14,
-            "formatter": "access",
-            "filename": '/app/{}/logs/gunicorn_access.log'.format(APP_NAME),
-            'encoding': 'utf-8'
-        }
-    },
-    'formatters': {
-        "generic": {
-            "format": "[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(process)d] [%(filename)s:%(lineno)s] - %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",  # 时间显示格式
-            "class": "logging.Formatter"
-        },
-        "access": {
-            "format": "[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(process)d] [%(filename)s:%(lineno)s] - %(message)s",
-            "datefmt": "%Y-%m-%d %H:%M:%S",  # 时间显示格式
-            "class": "logging.Formatter"
-        }
-    }
-}
+# logconfig_dict = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'loggers': {
+#         "gunicorn.error": {
+#             "level": "DEBUG",  # 打日志的等级可以换的，下面的同理
+#             "handlers": ["error_file"],  # 对应下面的键
+#             "propagate": 1,
+#             "qualname": "gunicorn.error"
+#         },
+#         "gunicorn.access": {
+#             "level": "DEBUG",
+#             "handlers": ["access_file"],
+#             "propagate": 0,
+#             "qualname": "gunicorn.access"
+#         }
+#     },
+#     'handlers': {
+#         "error_file": {
+#             "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
+#             "when": "midnight",
+#             "interval": 1,
+#             "backupCount": 14,  # 备份多少份
+#             "formatter": "generic",  # 对应下面的键
+#             # 'mode': 'w+',
+#             "filename": '/app/{}/logs/gunicorn_server.log'.format(APP_NAME),  # 日志文件路径
+#             'encoding': 'utf-8'  # 日志文件编码
+#         },
+#         "access_file": {
+#             "class": "app.util.file_handlers.MultiProcessSafeTimedRotatingFileHandler",
+#             "when": "midnight",
+#             "interval": 1,
+#             "backupCount": 14,
+#             "formatter": "access",
+#             "filename": '/app/{}/logs/gunicorn_access.log'.format(APP_NAME),
+#             'encoding': 'utf-8'
+#         }
+#     },
+#     'formatters': {
+#         "generic": {
+#             "format": "[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(process)d] [%(filename)s:%(lineno)s] - %(message)s",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",  # 时间显示格式
+#             "class": "logging.Formatter"
+#         },
+#         "access": {
+#             "format": "[%(asctime)s.%(msecs)03d] [%(levelname)s] [%(process)d] [%(filename)s:%(lineno)s] - %(message)s",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",  # 时间显示格式
+#             "class": "logging.Formatter"
+#         }
+#     }
+# }
