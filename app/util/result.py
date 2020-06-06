@@ -3,7 +3,7 @@ import json
 from flask import jsonify, Response
 
 from app.util.base.base_entity import BaseEntity
-from app.util.code import ResponseCode
+from app.util.code import ResponseCode, ResponseMessage
 
 
 class Result:
@@ -43,7 +43,7 @@ class Result:
     def error(msg):
         result = Result()
         result.code = ResponseCode.Error
-        result.msg = msg
+        result.msg = ResponseMessage.Error if not msg else msg
         return result
 
     @staticmethod
@@ -70,7 +70,7 @@ class Result:
         return result
 
     @staticmethod
-    def success_response(obj):
+    def success_response(obj=None):
         """返回成功信息"""
         result = Result.from_entity(obj)
         return Response(json.dumps({"code": result.code, "msg": result.msg, "data": result.data}),
@@ -78,7 +78,7 @@ class Result:
         # return {"code": result.code, "msg": result.msg, "data": result.data}
 
     @staticmethod
-    def error_response(msg):
+    def error_response(msg=None):
         """返回错误信息"""
         result = Result.error(msg)
         return jsonify({"code": result.code, "msg": result.msg})

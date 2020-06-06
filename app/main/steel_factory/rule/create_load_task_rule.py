@@ -41,11 +41,12 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task_item.receive_address = i.detail_address
         load_task_item.parent_load_task_id = i.parent_stock_id
         load_task_item.latest_order_time = i.latest_order_time
+        load_task_item.notice_stockinfo_id = i.notice_stockinfo_id
         load_task_item.consumer = i.consumer
         total_weight += load_task_item.weight
         priority_set.add(i.priority)
         latest_order_time_set.add(load_task_item.latest_order_time)
-        remark_list.extend(ModelConfig.RG_VARIETY_VEHICLE[load_task_item.big_commodity])
+        remark_list.extend(ModelConfig.RG_VARIETY_VEHICLE.get(load_task_item.big_commodity, []))
         # 得到翻转优先级的字典
         dic_priority = dict((val, key) for key, val in ModelConfig.RG_PRIORITY.items())
         if i.priority not in dic_priority:
