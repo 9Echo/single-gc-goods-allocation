@@ -279,6 +279,8 @@ def deal_stock(data):
     #         stock_list.remove(num)
     # xg_stock_dic = sorted(xg_stock_dic.items(), key=lambda x: x[1]["weight"], reverse=True)
     # xg_stock_dic2 = {x[0]: x[1]["result"] for x in xg_stock_dic}
+    if not stock_list:
+        raise MyException('可用库存为空！', ResponseCode.Error)
     return stock_list
 
 
