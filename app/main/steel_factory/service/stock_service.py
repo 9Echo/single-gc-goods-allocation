@@ -160,7 +160,7 @@ def deal_stock(data):
                 and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT):
             stock.sort = 1
         # 按33000将货物分成若干份
-        num = 33000 // stock.piece_weight
+        num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
         # 首先去除 件重大于33000的货物
         if num < 1:
             continue
