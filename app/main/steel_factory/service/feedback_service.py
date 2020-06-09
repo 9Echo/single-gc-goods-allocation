@@ -3,7 +3,6 @@ from typing import List
 import requests
 import json
 
-from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from app.util.rest_template import RestTemplate
 import config
@@ -23,7 +22,7 @@ def service(param: Result, id_list):
     Raise:
 
     """
-    if param.code == ResponseCode.Success:
+    if param.data:
         data_list = list()
         for res in param.data:
             data_list.append(data_format(res, id_list))

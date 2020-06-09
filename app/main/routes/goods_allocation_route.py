@@ -1,4 +1,5 @@
 import json
+
 from flask import request, current_app
 from flask_restful import Resource
 from app.main.steel_factory.service.dispatch_service import dispatch, save_load_task
@@ -30,7 +31,7 @@ class GoodsAllocationRoute(Resource):
             current_app.logger.exception(e)
             return Result.error_response()
         else:
-            current_app.logger.info('分货成功，准备进行反馈')
+            current_app.logger.info('分货成功，准备调用进行反馈')
             # 调用反馈接口，模型成功
             service(Result.success(data=load_task_list), id_list)
             # 写库
