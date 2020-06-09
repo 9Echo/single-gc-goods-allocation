@@ -108,7 +108,7 @@ def deal_stock(data):
     df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
         "big_commodity_name"]] = ["西区开平板"]
     df_stock.loc[
-        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") == False), [
+        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") is False), [
             "big_commodity_name"]] = ["开平板"]
     # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
