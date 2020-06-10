@@ -70,7 +70,7 @@ def deal_stock(data):
         6 得到新的库存列表，返回
         """
     if not data:
-        raise MyException('输入输出为空', ResponseCode.Error)
+        raise MyException('输入列表为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
     # 存放除型钢外的stock的结果
     stock_list = []
@@ -192,6 +192,8 @@ def deal_stock(data):
     for num in copy.copy(stock_list):
         num.stock_id = count
         count += 1
+    if not stock_list:
+        raise MyException('输入可发库存无效', ResponseCode.Error)
     return stock_list
 
 
