@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Description: 钢铁配货服务
 # Created: shaoluyu 2020/03/12
-import copy
 from typing import List
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task
