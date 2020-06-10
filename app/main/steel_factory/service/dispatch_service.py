@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Description: 钢铁配货服务
 # Created: shaoluyu 2020/03/12
-import copy
 from typing import List
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task
@@ -20,7 +19,8 @@ def dispatch(stock_list) -> List[LoadTask]:
     :return:
     """
     load_task_list = list()
-    # 库存信息获取
+    # 重置车次id
+    TrainId.set_id()
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict:

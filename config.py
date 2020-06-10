@@ -41,7 +41,6 @@ class Config:
     ODS_MYSQL_DB = 'db_dw'
     ODS_MYSQL_CHARSET = 'utf8'
 
-
     # 开单参数配置
     # 车载最大重量
     MAX_WEIGHT = 33000
@@ -205,47 +204,22 @@ class TestConfig(Config):
 class UatConfig(Config):
     """测试环境配置
     """
-    # Mysql配置，可选（不使用时可删除）
-    MYSQL_HOST = '47.99.118.183'
-    MYSQL_PORT = 3306
-    MYSQL_USER = 'v3dev_user'
-    MYSQL_PASSWD = 'V3dev!56'
-    MYSQL_DB = 'db_trans_plan'
-    MYSQL_CHARSET = 'utf8'
-
-    # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
-        MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
+    # 数仓连接
+    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
+    ODS_MYSQL_PORT = 3306
+    ODS_MYSQL_USER = 'bigdata_user4'
+    ODS_MYSQL_PASSWD = 'user4!0525'
+    ODS_MYSQL_DB = 'db_dw'
+    ODS_MYSQL_CHARSET = 'utf8'
 
     # Redis配置，可选（不使用时可删除）
-    REDIS_HOST = '47.99.118.183'
+    REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
-    REDIS_PASSWD = 'wobugaoxing'
+    REDIS_PASSWD = 'JCdev@56zh'
     REDIS_MAX_CONNECTIONS = 2
 
-    # APScheduler定时任务配置，可选（不使用时可删除）
-    SCHEDULER_OPEN = False
-    SCHEDULER_API_ENABLED = True
-    # JOBS = [
-    #     {
-    #         # 程序启动执行一次
-    #         'id': 'redis_task_start',
-    #         'func': 'app.task.task:update_stock_job',
-    #         'args': None,
-    #         'trigger': 'date',
-    #         'run_date': datetime.datetime.now() + datetime.timedelta(seconds=30)
-    #     },
-    #     {
-    #         # 周期定时任务
-    #         'id': 'redis_task2',
-    #         'func': 'app.task.task:update_stock_job',
-    #         'args': None,
-    #         'trigger': 'interval',
-    #         'seconds': 60*30
-    #     },
-    #
-    # ]
-
+    # 微服务url
+    DISPATCH_SERVICE_URL = 'http://192.168.1.70:9078'
     # Celery配置，可选（不使用时可删除）
     # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'
     # CELERY_RESULT_BACKEND = 'redis://:wobugaoxing@47.99.118.183:6379/0'

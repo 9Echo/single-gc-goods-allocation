@@ -70,7 +70,7 @@ def deal_stock(data):
         6 得到新的库存列表，返回
         """
     if not data:
-        raise MyException('输入输出为空', ResponseCode.Error)
+        raise MyException('输入列表为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
     # 存放除型钢外的stock的结果
     stock_list = []
@@ -108,7 +108,7 @@ def deal_stock(data):
     df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
         "big_commodity_name"]] = ["西区开平板"]
     df_stock.loc[
-        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") == False), [
+        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") is False), [
             "big_commodity_name"]] = ["开平板"]
     # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
@@ -192,6 +192,8 @@ def deal_stock(data):
     for num in copy.copy(stock_list):
         num.stock_id = count
         count += 1
+    if not stock_list:
+        raise MyException('输入可发库存无效', ResponseCode.Error)
     return stock_list
 
 
