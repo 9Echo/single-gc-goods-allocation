@@ -72,10 +72,10 @@ def deal_stock(data):
     if not data:
         raise MyException('输入列表为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
-    # 存放除型钢外的stock的结果
+    # 存放满足条件的stock结果
     stock_list = []
-    # 存放型钢的stock的结果
-    xg_stock_dic = {}
+    # 存放筛除的stock结果
+    sift_stock_list = []
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
@@ -109,9 +109,9 @@ def deal_stock(data):
     # 区分西老区的开平板
     df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
         "big_commodity_name"]] = ["西区开平板"]
-    df_stock.loc[
-        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") is False), [
-            "big_commodity_name"]] = ["开平板"]
+    # df_stock.loc[
+    #     (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P") is False), [
+    #         "big_commodity_name"]] = ["开平板"]
     df_stock.loc[(df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P")), [
         "big_commodity_name"]] = ["西区黑卷"]
     df_stock.loc[
@@ -120,33 +120,44 @@ def deal_stock(data):
     # stock2 = df_stock.loc[(df_stock["实际可发件数"] <= 0)]
     # print("筛选值:{}".format(stock2["实际可发重量"].sum()))
     # 筛选出不为0的数据
-    df_stock = df_stock.loc[
+    df_stock_temp = df_stock.loc[
         (df_stock["实际可发重量"] > 0) & (df_stock["实际可发件数"] > 0) & (df_stock["latest_order_time"].notnull())]
     # 可发件数小于待发件数并且待发重量在31-33，则过滤掉
-    df_stock.drop(
-        index=(df_stock.loc[
-                   (df_stock["can_send_number"] < df_stock["waint_fordel_number"]) & (
-                               31 <= df_stock["waint_fordel_weight"]) & (df_stock["waint_fordel_weight"] <= 33)].index),
+    df_stock_temp.drop(
+        index=(df_stock_temp.loc[
+                   (df_stock_temp["can_send_number"] < df_stock_temp["waint_fordel_number"]) & (
+                               31 <= df_stock_temp["waint_fordel_weight"]) & (df_stock_temp["waint_fordel_weight"] <= 33)].index),
         inplace=True)
-    df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
-    df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
-        df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
-    df_stock.loc[df_stock["deliware"].str.startswith("U"), ["卸货地址2"]] = df_stock["portnum"]
-    df_stock.loc[df_stock["priority"].isnull(), ["priority"]] = ""
-    df_stock["sort"] = 3
-    df_stock.loc[
-        (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
+
+    df_stock_temp.loc[df_stock_temp["deliware"].str.startswith("U"), ["实际终点"]] = df_stock_temp["deliware"]
+    df_stock_temp.loc[(df_stock_temp["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
+        df_stock_temp["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
+    df_stock_temp.loc[df_stock_temp["deliware"].str.startswith("U"), ["卸货地址2"]] = df_stock_temp["portnum"]
+    df_stock_temp.loc[df_stock_temp["priority"].isnull(), ["priority"]] = ""
+    df_stock_temp["sort"] = 3
+    df_stock_temp.loc[
+        (df_stock_temp["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock_temp["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
             "sort"]] = 2
     # ——————————————注释结束
-    result = result.append(df_stock)
+    # 找出被筛除的项
+    df_stock = df_stock.append(df_stock_temp)
+    df_stock = df_stock.drop_duplicates(keep=False)
+    df_stock["sift_away"] = True
+    df_stock_temp = df_stock_temp.append(df_stock)
+    result = result.append(df_stock_temp)
     result = rename_pd(result)
+    # 如果标准地址没有匹配到，那么就是用详细地址代替
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     # print("分货之后总重量:{}".format(result["actual_weight"].sum()))
     dic = result.to_dict(orient="record")
     count_parent = 0
     for record in dic:
+
         count_parent += 1
         stock = Stock(record)
+        if stock.sift_away:
+            sift_stock_list.append(stock)
+            continue
         stock.parent_stock_id = count_parent
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
@@ -170,6 +181,7 @@ def deal_stock(data):
         num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
         # 首先去除 件重大于33000的货物
         if num < 1:
+            sift_stock_list.append(stock)
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
         elif num > stock.actual_number:
@@ -201,7 +213,7 @@ def deal_stock(data):
         count += 1
     if not stock_list:
         raise MyException('输入可发库存无效', ResponseCode.Error)
-    return stock_list
+    return stock_list, sift_stock_list
 
 
 def rename_pd(dataframe):
