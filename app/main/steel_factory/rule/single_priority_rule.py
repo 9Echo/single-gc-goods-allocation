@@ -8,6 +8,7 @@ def filter(stock):
     """
     return stock
 
+
 def update_custom_list(stock):
     """
     更新客户优先级列表（一天一次）
