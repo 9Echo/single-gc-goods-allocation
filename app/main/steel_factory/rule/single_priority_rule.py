@@ -1,5 +1,5 @@
-
 custom_list = []
+
 
 def filter(stock_list):
     """
