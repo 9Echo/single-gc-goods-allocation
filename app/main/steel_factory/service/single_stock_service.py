@@ -8,9 +8,6 @@ import pandas as pd
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.service import truck_service
-from app.main.steel_factory.service.dispatch_service import dispatch
-from app.main.steel_factory.service.generate_excel_service import generate_excel
-from app.main.steel_factory.service.truck_service import get_truck
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 from model_config import ModelConfig
@@ -173,7 +170,7 @@ def rename_pd(dataframe):
                          "优先发运": "priority",
                          "收货用户": "consumer",
                          "品名名称": "commodity_name",
-                         "品名": "big_product_name",
+                         "品名": "big_commodity_name",
                          "牌号": "mark",
                          "规格": "specs",
                          "出库仓库": "deliware_house",
@@ -231,3 +228,4 @@ if __name__ == '__main__':
     print(len(stock_list))
     for stock in stock_list:
         print(stock.dlv_spot_name_end + ',' + stock.big_commodity_name)
+
