@@ -8,6 +8,8 @@ import pandas as pd
 from app.main.steel_factory.entity.truck import Truck
 from app.util.get_static_path import get_path
 
+file_name = 'truck.xls'
+
 
 def generate_truck(json_data):
     """
@@ -19,7 +21,7 @@ def generate_truck(json_data):
     return truck_list
 
 
-def get_truck(file_name):
+def get_truck():
     """
     获取库存
     :param vehicle:
@@ -46,7 +48,3 @@ def get_truck(file_name):
         truck.remark=row['remark']
         truck_list.append(truck)
     return truck_list
-
-if __name__ == "__main__":
-    truck_list=get_truck("truck.xls")
-    print(truck_list[0])
