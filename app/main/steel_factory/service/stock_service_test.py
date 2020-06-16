@@ -4,11 +4,12 @@
 
 
 import copy
-
+import xlwt
 from app.main.steel_factory.entity.stock import Stock
+from app.main.steel_factory.service.generate_excel_service import generate_excel
 from model_config import ModelConfig
 import pandas as pd
-
+from app.main.steel_factory.service.dispatch_service import dispatch
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 
@@ -93,6 +94,17 @@ def address_latitude_and_longitude():
     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
     return result_1, result_2
 
+def stock_merge(df_stock):
+    '''
+
+    :param df_stock:库存表
+    :return:
+    '''
+    #data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
+    data1, data2 = address_latitude_and_longitude()
+    df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
+    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    return df_stock
 
 def deal_stock(file_name):
     """
@@ -109,15 +121,15 @@ def deal_stock(file_name):
         5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
         6 得到新的库存列表，返回
         """
-    data1, data2 = address_latitude_and_longitude()
     # 存放stock的结果
     stock_list = []
     # 存放dataframe的结果
     result = pd.DataFrame()
     # 获取库存
     df_stock = get_stock(file_name)
-    df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
-    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    #与需卸货的订单地址，数据库中保存的地址及经纬度合并
+    df_stock = stock_merge(df_stock)
+    #数据预处理
     df_stock["实际终点"] = df_stock["终点"]
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
@@ -146,10 +158,11 @@ def deal_stock(file_name):
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["实际终点"]] = df_stock["入库仓库"]
     df_stock.loc[df_stock["入库仓库"].str.startswith("U"), ["卸货地址2"]] = df_stock["港口批号"]
     df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
+
     result = result.append(df_stock)
     result = rename_pd(result)
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["address"]
-    # result.to_excel("3.xls")
+    result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
     dic = result.to_dict(orient="record")
@@ -252,5 +265,7 @@ def rename_pd(dataframe):
 
 if __name__ == "__main__":
     a = deal_stock("sheet1.xls")
+    load_task_list=dispatch(a)
+    generate_excel(load_task_list)
     # for i in a:
     #     print(i.Stock_id, i.Priority, i.Latest_order_time, i.Actual_weight, i.Piece_weight, i.Actual_number)
