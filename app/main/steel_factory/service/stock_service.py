@@ -126,7 +126,8 @@ def deal_stock(data):
     df_stock_temp.drop(
         index=(df_stock_temp.loc[
                    (df_stock_temp["can_send_number"] < df_stock_temp["waint_fordel_number"]) & (
-                               31 <= df_stock_temp["waint_fordel_weight"]) & (df_stock_temp["waint_fordel_weight"] <= 33)].index),
+                           31 <= df_stock_temp["waint_fordel_weight"]) & (
+                           df_stock_temp["waint_fordel_weight"] <= 33)].index),
         inplace=True)
 
     df_stock_temp.loc[df_stock_temp["deliware"].str.startswith("U"), ["实际终点"]] = df_stock_temp["deliware"]
@@ -136,7 +137,8 @@ def deal_stock(data):
     df_stock_temp.loc[df_stock_temp["priority"].isnull(), ["priority"]] = ""
     df_stock_temp["sort"] = 3
     df_stock_temp.loc[
-        (df_stock_temp["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (df_stock_temp["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
+        (df_stock_temp["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (
+                df_stock_temp["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
             "sort"]] = 2
     # ——————————————注释结束
     # 找出被筛除的项

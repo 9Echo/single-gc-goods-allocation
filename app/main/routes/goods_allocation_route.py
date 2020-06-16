@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Description: 分货
+# Created: shaoluyu 2020/06/16
 import json
 from flask import request, current_app
 from flask_restful import Resource
