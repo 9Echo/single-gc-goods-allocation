@@ -1,14 +1,13 @@
-from typing import Dict, List
-from app.main.steel_factory.entity.load_task import LoadTask
+from typing import List
 from app.main.steel_factory.entity.stock import Stock
-from app.main.steel_factory.rule.calculate_rule import calculate
+from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.goods_filter_rule import goods_filter
 from app.main.steel_factory.rule.split_rule import split
 from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def filter(stocks: list, truck):
+def filter(stock_list: list, truck):
     """
     按层次分货
     第一层：一装一卸
@@ -16,212 +15,193 @@ def filter(stocks: list, truck):
     第三层：异库两装一卸
     第四层：一装两卸
     """
-    stock_dict = {i.stock_id: i for i in stocks}
-    load_task_list = []
-    dispatch_type = 1
-    first_result_dict = first_deal_general_stock(stock_dict, load_task_list, dispatch_type, min_weight)
-    second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type, min_weight)
-    third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
-    surplus_stock_dict = fourth_deal_general_stock(third_stock_dict, load_task_list, dispatch_type, min_weight)
-    return surplus_stock_dict
+    # 车辆最大载重，转化为kg
+    max_weight = truck.load_weight * 1000
+    # 车次对象
+    load_task = None
+    for i in stock_list:
+        # 如果目标品种不是车辆信息指定的品种，跳过
+        if i.big_commodity_name != truck.big_commodity_name:
+            continue
+        # 一装一卸
+        load_task = first_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            break
+        # 同区两装一卸
+        load_task = second_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            break
+        # 非同区两装一卸
+        load_task = third_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            break
+        # 一装两卸
+        load_task = fourth_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
+    # 合并
+    merge_result(load_task)
+    return load_task
 
 
-def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                             min_weight) -> Dict[int, Stock]:
+def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     """
     一装一卸筛选器
-    :param min_weight:
+    :param i:
+    :param max_weight:
+    :param stock_list:
     :param dispatch_type:
-    :param general_stock_dict:
-    :param load_task_list:
     :return:
     """
-    result_dict = dict()
-    while general_stock_dict:
-        # 取第一个
-        stock_id = list(general_stock_dict.keys())[0]
-        temp_stock = general_stock_dict.get(stock_id)
-        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
-            result_dict = {**result_dict, **general_stock_dict}
-            break
-        if dispatch_type is DispatchType.THIRD:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
-        else:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
-            general_stock_dict.pop(stock_id)
-        # 得到待匹配列表
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
-                       and v.deliware_house == temp_stock.deliware_house
-                       and v.standard_address == temp_stock.standard_address
-                       and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
-                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
-        if filter_list:
-            if temp_stock.big_commodity_name == '型钢':
-                temp_max_weight: int = 0
-                # 目标拼货组合
-                target_compose_list: List[Stock] = list()
-                temp_set: set = set([i.specs for i in filter_list])
-                for i in temp_set:
-                    temp_list = [v for v in filter_list if v.specs == i or v.specs == temp_stock.specs]
-                    result_list = split(temp_list)
-                    # 选中的列表
-                    compose_list, value = goods_filter(result_list, surplus_weight)
-                    if value >= new_min_weight:
-                        if temp_max_weight < value:
-                            temp_max_weight = value
-                            target_compose_list = compose_list
-                if temp_max_weight:
-                    temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-                    calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock,
-                              LoadTaskType.TYPE_1.value)
-                    continue
-            else:
-                temp_list = split(filter_list)
+    # 取第i个元素作为目标库存
+    temp_stock = stock_list[i]
+    # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
+    if dispatch_type is DispatchType.THIRD:
+        surplus_weight = max_weight
+        new_min_weight = surplus_weight - 1000
+    # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
+    else:
+        surplus_weight = max_weight - temp_stock.actual_weight
+        new_min_weight = surplus_weight - 1000
+    # 得到待匹配列表
+    filter_list = [stock for stock in stock_list if stock is not temp_stock
+                   and stock.deliware_house == temp_stock.deliware_house
+                   and stock.standard_address == temp_stock.standard_address
+                   and stock.piece_weight <= surplus_weight
+                   ]
+    if filter_list:
+        if temp_stock.big_commodity_name == '型钢':
+            temp_max_weight: int = 0
+            # 目标拼货组合
+            target_compose_list: List[Stock] = list()
+            temp_set: set = set([i.specs for i in filter_list])
+            for i in temp_set:
+                temp_list = [v for v in filter_list if v.specs == i or v.specs == temp_stock.specs]
+                result_list = split(temp_list)
                 # 选中的列表
-                compose_list, value = goods_filter(temp_list, surplus_weight)
+                compose_list, value = goods_filter(result_list, surplus_weight)
                 if value >= new_min_weight:
-                    temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-                    calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
-                    continue
-        # 一单在[31-33]并且无货可拼的情况生成车次
-        elif temp_stock.actual_weight >= ModelConfig.RG_MIN_WEIGHT:
-            calculate([], general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
-            continue
-        general_stock_dict.pop(stock_id, 404)
-        result_dict[stock_id] = temp_stock
-    return result_dict
+                    if temp_max_weight < value:
+                        temp_max_weight = value
+                        target_compose_list = compose_list
+            if temp_max_weight:
+                temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
+                if temp_stock:
+                    target_compose_list.append(temp_stock)
+                return create_load_task(target_compose_list, None, LoadTaskType.TYPE_1.value)
+        else:
+            temp_list = split(filter_list)
+            # 选中的列表
+            compose_list, value = goods_filter(temp_list, surplus_weight)
+            if value >= new_min_weight:
+                temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
+                if temp_stock: compose_list.append(temp_stock)
+                return create_load_task(compose_list, None, LoadTaskType.TYPE_1.value)
+    # 一单在达标重量之上并且无货可拼的情况生成车次
+    elif temp_stock.actual_weight >= new_min_weight:
+        return create_load_task([temp_stock], None, LoadTaskType.TYPE_1.value)
+    else:
+        return None
 
 
-def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                              min_weight) -> Dict[int, Stock]:
+def second_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     """
     两装一卸（同区仓库）筛选器
-    :param min_weight:
+    :param max_weight:
+    :param i:
+    :param stock_list:
     :param dispatch_type:
-    :param general_stock_dict:
-    :param load_task_list:
     :return:
     """
-    result_dict = dict()
-    while general_stock_dict:
-        # 取第一个
-        stock_id = list(general_stock_dict.keys())[0]
-        temp_stock = general_stock_dict.get(stock_id)
-        # 优先考虑的货物分完后终止
-        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
-            result_dict = {**result_dict, **general_stock_dict}
-            break
-        if dispatch_type is DispatchType.THIRD:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
-        else:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
-            general_stock_dict.pop(stock_id)
-        # 获取可拼货同区仓库
-        warehouse_out_group = get_warehouse_out_group(temp_stock)
-        # 条件筛选
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
-                       and v.standard_address == temp_stock.standard_address
-                       and v.deliware_house in warehouse_out_group
-                       and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
-                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
-        optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
-                                                                'deliware_house')
-        if optimal_weight:
-            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-            calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_2.value)
-        else:
-            general_stock_dict.pop(stock_id, 404)
-            result_dict[stock_id] = temp_stock
-    return result_dict
+    # 取第i个元素作为目标库存
+    temp_stock = stock_list[i]
+    # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
+    if dispatch_type is DispatchType.THIRD:
+        surplus_weight = max_weight
+        new_min_weight = surplus_weight - 1000
+    # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
+    else:
+        surplus_weight = max_weight - temp_stock.actual_weight
+        new_min_weight = surplus_weight - 1000
+    # 获取可拼货同区仓库
+    warehouse_out_group = get_warehouse_out_group(temp_stock)
+    # 条件筛选
+    filter_list = [stock for stock in stock_list if stock is not temp_stock
+                   and stock.standard_address == temp_stock.standard_address
+                   and stock.deliware_house in warehouse_out_group
+                   and stock.piece_weight <= surplus_weight]
+    optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
+                                                            'deliware_house')
+    if optimal_weight:
+        temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
+        if temp_stock:
+            target_compose_list.append(temp_stock)
+        return create_load_task(target_compose_list, None, LoadTaskType.TYPE_2.value)
+    else:
+        return None
 
 
-def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                             min_weight) -> Dict[int, Stock]:
+def third_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     """
     两装一卸（非同区仓库）筛选器
-    :param min_weight:
+    :param max_weight:
+    :param i:
+    :param stock_list:
     :param dispatch_type:
-    :param general_stock_dict:
-    :param load_task_list:
     :return:
     """
-    result_dict = dict()
-    while general_stock_dict:
-        # 取第一个
-        stock_id = list(general_stock_dict.keys())[0]
-        temp_stock = general_stock_dict.get(stock_id)
-        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
-            result_dict = {**result_dict, **general_stock_dict}
-            break
-        if dispatch_type is DispatchType.THIRD:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
-        else:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
-            general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
-                       and v.standard_address == temp_stock.standard_address
-                       and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
-                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
-        optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
-                                                                'deliware_house')
-        if optimal_weight:
-            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-            calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_3.value)
-        else:
-            general_stock_dict.pop(stock_id, 404)
-            result_dict[stock_id] = temp_stock
-    return result_dict
+    # 取第i个元素作为目标库存
+    temp_stock = stock_list[i]
+    # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
+    if dispatch_type is DispatchType.THIRD:
+        surplus_weight = max_weight
+        new_min_weight = surplus_weight - 1000
+    # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
+    else:
+        surplus_weight = max_weight - temp_stock.actual_weight
+        new_min_weight = surplus_weight - 1000
+    filter_list = [stock for stock in stock_list if stock is not temp_stock
+                   and stock.standard_address == temp_stock.standard_address
+                   and stock.piece_weight <= surplus_weight]
+    optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
+                                                            'deliware_house')
+    if optimal_weight:
+        if temp_stock:
+            target_compose_list.append(temp_stock)
+        return create_load_task(target_compose_list, None, LoadTaskType.TYPE_3.value)
+    else:
+        return None
 
 
-def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                              min_weight) -> Dict[int, Stock]:
+def fourth_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     """
     一装两卸筛选器
-    :param min_weight:
+    :param max_weight:
+    :param i:
+    :param stock_list:
     :param dispatch_type:
-    :param general_stock_dict:
-    :param load_task_list:
     :return:
     """
-    result_dict = dict()
-    while general_stock_dict:
-        # 取第一个
-        stock_id = list(general_stock_dict.keys())[0]
-        temp_stock = general_stock_dict.get(stock_id)
-        if dispatch_type is DispatchType.FIRST and temp_stock.sort != 1:
-            result_dict = {**result_dict, **general_stock_dict}
-            break
-        if dispatch_type is DispatchType.THIRD:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
-        else:
-            surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
-            general_stock_dict.pop(stock_id)
-        filter_list = [v for v in general_stock_dict.values() if v is not temp_stock
-                       and v.deliware_house == temp_stock.deliware_house
-                       and v.actual_end_point == temp_stock.actual_end_point
-                       and v.piece_weight <= surplus_weight
-                       and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
-                       temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
-        optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
-                                                                'standard_address')
-        if optimal_weight:
-            temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
-            calculate(target_compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_4.value)
-        else:
-            general_stock_dict.pop(stock_id, 404)
-            result_dict[stock_id] = temp_stock
-    return result_dict
+    # 取第i个元素作为目标库存
+    temp_stock = stock_list[i]
+    # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
+    if dispatch_type is DispatchType.THIRD:
+        surplus_weight = max_weight
+        new_min_weight = surplus_weight - 1000
+    # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
+    else:
+        surplus_weight = max_weight - temp_stock.actual_weight
+        new_min_weight = surplus_weight - 1000
+    filter_list = [stock for stock in stock_list if stock is not temp_stock
+                   and stock.deliware_house == temp_stock.deliware_house
+                   and stock.actual_end_point == temp_stock.actual_end_point
+                   and stock.piece_weight <= surplus_weight]
+    optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
+                                                            'standard_address')
+    if optimal_weight:
+        if temp_stock:
+            target_compose_list.append(temp_stock)
+        return create_load_task(target_compose_list, None, LoadTaskType.TYPE_4.value)
+    else:
+        return None
 
 
 def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, attr_name):
@@ -277,3 +257,18 @@ def get_warehouse_out_group(temp_stock: Stock) -> List[str]:
     for group in ModelConfig.RG_WAREHOUSE_GROUP:
         if temp_stock.deliware_house in group:
             return group
+
+
+def merge_result(load_task):
+    result_dict = dict()
+    for item in load_task.items:
+        result_dict.setdefault(item.parent_load_task_id, []).append(item)
+    # 暂时清空items
+    load_task.items = []
+    for res_list in result_dict.values():
+        sum_list = [(i.weight, i.count) for i in res_list]
+        sum_weight = sum(i[0] for i in sum_list)
+        sum_count = sum(i[1] for i in sum_list)
+        res_list[0].weight = sum_weight
+        res_list[0].count = sum_count
+        load_task.items.append(res_list[0])
