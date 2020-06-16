@@ -61,5 +61,4 @@ celerybeat-schedule.dir
 *.mps
 *.sol
 #excel
-*.xls
 *.xlsx
