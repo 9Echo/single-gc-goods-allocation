@@ -33,4 +33,20 @@ def get_truck(file_name):
     data_path = get_path(file_name)
     df_truck = pd.read_excel(data_path)
 
-    return df_truck
+    truck_list=[]
+    for _, row in df_truck.iterrows():
+        truck=Truck()
+        truck.car_mark=row['car_mark']
+        truck.driver_id=row['driver_id']
+        truck.trans_group_name=row['trans_group_name']
+        truck.city=row['city']
+        truck.dlv_spot_name_end=row['dlv_spot_name_end']
+        truck.big_commodity_name=row['big_commodity_name']
+        truck.load_weight=row['load_weight']
+        truck.remark=row['remark']
+        truck_list.append(truck)
+    return truck_list
+
+if __name__ == "__main__":
+    truck_list=get_truck("truck.xls")
+    print(truck_list[0])
