@@ -10,6 +10,7 @@ from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.service import truck_service
 from app.main.steel_factory.service.dispatch_service import dispatch
 from app.main.steel_factory.service.generate_excel_service import generate_excel
+from app.main.steel_factory.service.truck_service import get_truck
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 from model_config import ModelConfig
@@ -36,7 +37,6 @@ def get_stock(truck):
     commodity_group = ModelConfig.RG_COMMODITY_GROUP[truck.big_commodity_name]
     # 根据目的地和可拼货品类筛选库存
     for stock in all_stock_list:
-        print(stock.dlv_spot_name_end)
         if truck.dlv_spot_name_end == stock.dlv_spot_name_end \
                 and commodity_group.__contains__(stock.big_commodity_name):
             # 生成库存id
@@ -155,34 +155,40 @@ def get_all_stock():
 
     return stock_list
 
-
 def rename_pd(dataframe):
     """
     更改列名
+    Args:
+        dataframe: dataframe数据
+
+    Returns:
+
+    Raise:
+
     """
     dataframe.rename(index=str,
                      columns={
-                         "发货通知单": "delivery",
-                         "订单号": "order",
+                         "发货通知单": "notice_num",
+                         "订单号": "oritem_num",
                          "优先发运": "priority",
                          "收货用户": "consumer",
-                         "品名名称": "small_product_name",
+                         "品名名称": "commodity_name",
                          "品名": "big_product_name",
                          "牌号": "mark",
                          "规格": "specs",
-                         "出库仓库": "warehouse_out",
+                         "出库仓库": "deliware_house",
                          "省份": "province",
                          "城市": "city",
-                         "终点": "end_point",
-                         "物流公司类型": "logistics",
-                         "包装形式": "pack_form",
-                         "卸货地址": "address",
+                         "终点": "dlv_spot_name_end",
+                         "物流公司类型": "logistics_company_type",
+                         "包装形式": "pack",
+                         "卸货地址": "detail_address",
                          "最新挂单时间": "latest_order_time",
-                         "合同约定交货日期": "delivery_date",
+                         "合同约定交货日期": "devperiod",
                          "实际可发重量": "actual_weight",
                          "实际可发件数": "actual_number",
                          "件重": "piece_weight",
-                         "入库仓库": "warehouse_in",
+                         "入库仓库": "deliware",
                          "卸货地址2": "standard_address",
                          "实际终点": "actual_end_point"
 
@@ -225,4 +231,3 @@ if __name__ == '__main__':
     print(len(stock_list))
     for stock in stock_list:
         print(stock.dlv_spot_name_end + ',' + stock.big_commodity_name)
-
