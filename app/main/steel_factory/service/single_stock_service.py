@@ -9,6 +9,7 @@ from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.service.dispatch_service import dispatch
 from app.main.steel_factory.service.generate_excel_service import generate_excel
+from app.main.steel_factory.service.truck_service import get_truck
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 from model_config import ModelConfig
@@ -77,7 +78,7 @@ def get_all_stock():
 
     result = result.append(df_stock)
     result = rename_pd(result)
-    result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["address"]
+    result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
@@ -91,7 +92,7 @@ def get_all_stock():
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
         if not stock.standard_address:
-            stock.standard_address = stock.address
+            stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         else:
@@ -136,10 +137,16 @@ def get_all_stock():
 
     return stock_list
 
-
 def rename_pd(dataframe):
     """
     更改列名
+    Args:
+        dataframe: dataframe数据
+
+    Returns:
+
+    Raise:
+
     """
     dataframe.rename(index=str,
                      columns={
@@ -200,5 +207,7 @@ def merge_stock(df_stock):
 
 
 if __name__ == '__main__':
-    stock_list = get_all_stock()
+    truck_list=get_truck("truck.xls")
+    stock_list = get_stock(truck_list[0])
+
     print(stock_list[0].as_dict())
