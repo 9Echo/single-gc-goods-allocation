@@ -8,7 +8,7 @@ from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def filter(stocks: list, min_weight):
+def filter(stocks: list, truck):
     """
     按层次分货
     第一层：一装一卸
