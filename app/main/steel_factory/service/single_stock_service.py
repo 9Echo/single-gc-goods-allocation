@@ -155,7 +155,7 @@ def rename_pd(dataframe):
                          "优先发运": "priority",
                          "收货用户": "consumer",
                          "品名名称": "commodity_name",
-                         "品名": "big_product_name",
+                         "品名": "big_commodity_name",
                          "牌号": "mark",
                          "规格": "specs",
                          "出库仓库": "deliware_house",
@@ -208,6 +208,5 @@ def merge_stock(df_stock):
 
 if __name__ == '__main__':
     truck_list=get_truck("truck.xls")
-    stock_list = get_stock(truck_list[0])
 
     print(stock_list[0].as_dict())
