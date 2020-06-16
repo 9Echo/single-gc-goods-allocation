@@ -15,13 +15,13 @@ def get_stock_id(obj):
         return hash(obj.notice_num + obj.oritem_num + obj.outstock_code)
 
 
-def get_stock():
+def get_stock(truck):
     """
     获取当前库存
     :return:
     """
-    pass
-
+    stock_list = []
+    return stock_list
 
 def update_stock(load_task, stock_list):
     """
