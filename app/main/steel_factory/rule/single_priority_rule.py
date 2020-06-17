@@ -56,5 +56,3 @@ if __name__ == '__main__':
         stock_list = filter(stock_list)
         for stock in stock_list:
             print(stock.consumer)
-
-

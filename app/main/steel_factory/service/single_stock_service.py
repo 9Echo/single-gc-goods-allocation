@@ -152,6 +152,7 @@ def get_all_stock():
 
     return stock_list
 
+
 def rename_pd(dataframe):
     """
     更改列名
@@ -228,4 +229,3 @@ if __name__ == '__main__':
     print(len(stock_list))
     for stock in stock_list:
         print(stock.dlv_spot_name_end + ',' + stock.big_commodity_name)
-
