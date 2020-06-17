@@ -7,8 +7,7 @@ import pandas as pd
 
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
-from app.main.steel_factory.service.dispatch_service import dispatch
-from app.main.steel_factory.service.generate_excel_service import generate_excel
+from app.main.steel_factory.service import truck_service
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 from model_config import ModelConfig
@@ -24,6 +23,22 @@ def get_stock_id(obj):
         return hash(obj.notice_num + obj.oritem_num + obj.deliware_house)
     elif isinstance(obj, LoadTaskItem):
         return hash(obj.notice_num + obj.oritem_num + obj.outstock_code)
+
+
+def get_stock(truck):
+    """
+    根据车辆目的地和可运货物返回库存列表
+    """
+    all_stock_list = get_all_stock()
+    stock_list = []
+    commodity_group = ModelConfig.RG_COMMODITY_GROUP[truck.big_commodity_name]
+    # 根据目的地和可拼货品类筛选库存
+    for stock in all_stock_list:
+        if truck.dlv_spot_name_end == stock.dlv_spot_name_end \
+                and commodity_group.__contains__(stock.big_commodity_name):
+            # 生成库存id
+            stock_list.append(stock)
+    return stock_list
 
 
 def get_all_stock():
@@ -78,7 +93,7 @@ def get_all_stock():
 
     result = result.append(df_stock)
     result = rename_pd(result)
-    result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["address"]
+    result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
     result.to_excel("3.xls")
     # print("分货之后总重量:{}".format(result["Actual_weight"].sum()))
     # return result
@@ -92,7 +107,7 @@ def get_all_stock():
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
         if not stock.standard_address:
-            stock.standard_address = stock.address
+            stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         else:
@@ -137,34 +152,40 @@ def get_all_stock():
 
     return stock_list
 
-
 def rename_pd(dataframe):
     """
     更改列名
+    Args:
+        dataframe: dataframe数据
+
+    Returns:
+
+    Raise:
+
     """
     dataframe.rename(index=str,
                      columns={
-                         "发货通知单": "delivery",
-                         "订单号": "order",
+                         "发货通知单": "notice_num",
+                         "订单号": "oritem_num",
                          "优先发运": "priority",
                          "收货用户": "consumer",
-                         "品名名称": "small_product_name",
-                         "品名": "big_product_name",
+                         "品名名称": "commodity_name",
+                         "品名": "big_commodity_name",
                          "牌号": "mark",
                          "规格": "specs",
-                         "出库仓库": "warehouse_out",
+                         "出库仓库": "deliware_house",
                          "省份": "province",
                          "城市": "city",
-                         "终点": "end_point",
-                         "物流公司类型": "logistics",
-                         "包装形式": "pack_form",
-                         "卸货地址": "address",
+                         "终点": "dlv_spot_name_end",
+                         "物流公司类型": "logistics_company_type",
+                         "包装形式": "pack",
+                         "卸货地址": "detail_address",
                          "最新挂单时间": "latest_order_time",
-                         "合同约定交货日期": "delivery_date",
+                         "合同约定交货日期": "devperiod",
                          "实际可发重量": "actual_weight",
                          "实际可发件数": "actual_number",
                          "件重": "piece_weight",
-                         "入库仓库": "warehouse_in",
+                         "入库仓库": "deliware",
                          "卸货地址2": "standard_address",
                          "实际终点": "actual_end_point"
 
@@ -201,5 +222,10 @@ def merge_stock(df_stock):
 
 
 if __name__ == '__main__':
-    stock_list = get_all_stock()
-    print(stock_list[0].as_dict())
+    truck_list = truck_service.get_truck()
+    stock_list = get_stock(truck_list[0])
+    print('Truck:' + truck_list[0].dlv_spot_name_end + ',' + truck_list[0].big_commodity_name)
+    print(len(stock_list))
+    for stock in stock_list:
+        print(stock.dlv_spot_name_end + ',' + stock.big_commodity_name)
+

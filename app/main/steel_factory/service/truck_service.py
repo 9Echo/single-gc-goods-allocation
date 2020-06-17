@@ -8,6 +8,8 @@ import pandas as pd
 from app.main.steel_factory.entity.truck import Truck
 from app.util.get_static_path import get_path
 
+file_name = 'truck.xls'
+
 
 def generate_truck(json_data):
     """
@@ -19,7 +21,7 @@ def generate_truck(json_data):
     return truck_list
 
 
-def get_truck(file_name):
+def get_truck():
     """
     获取库存
     :param vehicle:
@@ -33,21 +35,16 @@ def get_truck(file_name):
     data_path = get_path(file_name)
     df_truck = pd.read_excel(data_path)
 
-    truck_list = []
+    truck_list=[]
     for _, row in df_truck.iterrows():
-        truck = Truck()
-        truck.car_mark = row['car_mark']
-        truck.driver_id = row['driver_id']
-        truck.trans_group_name = row['trans_group_name']
-        truck.city = row['city']
-        truck.dlv_spot_name_end = row['dlv_spot_name_end']
-        truck.big_commodity_name = row['big_commodity_name']
-        truck.load_weight = row['load_weight']
-        truck.remark = row['remark']
+        truck=Truck()
+        truck.car_mark=row['car_mark']
+        truck.driver_id=row['driver_id']
+        truck.trans_group_name=row['trans_group_name']
+        truck.city=row['city']
+        truck.dlv_spot_name_end=row['dlv_spot_name_end']
+        truck.big_commodity_name=row['big_commodity_name']
+        truck.load_weight=row['load_weight']
+        truck.remark=row['remark']
         truck_list.append(truck)
     return truck_list
-
-
-if __name__ == "__main__":
-    truck_list = get_truck("truck.xls")
-    print(truck_list[0])
