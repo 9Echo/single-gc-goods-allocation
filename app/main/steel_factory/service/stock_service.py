@@ -129,7 +129,7 @@ def deal_stock(data):
     for record in dic:
         count_parent += 1
         stock = Stock(record)
-        if stock.actual_number < 0 or stock.actual_weight < 0 or not stock.latest_order_time or (
+        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
                 stock.can_send_number < stock.waint_fordel_number and ModelConfig.RG_MAX_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MIN_WEIGHT):
             sift_stock_list.append(stock)
             continue
