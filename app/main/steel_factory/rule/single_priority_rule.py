@@ -45,4 +45,3 @@ def update_custom_list(hurry_stock_list):
         if not hurry_custom_list.__contains__(stock.custom):
             temp_custom_list.append(stock.custom)
     hurry_custom_list.insert(0, temp_custom_list)
-

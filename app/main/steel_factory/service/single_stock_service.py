@@ -15,6 +15,7 @@ from model_config import ModelConfig
 
 file_name = 'test_stock.xls'
 
+
 def get_stock_id(obj):
     """
     根据库存信息生成每条库存的唯一id
@@ -43,9 +44,9 @@ def get_all_stock():
     # 获取库存
     data_path = get_path(file_name)
     df_stock = pd.read_excel(data_path)
-    #与需卸货的订单地址，数据库中保存的地址及经纬度合并
+    # 与需卸货的订单地址，数据库中保存的地址及经纬度合并
     df_stock = merge_stock(df_stock)
-    #数据预处理
+    # 数据预处理
     df_stock["实际终点"] = df_stock["终点"]
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["实际可发重量"] = (df_stock["可发重量"] + df_stock["需开单重量"]) * 1000
@@ -192,7 +193,7 @@ def address_latitude_and_longitude():
 
 
 def merge_stock(df_stock):
-    #data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
+    # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
     data1, data2 = address_latitude_and_longitude()
     df_stock = pd.merge(df_stock, data1, on="卸货地址", how="left")
     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
