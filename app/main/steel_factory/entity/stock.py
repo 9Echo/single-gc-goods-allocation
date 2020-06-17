@@ -41,6 +41,6 @@ class Stock(BaseEntity):
         self.waint_fordel_number = None  # 待发件数
         self.waint_fordel_weight = None  # 待发重量
         self.notice_stockinfo_id = None
-        self.sift_away = False  # 是否筛去 默认否
+        self.can_send_number = None  # 可发件数
         if stock:
             self.set_attr(stock)
