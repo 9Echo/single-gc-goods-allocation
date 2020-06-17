@@ -12,8 +12,6 @@ from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.goods_allocation_route import GoodsAllocationRoute
 from app.main.routes.order_route import OrderRoute
 from app.main.routes.loading_route import LoadingRoute
-from app.main.routes.test import TestJmeter
-from app.main.routes.test2 import TestJmeter2
 from app.test.main.routes.order_route_test import OrderRouteTest
 
 blueprint = Blueprint('main', __name__)
@@ -32,8 +30,6 @@ api.add_resource(ComposeRoute, '/compose')
 api.add_resource(LoadingRoute, '/loading')
 # 钢厂智能分货请求
 api.add_resource(GoodsAllocationRoute, '/goodsAllocation')
-api.add_resource(TestJmeter, "/test")
-api.add_resource(TestJmeter2, "/test2")
 
 
 @blueprint.route('/demo', methods=['GET'])
