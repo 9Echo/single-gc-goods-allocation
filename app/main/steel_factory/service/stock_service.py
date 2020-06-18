@@ -117,8 +117,7 @@ def deal_stock(data):
     df_stock["sort"] = 3
     df_stock.loc[
         (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (
-                df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), [
-            "sort"]] = 2
+                df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     # ——————————————注释结束
     result = result.append(df_stock)
     result = rename_pd(result)

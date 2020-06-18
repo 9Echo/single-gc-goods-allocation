@@ -12,6 +12,7 @@ from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.goods_allocation_route import GoodsAllocationRoute
 from app.main.routes.order_route import OrderRoute
 from app.main.routes.loading_route import LoadingRoute
+from app.main.routes.single_goods_allocation_route import SingleGoodsAllocationRoute
 from app.test.main.routes.order_route_test import OrderRouteTest
 
 blueprint = Blueprint('main', __name__)
@@ -30,9 +31,10 @@ api.add_resource(ComposeRoute, '/compose')
 api.add_resource(LoadingRoute, '/loading')
 # 钢厂智能分货请求
 api.add_resource(GoodsAllocationRoute, '/goodsAllocation')
+# 单车配货请求
+api.add_resource(SingleGoodsAllocationRoute, '/singleGoodsAllocation')
 
 
 @blueprint.route('/demo', methods=['GET'])
 def demo():
     return jsonify({"name": "gc goods allocation"})
-

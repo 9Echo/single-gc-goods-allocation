@@ -1,5 +1,4 @@
 from typing import List
-
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock

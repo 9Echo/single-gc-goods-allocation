@@ -13,7 +13,7 @@ class Stock(BaseEntity):
         self.stock_id = None  # Id
         self.notice_num = None  # 发货通知单
         self.oritem_num = None  # 订单号
-        self.priority = None  # 优先发运
+        self.priority = None  # 优先发运 1.客户催货 2.超期清理 3.其余
         self.consumer = None  # 收货用户
         self.commodity_name = None  # 品名名称
         self.big_commodity_name = None  # 品名
