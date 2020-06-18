@@ -2,17 +2,13 @@
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
 import copy
-
 import pandas as pd
-
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.service import truck_service
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 from model_config import ModelConfig
-
-file_name = 'test_stock.xls'
 
 
 def get_stock_id(obj):
