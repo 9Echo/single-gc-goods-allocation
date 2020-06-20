@@ -19,21 +19,21 @@ def handle_mysql_exception(e):
 def handle_key_exception(e):
     """缺少输入参数错误信息"""
     current_app.logger.exception(e)
-    return Result.error_response("缺少输入参数")
+    return Result.error_response("缺少输入参数" + str(e))
 
 
 @blueprint.app_errorhandler(ValueError)
 def handle_value_exception(e):
     """传入参数的值错误信息"""
     current_app.logger.exception(e)
-    return Result.error_response("传入参数的值错误")
+    return Result.error_response("传入参数的值错误" + str(e))
 
 
 @blueprint.app_errorhandler(TypeError)
 def handle_type_exception(e):
     """传入参数的类型错误信息"""
     current_app.logger.exception(e)
-    return Result.error_response("传入参数的类型错误")
+    return Result.error_response("传入参数的类型错误" + str(e))
 
 
 @blueprint.app_errorhandler(Exception)

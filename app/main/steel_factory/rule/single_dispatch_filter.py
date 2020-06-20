@@ -11,7 +11,7 @@ def dispatch(truck):
     单车分货模块
     """
     redis_conn = redis.Redis(connection_pool=redis_pool)
-    lock_id = RedisLock.try_lock(redis_conn, 'rg_stock', wait_time=20)
+    lock_id = RedisLock.try_lock(redis_conn, 'rg_stock_lock', wait_time=20)
     if lock_id:
         try:
             # 获取指定库存
@@ -22,6 +22,6 @@ def dispatch(truck):
             load_task = single_layer_rule.layer_filter(stock_list, truck)
             return load_task
         finally:
-            RedisLock.unlock(redis_conn, 'rg_stock', lock_id)
+            RedisLock.unlock(redis_conn, 'rg_stock_lock', lock_id)
     else:
         return None

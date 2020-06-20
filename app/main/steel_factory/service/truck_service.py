@@ -13,6 +13,16 @@ def generate_truck(json_data):
     :param json_data:
     :return:
     """
-    truck = Truck(json_data)
+    truck = Truck()
+    truck.schedule_no = json_data['schedule_no']
+    truck.car_mark = json_data['car_mark']
+    truck.driver_id = json_data['driver_id']
+    truck.trans_group_name = json_data['trans_group_name']
+    truck.province = json_data['province']
+    truck.city = json_data['city']
+    truck.dlv_spot_name_end = json_data['dlv_spot_name_end']
+    truck.big_commodity_name = json_data['big_commodity_name']
+    truck.load_weight = json_data['load_weight']
+    truck.remark = json_data['remark']
     truck.actual_end_point = ModelConfig.RG_LY_GROUP.get(truck.dlv_spot_name_end, [truck.dlv_spot_name_end])
     return truck

@@ -19,7 +19,7 @@ class Truck(BaseEntity):
         self.dlv_spot_name_end = None  # 终点（区县）
         self.big_commodity_name = None  # 大品名
         self.load_weight = 0  # 载重
-        self.remark = None  # 备注信息
+        self.remark = None  # 备注信息(配件信息)
         self.actual_end_point = None  # 实际区县
         if truck:
             self.set_attr(truck)

@@ -3,8 +3,6 @@
 # Created: shaoluyu 2020/03/12
 import copy
 import datetime
-from decimal import Decimal
-
 import pandas as pd
 from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
@@ -48,12 +46,12 @@ def deal_stock(all_stock_list, truck):
     df_stock = pd.DataFrame(all_stock_list)
     # 需与卸货的订单地址，数据库中保存的地址及经纬度合并
     df_stock = merge_stock(df_stock)
-    # 根据公式，计算实际可发重量，实际可发件数
     df_stock["CANSENDWEIGHT"] = df_stock["CANSENDWEIGHT"].astype('float64')
     df_stock["CANSENDNUMBER"] = df_stock["CANSENDNUMBER"].astype('float64')
     df_stock["NEED_LADING_WT"] = df_stock["NEED_LADING_WT"].astype('float64')
     df_stock["NEED_LADING_NUM"] = df_stock["NEED_LADING_NUM"].astype('float64')
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"].astype('float64')
+    # 根据公式，计算实际可发重量，实际可发件数
     df_stock["actual_weight"] = (df_stock["CANSENDWEIGHT"] + df_stock["NEED_LADING_WT"]) * 1000
     df_stock["actual_number"] = df_stock["CANSENDNUMBER"] + df_stock["NEED_LADING_NUM"]
     # 根据公式计算件重
@@ -63,14 +61,17 @@ def deal_stock(all_stock_list, truck):
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
-    df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_weight"]] = df_stock["actual_weight"] + df_stock["piece_weight"] * (
-            -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
+    df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_weight"]] = df_stock["actual_weight"] + df_stock[
+        "piece_weight"] * (
+                                                                            -df_stock["OVER_FLOW_WT"] // df_stock[
+                                                                        "piece_weight"])
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["PACK_NUMBER"] > 0), ["actual_number"]] = \
         df_stock["PACK_NUMBER"]
     # 区分西老区
     df_stock.loc[
-        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), ["big_commodity_name"]] = [
+        (df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
+            "big_commodity_name"]] = [
         "西区开平板"]
     df_stock.loc[(df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P")), [
         "big_commodity_name"]] = ["西区黑卷"]
