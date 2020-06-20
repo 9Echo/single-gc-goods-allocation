@@ -36,11 +36,11 @@ class StockDao(BaseDao):
             OVER_FLOW_WT, 
             LATEST_ORDER_TIME as latest_order_time, 
             PORT_NAME_END as port_name_end,
-            priority,
-            concat(longitude,latitude) as standard_address
+            priority
         from
         db_ads.kc_rg_product_can_be_send_amount
         """
+        # concat(longitude, latitude) as standard_address
         data = self.select_all(sql)
         return data
 

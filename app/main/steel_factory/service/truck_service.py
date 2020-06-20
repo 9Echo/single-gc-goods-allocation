@@ -2,7 +2,6 @@
 # Description: 车辆实例化服务
 # Created: shaoluyu 2020/06/16
 
-import pandas as pd
 from app.main.steel_factory.entity.truck import Truck
 from model_config import ModelConfig
 

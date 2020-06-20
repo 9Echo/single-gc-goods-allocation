@@ -18,5 +18,5 @@ class SingleGoodsAllocationRoute(Resource):
         """
         json_data = json.loads(request.get_data().decode("utf-8"))
         truck = generate_truck(json_data["data"])
-        load_task = dispatch(truck)
-        return Result.success_response(load_task)
+        load_task_dict = dispatch(truck)
+        return Result.success_response(load_task_dict)
