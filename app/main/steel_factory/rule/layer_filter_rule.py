@@ -19,8 +19,8 @@ def layer_filter(general_stock_dict, load_task_list, dispatch_type, min_weight):
     """
     first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, dispatch_type, min_weight)
     second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type, min_weight)
-    third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
-    surplus_stock_dict = fourth_deal_general_stock(third_stock_dict, load_task_list, dispatch_type, min_weight)
+    # third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
+    surplus_stock_dict = fourth_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
     return surplus_stock_dict
 
 

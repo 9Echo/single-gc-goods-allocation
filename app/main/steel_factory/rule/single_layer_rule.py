@@ -7,7 +7,7 @@ from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def filter(stock_list: list, truck):
+def layer_filter(stock_list: list, truck):
     """
     按层次分货
     第一层：一装一卸
@@ -31,12 +31,10 @@ def filter(stock_list: list, truck):
         load_task = second_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
         if load_task:
             break
-        # 非同区两装一卸
-        load_task = third_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
-        if load_task:
-            break
         # 一装两卸
         load_task = fourth_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            break
     # 合并
     merge_result(load_task)
     return load_task
@@ -52,7 +50,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     :return:
     """
     # 取第i个元素作为目标库存
-    temp_stock = stock_list[i]
+    temp_stock = i
     # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
     if dispatch_type is DispatchType.THIRD:
         surplus_weight = max_weight
@@ -112,7 +110,7 @@ def second_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     :return:
     """
     # 取第i个元素作为目标库存
-    temp_stock = stock_list[i]
+    temp_stock = i
     # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
     if dispatch_type is DispatchType.THIRD:
         surplus_weight = max_weight
@@ -139,38 +137,6 @@ def second_deal_general_stock(stock_list, i, dispatch_type, max_weight):
         return None
 
 
-def third_deal_general_stock(stock_list, i, dispatch_type, max_weight):
-    """
-    两装一卸（非同区仓库）筛选器
-    :param max_weight:
-    :param i:
-    :param stock_list:
-    :param dispatch_type:
-    :return:
-    """
-    # 取第i个元素作为目标库存
-    temp_stock = stock_list[i]
-    # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
-    if dispatch_type is DispatchType.THIRD:
-        surplus_weight = max_weight
-        new_min_weight = surplus_weight - 1000
-    # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
-    else:
-        surplus_weight = max_weight - temp_stock.actual_weight
-        new_min_weight = surplus_weight - 1000
-    filter_list = [stock for stock in stock_list if stock is not temp_stock
-                   and stock.standard_address == temp_stock.standard_address
-                   and stock.piece_weight <= surplus_weight]
-    optimal_weight, target_compose_list = get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight,
-                                                            'deliware_house')
-    if optimal_weight:
-        if temp_stock:
-            target_compose_list.append(temp_stock)
-        return create_load_task(target_compose_list, None, LoadTaskType.TYPE_3.value)
-    else:
-        return None
-
-
 def fourth_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     """
     一装两卸筛选器
@@ -181,7 +147,7 @@ def fourth_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     :return:
     """
     # 取第i个元素作为目标库存
-    temp_stock = stock_list[i]
+    temp_stock = i
     # 拆散的情况下，最大重量等于车辆最大载重，下浮1000
     if dispatch_type is DispatchType.THIRD:
         surplus_weight = max_weight

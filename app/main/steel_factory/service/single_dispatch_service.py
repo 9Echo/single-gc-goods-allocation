@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 # Description: 单车配载服务
 # Created: shaoluyu 2020/06/16
+from app.main.steel_factory.rule import single_dispatch_filter
 
 
-def dispatch(truck_list):
+def dispatch(truck):
     """
     进行单车分货
-    1.查询当前库存
-    2.根据single_dispatch_filter为每个truck生成loadtask
-    3.完善loadtask的属性
     """
-    load_task_list = []
+    load_task = single_dispatch_filter.dispatch(truck)
+    if load_task:
+        load_task.schedule_no = truck.schedule_no
+        load_task.car_mark = truck.car_mark
+    # 生成的车次信息保存入库
 
-    return load_task_list
+    return load_task

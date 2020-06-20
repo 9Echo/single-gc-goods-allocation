@@ -8,6 +8,10 @@ class LoadTask(BaseEntity):
     """车次类"""
 
     def __init__(self):
+        # 报道号
+        self.schedule_no = None
+        # 车牌号
+        self.car_mark = None
         # 所属车次号
         self.load_task_id = None
         # 装卸类型
