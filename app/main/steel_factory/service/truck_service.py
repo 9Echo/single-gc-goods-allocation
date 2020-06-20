@@ -23,7 +23,7 @@ def generate_truck(json_data):
     truck.city = json_data['city']
     truck.dlv_spot_name_end = json_data['dlv_spot_name_end']
     truck.big_commodity_name = json_data['big_commodity_name']
-    truck.load_weight = float(json_data['load_weight'])
+    truck.load_weight = int(float(json_data['load_weight']) * 1000)
     truck.remark = json_data['remark']
     truck.actual_end_point = ModelConfig.RG_LY_GROUP.get(truck.dlv_spot_name_end, [truck.dlv_spot_name_end])
     # 必填字段非空检查

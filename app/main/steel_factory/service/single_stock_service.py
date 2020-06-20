@@ -114,7 +114,7 @@ def deal_stock(all_stock_list, truck):
             else:
                 stock.priority = 3
         # 按33000将货物分成若干份
-        num = (truck.load_weight * 1000) // stock.piece_weight
+        num = truck.load_weight // stock.piece_weight
         # 首先去除 件重大于33000的货物
         if num < 1:
             continue

@@ -16,7 +16,7 @@ def layer_filter(stock_list: list, truck):
     第四层：一装两卸
     """
     # 车辆最大载重，转化为kg
-    max_weight = truck.load_weight * 1000
+    max_weight = truck.load_weight
     # 车次对象
     load_task = None
     for i in stock_list:
@@ -94,7 +94,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
                 if temp_stock: compose_list.append(temp_stock)
                 return create_load_task(compose_list, None, LoadTaskType.TYPE_1.value)
     # 一单在达标重量之上并且无货可拼的情况生成车次
-    elif temp_stock.actual_weight >= new_min_weight:
+    elif temp_stock.actual_weight >= (max_weight - 1000):
         return create_load_task([temp_stock], None, LoadTaskType.TYPE_1.value)
     else:
         return None
