@@ -42,7 +42,7 @@ def data_format(load_task: LoadTask):
                 "city": item.city,
                 "dlvSpotNameEnd": item.end_point,
                 "bigCommodity": item.big_commodity,
-                "commodity": item.commodity,
+                "commodityName": item.commodity,
                 "noticeNum": item.notice_num,
                 "oritemNum": item.oritem_num,
                 "consumer": item.consumer,
