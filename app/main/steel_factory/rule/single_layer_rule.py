@@ -226,15 +226,18 @@ def get_warehouse_out_group(temp_stock: Stock) -> List[str]:
 
 
 def merge_result(load_task):
-    result_dict = dict()
-    for item in load_task.items:
-        result_dict.setdefault(item.parent_load_task_id, []).append(item)
-    # 暂时清空items
-    load_task.items = []
-    for res_list in result_dict.values():
-        sum_list = [(i.weight, i.count) for i in res_list]
-        sum_weight = sum(i[0] for i in sum_list)
-        sum_count = sum(i[1] for i in sum_list)
-        res_list[0].weight = sum_weight
-        res_list[0].count = sum_count
-        load_task.items.append(res_list[0])
+    if load_task:
+        result_dict = dict()
+        for item in load_task.items:
+            result_dict.setdefault(item.parent_load_task_id, []).append(item)
+        # 暂时清空items
+        load_task.items = []
+        for res_list in result_dict.values():
+            sum_list = [(i.weight, i.count) for i in res_list]
+            sum_weight = sum(i[0] for i in sum_list)
+            sum_count = sum(i[1] for i in sum_list)
+            res_list[0].weight = sum_weight
+            res_list[0].count = sum_count
+            load_task.items.append(res_list[0])
+    else:
+        return None
