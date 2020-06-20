@@ -26,18 +26,13 @@ def get_stock(truck):
     """
     根据车辆目的地和可运货物返回库存列表
     """
-    all_stock_list = stock_dao.select_stock()
+    all_stock_list = stock_dao.select_stock(truck)
     out_stock_list = out_stock_queue_dao.select_out_stock_queue()
     # 排队信息
     if out_stock_list:
         all_stock_list = [i for i in all_stock_list if
-                          (i.get('deliware_house').split('-', 1)[0]) not in out_stock_list]
+                          (i.get('deliware_house').split('-')[0]) not in out_stock_list]
     target_stock_list = deal_stock(all_stock_list, truck)
-    commodity_group = ModelConfig.RG_COMMODITY_GROUP[truck.big_commodity_name]
-    # 根据目的地和可拼货品类筛选库存
-    target_stock_list = [i for i in target_stock_list if
-                         truck.dlv_spot_name_end == i.dlv_spot_name_end and commodity_group.__contains__(
-                             i.big_commodity_name)]
     return target_stock_list
 
 
@@ -45,7 +40,7 @@ def deal_stock(all_stock_list, truck):
     # 获取库存列表
     df_stock = pd.DataFrame(all_stock_list)
     # 需与卸货的订单地址，数据库中保存的地址及经纬度合并
-    df_stock = merge_stock(df_stock)
+    # df_stock = merge_stock(df_stock)
     df_stock["CANSENDWEIGHT"] = df_stock["CANSENDWEIGHT"].astype('float64')
     df_stock["CANSENDNUMBER"] = df_stock["CANSENDNUMBER"].astype('float64')
     df_stock["NEED_LADING_WT"] = df_stock["NEED_LADING_WT"].astype('float64')
@@ -62,9 +57,7 @@ def deal_stock(all_stock_list, truck):
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_weight"]] = df_stock["actual_weight"] + df_stock[
-        "piece_weight"] * (
-                                                                            -df_stock["OVER_FLOW_WT"] // df_stock[
-                                                                        "piece_weight"])
+        "piece_weight"] * (-df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["PACK_NUMBER"] > 0), ["actual_number"]] = \
         df_stock["PACK_NUMBER"]

@@ -9,8 +9,7 @@ class OutStockQueueDao(BaseDao):
         """
         sql = """
         SELECT
-        stock_code,
-        count( 1 ) AS queue_count 
+        stock_code
         FROM
         (
         SELECT
@@ -60,7 +59,8 @@ class OutStockQueueDao(BaseDao):
         out_stock_list = list()
         if data:
             for i in data:
-                out_stock_list.append(i.keys()[0])
+                code, = i.values()
+                out_stock_list.append(code)
         return out_stock_list
 
 

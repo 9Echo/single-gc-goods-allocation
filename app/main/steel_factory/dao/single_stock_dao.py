@@ -1,8 +1,10 @@
+from app.main.steel_factory.entity.truck import Truck
 from app.util.base.base_dao import BaseDao
+from model_config import ModelConfig
 
 
 class StockDao(BaseDao):
-    def select_stock(self):
+    def select_stock(self, truck: Truck):
         """
         查询库存
         :return:
@@ -36,12 +38,18 @@ class StockDao(BaseDao):
             OVER_FLOW_WT, 
             LATEST_ORDER_TIME as latest_order_time, 
             PORT_NAME_END as port_name_end,
-            priority
+            priority,
+            IFNULL(concat(longitude, latitude),'') as standard_address
         from
         db_ads.kc_rg_product_can_be_send_amount
+        where
+        BIG_COMMODITYNAME in ({})
         """
-        # concat(longitude, latitude) as standard_address
-        data = self.select_all(sql)
+        commodity_group = ModelConfig.RG_COMMODITY_GROUP_FOR_SQL.get(truck.big_commodity_name, ['未知品种'])
+        commodity_values = "'"
+        commodity_values += "','".join([i for i in commodity_group])
+        commodity_values += "'"
+        data = self.select_all(sql.format(commodity_values))
         return data
 
 
