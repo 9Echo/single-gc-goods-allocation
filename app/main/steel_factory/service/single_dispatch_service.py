@@ -16,7 +16,7 @@ def dispatch(truck):
         load_task.car_mark = truck.car_mark
     # 生成的车次信息保存入库
     load_task_dict = data_format(load_task)
-    return Result.success(load_task_dict)
+    return Result.success(data=load_task_dict)
 
 
 def data_format(load_task: LoadTask):
