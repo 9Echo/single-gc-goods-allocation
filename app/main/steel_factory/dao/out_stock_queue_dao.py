@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Description: 排队信息
+# Created: shaoluyu 2020/06/16
 from app.util.base.base_dao import BaseDao
 
 

@@ -25,8 +25,8 @@ def dispatch(truck):
             if load_task:
                 load_task.schedule_no = truck.schedule_no
                 load_task.car_mark = truck.car_mark
-            # 生成的车次信息保存入库
-            save_load_task(load_task)
+                # 生成的车次信息保存入库
+                save_load_task(load_task)
         finally:
             RedisLock.unlock(redis_conn, 'rg_stock_lock', lock_id)
     # 平台微服务所需格式转换

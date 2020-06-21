@@ -25,7 +25,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
     load_task = LoadTask()
     for i in stock_list:
         load_task_item = LoadTaskItem()
-        load_task_item.weight = i.actual_weight / 1000
+        load_task_item.weight = round(i.actual_weight / 1000, 3)
         load_task_item.count = i.actual_number
         load_task_item.city = i.city
         load_task.city = i.city

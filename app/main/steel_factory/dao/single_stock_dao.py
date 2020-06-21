@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# Description: 可用库存表
+# Created: shaoluyu 2020/06/16
 from app.main.steel_factory.entity.truck import Truck
 from app.util.base.base_dao import BaseDao
 from model_config import ModelConfig
@@ -44,6 +47,7 @@ class StockDao(BaseDao):
         db_ads.kc_rg_product_can_be_send_amount
         where
         BIG_COMMODITYNAME in ({})
+        and (CANSENDNUMBER > 0 OR NEED_LADING_NUM > 0)
         """
         commodity_group = ModelConfig.RG_COMMODITY_GROUP_FOR_SQL.get(truck.big_commodity_name, ['未知品种'])
         commodity_values = "'"

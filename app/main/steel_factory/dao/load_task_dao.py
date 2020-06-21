@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+# Description: 车次主表
+# Created: shaoluyu 2020/06/16
 from app.util.base.base_dao import BaseDao
-import datetime
 
 
 class LoadTaskDao(BaseDao):

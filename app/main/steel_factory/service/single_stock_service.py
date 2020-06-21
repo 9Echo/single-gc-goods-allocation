@@ -4,6 +4,8 @@
 import copy
 import datetime
 import pandas as pd
+
+from app.main.steel_factory.dao.loading_detail_dao import loading_detail_dao
 from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
@@ -32,6 +34,10 @@ def get_stock(truck):
     if out_stock_list:
         all_stock_list = [i for i in all_stock_list if
                           (i.get('deliware_house').split('-')[0]) not in out_stock_list]
+    # 获取已开装车清单信息、预装车清单信息、最大更新时间、开单推荐但未经过确认
+    # loading_detail_list = loading_detail_dao.select_loading_detail()
+    # 扣除操作
+    # 库存预处理
     target_stock_list = deal_stock(all_stock_list, truck)
     return target_stock_list
 
