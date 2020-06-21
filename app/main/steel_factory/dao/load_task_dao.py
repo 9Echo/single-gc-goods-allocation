@@ -6,6 +6,7 @@ class LoadTaskDao(BaseDao):
     """
     LoadTask相关数据库操作
     """
+
     def insert_load_task(self, values):
         """增
         Args:
@@ -18,6 +19,8 @@ class LoadTaskDao(BaseDao):
         sql = """
             insert into db_model.t_load_task(
             company_id,
+            schedule_no,
+            car_mark,
             load_task_id,
             load_task_type,
             total_weight,
@@ -30,7 +33,7 @@ class LoadTaskDao(BaseDao):
             create_id,
             `create_date`
             ) 
-            value(%s, %s, %s, %s, %s,
+            value(%s, %s, %s, %s, %s, %s, %s,
                    %s, %s, %s, %s, %s, 
                    %s, %s)
         """
@@ -87,4 +90,5 @@ load_task_dao = LoadTaskDao()
 if __name__ == "__main__":
     # ('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct', datetime.datetime(2020, 5, 28, 15, 35, 51, 453957)
     load_task_dao.insert_load_task(
-        [('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct', datetime.datetime(2020, 5, 28, 15, 35, 51, 453957))])
+        [('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct',
+          datetime.datetime(2020, 5, 28, 15, 35, 51, 453957))])

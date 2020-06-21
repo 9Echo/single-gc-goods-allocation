@@ -15,7 +15,7 @@ def layer_filter(stock_list: list, truck):
     第三层：异库两装一卸
     第四层：一装两卸
     """
-    # 车辆最大载重，转化为kg
+    # 车辆最大载重
     max_weight = truck.load_weight
     # 车次对象
     load_task = None
