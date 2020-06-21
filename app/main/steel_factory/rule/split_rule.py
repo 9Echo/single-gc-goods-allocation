@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List
+from typing import List
 from app.main.steel_factory.entity.stock import Stock
 
 

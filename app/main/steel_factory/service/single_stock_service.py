@@ -25,9 +25,10 @@ def get_stock(truck):
     """
     根据车辆目的地和可运货物返回库存列表
     """
+    # 根据品种查询库存
     all_stock_list = stock_dao.select_stock(truck)
     out_stock_list = out_stock_queue_dao.select_out_stock_queue()
-    # 排队信息
+    # 去除等待数较高的出库仓库，暂不往该仓库开单
     if out_stock_list:
         all_stock_list = [i for i in all_stock_list if
                           (i.get('deliware_house').split('-')[0]) not in out_stock_list]
