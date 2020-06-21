@@ -1,7 +1,6 @@
 # 催单客户列表
+from app.main.pipe_factory.service import redis_service
 from app.main.steel_factory.service import truck_service, single_stock_service
-
-hurry_consumer_list = []
 
 
 def filter(stock_list):
@@ -22,15 +21,24 @@ def filter(stock_list):
     hurry_stock_dict = {}
     for stock in hurry_stock_list:
         hurry_stock_dict.setdefault(stock.consumer, []).append(stock)
+    # 如果没有催货库存跳过该过滤器
+    if len(hurry_stock_dict) == 0:
+        return stock_list
     # 更新客户列表，添加新客户
-    update_consumer_list(hurry_stock_list)
+    hurry_consumer_list = update_consumer_list(hurry_stock_list)
     new_hurry_stock_list = []
+    first_index = 0
+    find_flag = False
     for consumer in hurry_consumer_list:
         if consumer in hurry_stock_dict:
+            find_flag = True
             new_hurry_stock_list.extend(hurry_stock_dict[consumer])
-    # 队列首位的客户移到队列末尾
-    hurry_consumer_list.append(hurry_consumer_list[0])
-    hurry_consumer_list.pop(0)
+        if not find_flag:
+            first_index += 1
+    # 队列第一次被抽到的客户移到队列末尾
+    hurry_consumer_list.append(hurry_consumer_list[first_index])
+    hurry_consumer_list.pop(first_index)
+    redis_service.set_hurry_consumer_list(hurry_consumer_list)
     # 将重新排序后的催货列表和剩余库存合并
     return new_hurry_stock_list + left_stock_list
 
@@ -40,11 +48,13 @@ def update_consumer_list(hurry_stock_list):
     更新客户优先级列表
     """
     temp_consumer_list = []
+    hurry_consumer_list = redis_service.get_hurry_consumer_list()
     # 催货库存中的新客户记录在临时客户列表中，统计完成后将新客户列表插入到催货客户列表首端
     for stock in hurry_stock_list:
         if stock.consumer not in hurry_consumer_list and stock.consumer not in temp_consumer_list:
             temp_consumer_list.append(stock.consumer)
     hurry_consumer_list[0:0] = temp_consumer_list
+    return hurry_consumer_list
 
 
 if __name__ == '__main__':
