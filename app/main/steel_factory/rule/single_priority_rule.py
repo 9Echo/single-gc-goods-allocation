@@ -1,6 +1,5 @@
 # 催单客户列表
-from app.main.pipe_factory.service import redis_service
-from app.main.steel_factory.service import truck_service, single_stock_service
+from app.main.steel_factory.service import redis_service
 
 
 def filter(stock_list):
@@ -56,13 +55,12 @@ def update_consumer_list(hurry_stock_list):
     hurry_consumer_list[0:0] = temp_consumer_list
     return hurry_consumer_list
 
-
-if __name__ == '__main__':
-    trucks = truck_service.get_truck()
-    for truck in trucks:
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-        stock_list = single_stock_service.get_stock(truck)
-        print('Length:' + str(len(stock_list)))
-        stock_list = filter(stock_list)
-        for stock in stock_list:
-            print(stock.consumer)
+# if __name__ == '__main__':
+#     trucks = truck_service.get_truck()
+#     for truck in trucks:
+#         print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+#         stock_list = single_stock_service.get_stock(truck)
+#         print('Length:' + str(len(stock_list)))
+#         stock_list = filter(stock_list)
+#         for stock in stock_list:
+#             print(stock.consumer)
