@@ -8,7 +8,6 @@ from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
-from app.util.db_pool import db_pool_ods
 from model_config import ModelConfig
 
 
@@ -98,14 +97,11 @@ def deal_stock(all_stock_list, truck):
             stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
+        elif datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
+                datetime.datetime.now() + datetime.timedelta(days=-2)):
+            stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
         else:
-            if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
-                    datetime.datetime.now() + datetime.timedelta(days=-2)):
-                stock.priority = "超期清理"
-            if stock.priority:
-                stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-            else:
-                stock.priority = 3
+            stock.priority = 3
         # 按33000将货物分成若干份
         num = (truck.load_weight + ModelConfig.RG_SINGLE_UP_WEIGHT) // stock.piece_weight
         # 首先去除 件重大于33000的货物
@@ -132,29 +128,28 @@ def deal_stock(all_stock_list, truck):
     stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
     return stock_list
 
-
-def address_latitude_and_longitude():
-    """获取数据表中地址经纬度信息
-    """
-    sql1 = """
-            select address as detail_address,longitude, latitude
-            from ods_db_sys_t_point
-        """
-    sql2 = """
-            select address as standard_address,longitude, latitude 
-            from ods_db_sys_t_point
-            where longitude is not null
-            And latitude is not null
-            GROUP BY longitude, latitude
-        """
-    result_1 = pd.read_sql(sql1, db_pool_ods.connection())
-    result_2 = pd.read_sql(sql2, db_pool_ods.connection())
-    return result_1, result_2
-
-
-def merge_stock(df_stock):
-    # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
-    data1, data2 = address_latitude_and_longitude()
-    df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
-    df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    return df_stock
+# def address_latitude_and_longitude():
+#     """获取数据表中地址经纬度信息
+#     """
+#     sql1 = """
+#             select address as detail_address,longitude, latitude
+#             from ods_db_sys_t_point
+#         """
+#     sql2 = """
+#             select address as standard_address,longitude, latitude
+#             from ods_db_sys_t_point
+#             where longitude is not null
+#             And latitude is not null
+#             GROUP BY longitude, latitude
+#         """
+#     result_1 = pd.read_sql(sql1, db_pool_ods.connection())
+#     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
+#     return result_1, result_2
+#
+#
+# def merge_stock(df_stock):
+#     # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
+#     data1, data2 = address_latitude_and_longitude()
+#     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
+#     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+#     return df_stock
