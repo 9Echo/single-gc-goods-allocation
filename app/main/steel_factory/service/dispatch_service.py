@@ -72,8 +72,11 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
     load_task_values = []
     load_task_item_values = []
     create_date = datetime.now()
+    # 1公司id 2计划号 3车牌号 4车次号 5装载类型 6总重量 7城市 8终点 9吨单价 10车次总价 11备注 12车次优先级 13创建人id 14创建时间
     for task in load_task_list:
         task_tup = (id_list[0],
+                    '',
+                    '',
                     task.load_task_id,
                     task.load_task_type,
                     task.total_weight,
@@ -87,8 +90,11 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
                     create_date
                     )
         load_task_values.append(task_tup)
+        # 1公司id 2报道号 3车次号 4优先级 5重量 6件数 7市 8终点 9大品名 10小品名 11发货通知单号
+        # 12订单号 13收货用户 14规格 15材质 16出库仓库 17入库仓库 18收货地址 19最新挂单时间 20创建人id 21创建时间
         for item in task.items:
             item_tup = (id_list[0],
+                        '',
                         task.load_task_id,
                         item.priority,
                         item.weight,
@@ -113,7 +119,7 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
     load_task_item_dao.insert_load_task_item(load_task_item_values)
 
 
-if __name__ == '__main__':
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '程序开始')
-    result = dispatch(["C000000882", "ct"])
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '程序结束')
+# if __name__ == '__main__':
+#     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '程序开始')
+#     result = dispatch(["C000000882", "ct"])
+#     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '程序结束')
