@@ -12,14 +12,31 @@ class LoadingDetailDao(BaseDao):
         """
 
         sql = """
-        SELECT 
+       SELECT 
+        schedule_no,
         notice_num,
         oritem_num,
         outstock_name,
         weight,
-        `count`
+        `count`,
+        'lms' as type
         FROM 
         `kc_rg_valid_loading_detail`
+        UNION ALL
+        select
+        schedule_no,
+        notice_num,
+        oritem_num,
+        outstock_code,
+        weight,
+        `count`,
+        'model' as type
+        from 
+        db_model.t_load_task_item
+        where 
+        create_date >= (select max(max_time) from kc_rg_valid_loading_detail)
+        and 
+        schedule_no is not null
         """
         data = self.select_all(sql)
         return data
