@@ -12,8 +12,8 @@ def goods_filter(general_stock_list: List[Stock], surplus_weight: int) -> (List[
     :return:
     """
     compose_list = list()
+    general_stock_list = sorted(general_stock_list, key=lambda x: x.actual_weight, reverse=False)
     weight_list = ([item.actual_weight for item in general_stock_list])
-    weight_list.sort(reverse=False)
     value_list = copy.deepcopy(weight_list)
     result_index_list, value = pulp_solve.pulp_pack(weight_list, None, value_list, surplus_weight)
     for index in sorted(result_index_list, reverse=True):

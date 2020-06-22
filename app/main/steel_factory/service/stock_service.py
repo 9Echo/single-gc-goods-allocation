@@ -102,13 +102,13 @@ def deal_stock(data):
     # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
     #         -df_stock["over_flow_wt"] // df_stock["件重"])
     # 区分西老区的开平板
-    df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
-        "big_commodity_name"]] = ["西区开平板"]
-    df_stock.loc[(df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P")), [
-        "big_commodity_name"]] = ["西区黑卷"]
-    df_stock.loc[
-        (df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P") is False), [
-            "big_commodity_name"]] = ["老区黑卷"]
+    # df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
+    #     "big_commodity_name"]] = ["西区开平板"]
+    # df_stock.loc[(df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P")), [
+    #     "big_commodity_name"]] = ["西区黑卷"]
+    # df_stock.loc[
+    #     (df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P") is False), [
+    #         "big_commodity_name"]] = ["老区黑卷"]
     df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
     df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
         df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"

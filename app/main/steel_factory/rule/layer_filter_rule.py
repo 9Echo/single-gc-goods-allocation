@@ -56,7 +56,7 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                        and v.big_commodity_name in ModelConfig.RG_COMMODITY_GROUP.get(
             temp_stock.big_commodity_name, [temp_stock.big_commodity_name])]
         if filter_list:
-            if temp_stock.big_commodity_name == '型钢':
+            if temp_stock.big_commodity_name == '老区-型钢':
                 temp_max_weight: int = 0
                 # 目标拼货组合
                 target_compose_list: List[Stock] = list()
@@ -235,7 +235,7 @@ def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, a
     target_compose_list: List[Stock] = list()
     temp_set: set = set([getattr(i, attr_name) for i in filter_list])
     # 如果目标货物品类为型钢
-    if temp_stock.big_commodity_name == '型钢':
+    if temp_stock.big_commodity_name == '老区-型钢':
         for i in temp_set:
             if i != getattr(temp_stock, attr_name):
                 temp_list = [v for v in filter_list if
