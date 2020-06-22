@@ -25,9 +25,9 @@ class GoodsAllocationRoute(Resource):
             # 可发库存数据列表
             data = json_data["data"]
             # 库存处理
-            stock_list = deal_stock(data)
+            stock_list, sift_stock_list = deal_stock(data)
             # 配载
-            load_task_list = dispatch(stock_list)
+            load_task_list = dispatch(stock_list, sift_stock_list)
         except MyException as me:
             # 调用反馈接口,模型错误
             service(Result.error(me.message), [])

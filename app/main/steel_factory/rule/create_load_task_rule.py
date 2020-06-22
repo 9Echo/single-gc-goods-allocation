@@ -58,7 +58,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task.items.append(load_task_item)
     remark_set = set(remark_list)
     load_task.load_task_id = load_task_id
-    load_task.total_weight = total_weight
+    load_task.total_weight = round(total_weight, 3)
     load_task.load_task_type = load_task_type
     load_task.priority_grade = ModelConfig.RG_PRIORITY_GRADE[min(priority_set)]
     load_task.latest_order_time = min(latest_order_time_set)

@@ -37,6 +37,16 @@ def get_stock(truck):
     # 获取已开装车清单信息、预装车清单信息、最大更新时间、开单推荐但未经过确认
     loading_detail_list = loading_detail_dao.select_loading_detail()
     # 扣除操作
+    for stock_dict in all_stock_list:
+        # 找出库存中被开单的子项
+        temp_list = [j for j in loading_detail_list if j.get('notice_num') == stock_dict.get('notice_num') and j.get(
+            'oritem_num') == stock_dict.get('oritem_num') and j.get('outstock_name') == stock_dict.get(
+            'deliware_house')]
+        if temp_list:
+            for i in temp_list:
+                stock_dict['CANSENDWEIGHT'] = float(stock_dict.get('CANSENDWEIGHT', 0)) - float(i.get('weight', 0))
+                stock_dict['CANSENDNUMBER'] = int(stock_dict.get('CANSENDNUMBER', 0)) - float(i.get('count', 0))
+
     # 库存预处理
     target_stock_list = deal_stock(all_stock_list, truck)
     return target_stock_list
@@ -79,7 +89,8 @@ def deal_stock(all_stock_list, truck):
             "big_commodity_name"]] = ["老区黑卷"]
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
-        (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (df_stock["latest_order_time"].notnull())]
+        (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
+            df_stock["latest_order_time"].notnull())]
     # 将终点统一赋值到实际终点，方便后续处理联运
     df_stock["actual_end_point"] = df_stock["dlv_spot_name_end"]
     df_stock.loc[df_stock["deliware"].str.startswith("U"), ["actual_end_point"]] = df_stock["deliware"]
@@ -135,28 +146,28 @@ def deal_stock(all_stock_list, truck):
     stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
     return stock_list
 
-# def address_latitude_and_longitude():
-#     """获取数据表中地址经纬度信息
-#     """
-#     sql1 = """
-#             select address as detail_address,longitude, latitude
-#             from ods_db_sys_t_point
-#         """
-#     sql2 = """
-#             select address as standard_address,longitude, latitude
-#             from ods_db_sys_t_point
-#             where longitude is not null
-#             And latitude is not null
-#             GROUP BY longitude, latitude
-#         """
-#     result_1 = pd.read_sql(sql1, db_pool_ods.connection())
-#     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
-#     return result_1, result_2
-#
-#
-# def merge_stock(df_stock):
-#     # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
-#     data1, data2 = address_latitude_and_longitude()
-#     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
-#     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-#     return df_stock
+    # def address_latitude_and_longitude():
+    #     """获取数据表中地址经纬度信息
+    #     """
+    #     sql1 = """
+    #             select address as detail_address,longitude, latitude
+    #             from ods_db_sys_t_point
+    #         """
+    #     sql2 = """
+    #             select address as standard_address,longitude, latitude
+    #             from ods_db_sys_t_point
+    #             where longitude is not null
+    #             And latitude is not null
+    #             GROUP BY longitude, latitude
+    #         """
+    #     result_1 = pd.read_sql(sql1, db_pool_ods.connection())
+    #     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
+    #     return result_1, result_2
+    #
+    #
+    # def merge_stock(df_stock):
+    #     # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
+    #     data1, data2 = address_latitude_and_longitude()
+    #     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
+    #     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
+    #     return df_stock

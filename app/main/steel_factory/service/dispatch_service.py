@@ -11,11 +11,10 @@ from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
 from app.util.generate_id import TrainId
 
 
-def dispatch(stock_list) -> List[LoadTask]:
+def dispatch(stock_list, sift_stock_list) -> List[LoadTask]:
     """
     车辆配货
     :param :
-            id:
     :return:
     """
     load_task_list = list()
@@ -23,9 +22,13 @@ def dispatch(stock_list) -> List[LoadTask]:
     TrainId.set_id()
     surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
+    surplus_stock_list = []
     if surplus_stock_dict:
+        surplus_stock_list = sift_stock_list.extend(list(surplus_stock_dict.values()))
+    if surplus_stock_list:
         load_task_list.append(
-            create_load_task(list(surplus_stock_dict.values()), TrainId.get_surplus_id(), LoadTaskType.TYPE_5.value))
+            create_load_task(surplus_stock_list + sift_stock_list, TrainId.get_surplus_id(),
+                             LoadTaskType.TYPE_5.value))
     # 合并
     merge_result(load_task_list)
     return load_task_list
@@ -117,7 +120,6 @@ def save_load_task(load_task_list: List[LoadTask], id_list):
             load_task_item_values.append(item_tup)
     load_task_dao.insert_load_task(load_task_values)
     load_task_item_dao.insert_load_task_item(load_task_item_values)
-
 
 # if __name__ == '__main__':
 #     print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '程序开始')
