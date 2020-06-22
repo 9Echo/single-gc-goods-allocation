@@ -23,3 +23,9 @@ def pulp_pack(weight_list, volume_list, value_list, new_max_weight):
     # print(len([i for i in r if value(x[i]) > 0.5]))
     # print(len(result_index_list))
     return [i for i in r if value(x[i]) > 0.5], int(value(prob.objective))
+
+
+if __name__ == '__main__':
+    a, b = pulp_pack([411, 411, 411, 9307, 9307, 9307, 9307, 9824, 9824, 9824], None,
+                     [411, 411, 411, 9307, 9307, 9307, 9307, 9824, 9824, 9824], 22676)
+    print(a, b)

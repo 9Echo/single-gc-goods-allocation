@@ -45,7 +45,7 @@ def get_stock(truck):
         if temp_list:
             for i in temp_list:
                 stock_dict['CANSENDWEIGHT'] = float(stock_dict.get('CANSENDWEIGHT', 0)) - float(i.get('weight', 0))
-                stock_dict['CANSENDNUMBER'] = int(stock_dict.get('CANSENDNUMBER', 0)) - float(i.get('count', 0))
+                stock_dict['CANSENDNUMBER'] = int(stock_dict.get('CANSENDNUMBER', 0)) - int(i.get('count', 0))
 
     # 库存预处理
     target_stock_list = deal_stock(all_stock_list, truck)

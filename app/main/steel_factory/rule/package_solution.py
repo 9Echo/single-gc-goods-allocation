@@ -1,4 +1,7 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
+# Description: 
+# Created: shaoluyu 2020/6/22 19:17
+
 import functools
 from collections.abc import Hashable
 
@@ -34,7 +37,7 @@ class memoized(object):
         return functools.partial(self.__call__, obj)
 
 
-def dynamic_programming(number, capacity, volume, weight_cost):
+def dynamic_programming(number, capacity, weight_cost):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than
@@ -50,34 +53,33 @@ def dynamic_programming(number, capacity, volume, weight_cost):
     # Return the value of the most valuable subsequence of the first i
     # elements in items whose weights sum to no more than j.
     @memoized
-    def bestvalue(i, v, j):
+    def bestvalue(i, j):
         if i == 0:
             return 0
-        weight, vol, cost = weight_cost[i - 1]
-        if weight > j or vol > v:
-            return bestvalue(i - 1, v, j)
+        weight, cost = weight_cost[i - 1]
+        if weight > j:
+            return bestvalue(i - 1, j)
         else:
             # maximizing the cost
-            return max(bestvalue(i - 1, v, j), bestvalue(i - 1, v - vol, j - weight) + cost)
+            return max(bestvalue(i - 1, j), bestvalue(i - 1, j - weight) + cost)
 
     j = capacity
-    v = volume
     result = [0] * number
     for i in range(len(weight_cost), 0, -1):
-        if bestvalue(i, v, j) != bestvalue(i - 1, v, j):
+        if bestvalue(i, j) != bestvalue(i - 1, j):
             result[i - 1] = 1
             j -= weight_cost[i - 1][0]
-            v -= weight_cost[i - 1][1]
-    return bestvalue(len(weight_cost), volume, capacity), result
+    return bestvalue(len(weight_cost), capacity), result
 
 
 if __name__ == '__main__':
-    volume = 100
     number = 10
     capacity = 22676
-    weight_cost = [(411, 0.4, 411), (411, 0.4, 411), (411, 0.2, 411), (9824, 0.2, 9824),
-                   (9824, 0.2, 9824), (9824, 0.4, 9824), (9824, 0.4, 9824), (9307, 0.4, 9307), (9307, 0.4, 9307),
-                   (9307, 0.4, 9307)]
-    bestvalue, result = dynamic_programming(number, capacity, volume, weight_cost)
+    weight_cost = [(411, 411), (411, 411), (411, 411), (9824, 9824),
+                   (9824, 9824), (9824, 9824), (9824, 9824), (9307, 9307), (9307, 9307),
+                   (9307, 9307)]
+    bestvalue, result = dynamic_programming(number, capacity, weight_cost)
+    result_list = []
+
     print(bestvalue)
     print(result)
