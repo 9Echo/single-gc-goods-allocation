@@ -64,12 +64,12 @@ class DevelopmentConfig(Config):
     MYSQL_DB = 'db_trans_plan'
     MYSQL_CHARSET = 'utf8'
 
-    ODS_MYSQL_HOST = 'localhost'
-    ODS_MYSQL_PORT = 3306
-    ODS_MYSQL_USER = 'root'
-    ODS_MYSQL_PASSWD = '123456'
-    ODS_MYSQL_DB = 'db_trans_plan'
-    ODS_MYSQL_CHARSET = 'utf8'
+    # ODS_MYSQL_HOST = 'localhost'
+    # ODS_MYSQL_PORT = 3306
+    # ODS_MYSQL_USER = 'root'
+    # ODS_MYSQL_PASSWD = '123456'
+    # ODS_MYSQL_DB = 'db_trans_plan'
+    # ODS_MYSQL_CHARSET = 'utf8'
 
     # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
