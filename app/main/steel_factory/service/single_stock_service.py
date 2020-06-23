@@ -76,15 +76,22 @@ def deal_stock(all_stock_list, truck):
         "piece_weight"] * (-df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
 
     def rename(row):
+        # 将所有黑卷置成卷板
         if row['big_commodity_name'] == '黑卷':
             row['big_commodity_name'] = '卷板'
+        # 如果是西区开平板，则改为新产品-冷板
         if row['deliware_house'].startswith("P") and row['big_commodity_name'] == '开平板':
             row['big_commodity_name'] = '新产品-冷板'
+        # 如果是西区非开平板，则品名前加新产品-
         elif row['deliware_house'].startswith("P") and row['big_commodity_name'] != '开平板':
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
+        # 如果是外库，且是西区品种，则品名前加新产品-
+        elif row['deliware_house'].find('运输处临港') and row['big_commodity_name'] in ['白卷', '窄带', '冷板']:
+            row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
+        # 其余全部是老区-
         else:
             row['big_commodity_name'] = '老区-' + row['big_commodity_name']
-        return row
+            return row
 
     df_stock = df_stock.apply(rename, axis=1)
     # 窄带按捆包数计算，实际可发件数 = 捆包数
