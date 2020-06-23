@@ -12,35 +12,31 @@ class LoadingDetailDao(BaseDao):
         """
 
         sql = """
-        SELECT 
+        SELECT
             schedule_no,
             notice_num,
             oritem_num,
             outstock_name,
             weight,
-            `count`
-        FROM 
-            db_ads.`kc_rg_valid_loading_detail`
+            `count` 
+        FROM
+            db_ads.`kc_rg_valid_loading_detail` 
+        WHERE 
+            id like 'lms%' or id like 'pre%'
         UNION ALL
-        select
+        SELECT
             schedule_no,
             notice_num,
             oritem_num,
             outstock_code,
             weight,
-            `count`
-        from 
-            db_model.t_load_task_item
-        where 
-            create_date >= (SELECT
-        IF
-            ( MAX( CREATTIME ) > MAX( ALTERTIME ), MAX( CREATTIME ), MAX( ALTERTIME ) ) max_time
+            `count` 
         FROM
-            db_ads.kc_rg_product_can_be_send_amount)
-        and 
-             IFNULL(schedule_no,'') <> ''
-        and 
-          schedule_no not in (select DISTINCT schedule_no from db_ads.kc_rg_valid_loading_detail where schedule_no is not null)
+            db_model.t_load_task_item 
+        WHERE
+            IFNULL( schedule_no, '' ) <> '' 
+            AND 
+            schedule_no in (SELECT DISTINCT schedule_no FROM db_ads.kc_rg_valid_loading_detail WHERE id like 'plan%')
 
         """
         data = self.select_all(sql)

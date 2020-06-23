@@ -4,7 +4,6 @@
 import copy
 import datetime
 import pandas as pd
-
 from app.main.steel_factory.dao.loading_detail_dao import loading_detail_dao
 from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
@@ -29,8 +28,6 @@ def get_stock(truck):
     """
     # 根据品种查询库存
     all_stock_list = stock_dao.select_stock(truck)
-    if not all_stock_list:
-        return []
     out_stock_list = out_stock_queue_dao.select_out_stock_queue()
     # 去除等待数较高的出库仓库，暂不往该仓库开单
     if out_stock_list:
@@ -48,7 +45,8 @@ def get_stock(truck):
             for i in temp_list:
                 stock_dict['CANSENDWEIGHT'] = float(stock_dict.get('CANSENDWEIGHT', 0)) - float(i.get('weight', 0))
                 stock_dict['CANSENDNUMBER'] = int(stock_dict.get('CANSENDNUMBER', 0)) - int(i.get('count', 0))
-
+    if not all_stock_list:
+        return []
     # 库存预处理
     target_stock_list = deal_stock(all_stock_list, truck)
     return target_stock_list
@@ -78,6 +76,8 @@ def deal_stock(all_stock_list, truck):
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
             df_stock["latest_order_time"].notnull())]
+    if df_stock.empty:
+        return []
 
     def rename(row):
         # 将所有黑卷置成卷板
@@ -90,7 +90,7 @@ def deal_stock(all_stock_list, truck):
         elif row['deliware_house'].startswith("P") and row['big_commodity_name'] != '开平板':
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 如果是外库，且是西区品种，则品名前加新产品-
-        elif row['deliware_house'].find('运输处临港') and row['big_commodity_name'] in ['白卷', '窄带', '冷板']:
+        elif row['deliware_house'].find('运输处临港') != -1 and row['big_commodity_name'] in ['白卷', '窄带', '冷板']:
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 其余全部是老区-
         else:

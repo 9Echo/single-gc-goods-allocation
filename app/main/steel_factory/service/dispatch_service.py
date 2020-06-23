@@ -54,7 +54,7 @@ def merge_result(load_task_list: list):
             sum_list = [(i.weight, i.count) for i in res_list]
             sum_weight = sum(i[0] for i in sum_list)
             sum_count = sum(i[1] for i in sum_list)
-            res_list[0].weight = sum_weight
+            res_list[0].weight = round(sum_weight, 3)
             res_list[0].count = sum_count
             load_task.items.append(res_list[0])
         del result_dic

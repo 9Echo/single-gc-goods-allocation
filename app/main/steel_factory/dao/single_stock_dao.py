@@ -42,18 +42,27 @@ class StockDao(BaseDao):
             LATEST_ORDER_TIME as latest_order_time, 
             PORT_NAME_END as port_name_end,
             priority,
-            IFNULL(concat(longitude, latitude)) as standard_address
+            concat(longitude, latitude) as standard_address
         from
         db_ads.kc_rg_product_can_be_send_amount
         where
         BIG_COMMODITYNAME in ({})
         and (CANSENDNUMBER > 0 OR NEED_LADING_NUM > 0)
         """
+        # 品种条件
         commodity_group = ModelConfig.RG_COMMODITY_GROUP_FOR_SQL.get(truck.big_commodity_name, ['未知品种'])
         commodity_values = "'"
         commodity_values += "','".join([i for i in commodity_group])
         commodity_values += "'"
-        data = self.select_all(sql.format(commodity_values))
+        sql = sql.format(commodity_values)
+        # 厂区条件
+        if truck.big_commodity_name.find('老区') != -1:
+            sql_condition = "and DELIWAREHOUSE not like 'P%'"
+            sql = sql + sql_condition
+        else:
+            sql_condition = "and (DELIWAREHOUSE like 'P%' or DELIWAREHOUSE like 'F10%' or DELIWAREHOUSE like 'F20%')"
+            sql = sql + sql_condition
+        data = self.select_all(sql)
         return data
 
 
