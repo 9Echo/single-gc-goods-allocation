@@ -56,7 +56,7 @@ class OutStockQueueDao(BaseDao):
         AND DATE_SUB( CURDATE( ), INTERVAL 1 DAY ) <= date( QUEUE_START_TIME ) 
         GROUP BY
         stock_code 
-        HAVING count(1)>35
+        HAVING count(1) > 35
         """
         data = self.select_all(sql)
         out_stock_list = list()

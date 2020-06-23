@@ -42,7 +42,7 @@ class StockDao(BaseDao):
             LATEST_ORDER_TIME as latest_order_time, 
             PORT_NAME_END as port_name_end,
             priority,
-            IFNULL(concat(longitude, latitude),'') as standard_address
+            IFNULL(concat(longitude, latitude)) as standard_address
         from
         db_ads.kc_rg_product_can_be_send_amount
         where

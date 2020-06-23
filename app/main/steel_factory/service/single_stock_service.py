@@ -29,6 +29,8 @@ def get_stock(truck):
     """
     # 根据品种查询库存
     all_stock_list = stock_dao.select_stock(truck)
+    if not all_stock_list:
+        return []
     out_stock_list = out_stock_queue_dao.select_out_stock_queue()
     # 去除等待数较高的出库仓库，暂不往该仓库开单
     if out_stock_list:
@@ -108,7 +110,6 @@ def deal_stock(all_stock_list, truck):
     # 按车辆流向筛选
     if truck.actual_end_point:
         df_stock = df_stock.loc[df_stock['actual_end_point'].isin(truck.actual_end_point)]
-    # df_stock.loc[df_stock["优先发运"].isnull(), ["优先发运"]] = ""
     df_stock.loc[df_stock["standard_address"].isnull(), ["standard_address"]] = df_stock["detail_address"]
     dic = df_stock.to_dict(orient="record")
     # 存放stock的结果
@@ -119,8 +120,6 @@ def deal_stock(all_stock_list, truck):
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        if not stock.standard_address:
-            stock.standard_address = stock.detail_address
         if stock.priority == "客户催货":
             stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
         elif datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
