@@ -72,8 +72,10 @@ def deal_stock(all_stock_list, truck):
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
-    df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_weight"]] = df_stock["actual_weight"] + df_stock[
-        "piece_weight"] * (-df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
+    # 筛选出大于0的数据
+    df_stock = df_stock.loc[
+        (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
+            df_stock["latest_order_time"].notnull())]
 
     def rename(row):
         # 将所有黑卷置成卷板
@@ -91,16 +93,12 @@ def deal_stock(all_stock_list, truck):
         # 其余全部是老区-
         else:
             row['big_commodity_name'] = '老区-' + row['big_commodity_name']
-            return row
+        return row
 
     df_stock = df_stock.apply(rename, axis=1)
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[(df_stock["big_commodity_name"] == "新产品-窄带") & (df_stock["PACK_NUMBER"] > 0), ["actual_number"]] = \
         df_stock["PACK_NUMBER"]
-    # 筛选出大于0的数据
-    df_stock = df_stock.loc[
-        (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
-            df_stock["latest_order_time"].notnull())]
     # 将终点统一赋值到实际终点，方便后续处理联运
     df_stock["actual_end_point"] = df_stock["dlv_spot_name_end"]
     df_stock.loc[df_stock["deliware"].str.startswith("U"), ["actual_end_point"]] = df_stock["deliware"]
