@@ -80,6 +80,8 @@ def deal_stock(all_stock_list, truck):
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
             df_stock["latest_order_time"].notnull())]
+    global flag
+    flag = False
 
     def rename(row):
         global flag
