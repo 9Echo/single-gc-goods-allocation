@@ -11,6 +11,8 @@ from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
 from model_config import ModelConfig
 
+flag = False
+
 
 def get_stock_id(obj):
     """
@@ -77,8 +79,15 @@ def deal_stock(all_stock_list, truck):
             df_stock["latest_order_time"].notnull())]
     if df_stock.empty:
         return []
+    global flag
+    flag = False
 
     def rename(row):
+        global flag
+        if not flag:
+            flag = True
+            return row
+        print(row['notice_num'])
         # 将所有黑卷置成卷板
         if row['big_commodity_name'] == '黑卷':
             row['big_commodity_name'] = '卷板'
