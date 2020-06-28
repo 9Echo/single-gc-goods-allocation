@@ -38,7 +38,7 @@ class Config:
     ODS_MYSQL_PORT = 3306
     ODS_MYSQL_USER = 'bigdata_user4'
     ODS_MYSQL_PASSWD = 'user4!0525'
-    ODS_MYSQL_DB = 'db_dw'
+    ODS_MYSQL_DB = 'db_model'
     ODS_MYSQL_CHARSET = 'utf8'
 
     # 开单参数配置

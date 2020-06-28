@@ -32,7 +32,7 @@ class LoadingDetailDao(BaseDao):
             weight,
             `count` 
         FROM
-            db_model.t_load_task_item 
+            t_load_task_item 
         WHERE
             IFNULL( schedule_no, '' ) <> '' 
             AND 

@@ -22,7 +22,7 @@ class LoadTaskItemDao(BaseDao):
         # 1公司id 2车次号 3优先级 4重量 5件数 6城市 7终点 8大品名 9小品名 10发货通知单号
         # 11订单号 12收货用户 13规格 14材质 15出库仓库 16入库仓库 17收货地址 18最新挂单时间 19创建人id 20创建时间
         sql = """
-            insert into db_model.t_load_task_item(
+            insert into t_load_task_item(
             company_id,
             schedule_no,
             load_task_id,
