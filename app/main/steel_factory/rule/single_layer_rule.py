@@ -57,7 +57,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
     else:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
-        new_min_weight = surplus_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT
+        new_min_weight = max_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT - temp_stock.actual_weight
     # 得到待匹配列表
     filter_list = [stock for stock in stock_list if stock is not temp_stock
                    and stock.deliware_house == temp_stock.deliware_house
@@ -94,7 +94,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
                     compose_list.append(temp_stock)
                 return create_load_task(compose_list, None, LoadTaskType.TYPE_1.value)
     # 一单在达标重量之上并且无货可拼的情况生成车次
-    elif temp_stock.actual_weight >= (max_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT):
+    elif new_min_weight <= 0:
         return create_load_task([temp_stock], None, LoadTaskType.TYPE_1.value)
     else:
         return None
@@ -118,7 +118,7 @@ def second_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
     else:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
-        new_min_weight = surplus_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT
+        new_min_weight = max_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT - temp_stock.actual_weight
     # 获取可拼货同区仓库
     warehouse_out_group = get_warehouse_out_group(temp_stock)
     # 条件筛选
@@ -155,7 +155,7 @@ def fourth_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
     else:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
-        new_min_weight = surplus_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT
+        new_min_weight = max_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT - temp_stock.actual_weight
     filter_list = [stock for stock in stock_list if stock is not temp_stock
                    and stock.deliware_house == temp_stock.deliware_house
                    and stock.actual_end_point == temp_stock.actual_end_point
