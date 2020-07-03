@@ -15,7 +15,7 @@ def before_request():
     current_app.logger.info('url is ' + request.url)
     current_app.logger.info('body is ' + str(request.json).replace('\'', '"'))
     current_app.logger.info('ip is ' + request.remote_addr)
-    current_app.logger.info('===========================end=============================')
+    current_app.logger.info('===========================end===============================')
 
 
 @blueprint.after_request
@@ -24,5 +24,5 @@ def after_request(response):
     current_app.logger.info("after_request")
     current_app.logger.info("body is " + str(response.json).replace("\'", '"'))
     current_app.logger.info("time is " + str(datetime.now())[:19])
-    current_app.logger.info('===========================end=============================')
+    current_app.logger.info('===========================end===============================')
     return response
