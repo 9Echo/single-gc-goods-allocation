@@ -87,7 +87,6 @@ def deal_stock(all_stock_list, truck):
         if not flag:
             flag = True
             return row
-        print(row['notice_num'])
         # 将所有黑卷置成卷板
         if row['big_commodity_name'] == '黑卷':
             row['big_commodity_name'] = '卷板'
