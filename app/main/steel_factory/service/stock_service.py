@@ -2,12 +2,12 @@
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
 import copy
-
+import pandas as pd
+import numpy as np
 from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
-import pandas as pd
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 
@@ -40,11 +40,11 @@ def address_latitude_and_longitude():
     """
     sql1 = """
             select address as 'detail_address',longitude, latitude
-            from ods_db_sys_t_point
+            from db_dw.ods_db_sys_t_point
         """
     sql2 = """
             select address as '卸货地址2',longitude, latitude 
-            from ods_db_sys_t_point
+            from db_dw.ods_db_sys_t_point
             where longitude is not null
             And latitude is not null
             GROUP BY longitude, latitude
@@ -123,33 +123,25 @@ def deal_stock(data):
     result = rename_pd(result)
     # 如果标准地址没有匹配到，那么就是用详细地址代替
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
+    result['actual_weight'].fillna(0, inplace=True)
+    result['actual_number'].fillna(0, inplace=True)
+    result['piece_weight'][np.isinf(result['piece_weight'])] = -1
     dic = result.to_dict(orient="record")
     count_parent = 0
     for record in dic:
         count_parent += 1
         stock = Stock(record)
-        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
-                stock.actual_number < stock.waint_fordel_number and ModelConfig.RG_MAX_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MIN_WEIGHT):
-            sift_stock_list.append(stock)
-            continue
         stock.parent_stock_id = count_parent
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        if not stock.standard_address:
-            stock.standard_address = stock.detail_address
-        if stock.priority == "客户催货":
-            stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-        else:
-            # if datetime.datetime.strptime(str(stock.latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
-            #         datetime.datetime.now() + datetime.timedelta(days=-2)):
-            #     stock.priority = "超期清理"
-            if stock.priority in ModelConfig.RG_PRIORITY:
-                stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-            else:
-                stock.priority = 3
-        if (stock.priority in ModelConfig.RG_PRIORITY.values()
-                and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT):
+        stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
+        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
+                stock.actual_number < stock.waint_fordel_number
+                and ModelConfig.RG_MIN_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
+            sift_stock_list.append(stock)
+            continue
+        if stock.priority != 4 and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT:
             stock.sort = 1
         # 按33000将货物分成若干份
         num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
