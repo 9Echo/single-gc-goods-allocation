@@ -16,7 +16,7 @@ class LoadingDetailDao(BaseDao):
             schedule_no,
             notice_num,
             oritem_num,
-            outstock_name,
+            SUBSTRING_INDEX(outstock_name,'-',1) as outstock_name,
             weight,
             `count` 
         FROM

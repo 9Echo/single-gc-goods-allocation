@@ -19,7 +19,7 @@ class StockDao(BaseDao):
             PURCHUNIT as consumer,
             ORITEMNUM as oritem_num, 
             DEVPERIOD as devperiod, 
-            DELIWAREHOUSE as deliware_house, 
+            SUBSTRING_INDEX(DELIWAREHOUSE,'-',1) as deliware_house, 
             COMMODITYNAME as commodity_name,
             BIG_COMMODITYNAME as big_commodity_name,
             PACK as pack,  

@@ -268,6 +268,9 @@ def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, a
 
 
 def get_warehouse_out_group(temp_stock: Stock) -> List[str]:
+    target_group = []
     for group in ModelConfig.RG_WAREHOUSE_GROUP:
         if temp_stock.deliware_house in group:
-            return group
+            target_group = group
+            break
+    return target_group

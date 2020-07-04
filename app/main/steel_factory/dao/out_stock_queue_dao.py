@@ -16,7 +16,7 @@ class OutStockQueueDao(BaseDao):
         from
         (
         SELECT
-        CONCAT(stock_code,'-',stock_name) as stock_name,
+        stock_code as stock_name,
         (dis_bill_no_jc_trucks_count+dis_cw_trucks_count+dis_jh_trucks_count+dis_jc_no_sign_trucks_count+dis_in_warehouse_trucks_count) as truck_count
         FROM
         db_dev.`dws_dis_warehouse_trucks`

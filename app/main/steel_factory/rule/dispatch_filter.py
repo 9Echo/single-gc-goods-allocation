@@ -23,7 +23,6 @@ def dispatch_filter(load_task_list, stock_list):
     surplus_stock_dict = dict()
     # 转换字典
     stock_dict = {i.stock_id: i for i in stock_list}
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '急发钢卷开始')
     # 优先考虑急发特殊货物
     general_stock_dict = layer_filter(stock_dict, load_task_list, DispatchType.FIRST, ModelConfig.RG_MIN_WEIGHT)
     # 剩余优先考虑急发特殊货物生成车次，走29吨包车运输
@@ -31,7 +30,6 @@ def dispatch_filter(load_task_list, stock_list):
         if v.sort == 1:
             load_task_list.append(create_load_task([v], TrainId.get_id(), LoadTaskType.TYPE_1.value))
             general_stock_dict.pop(k)
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '急发钢卷结束，正常流程开始')
     # 剩余货物走正常流程
     if general_stock_dict:
         # 目标货物整体分
@@ -41,5 +39,4 @@ def dispatch_filter(load_task_list, stock_list):
         surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.THIRD,
                                           ModelConfig.RG_MIN_WEIGHT)
     # surplus_stock_dict = {**surplus_stock_dict, **surplus_stock_xg_dict}
-    print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '正常流程结束')
     return surplus_stock_dict

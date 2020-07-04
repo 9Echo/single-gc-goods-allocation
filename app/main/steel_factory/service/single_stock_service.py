@@ -97,7 +97,8 @@ def deal_stock(all_stock_list, truck):
         elif row['deliware_house'].startswith("P") and row['big_commodity_name'] != '开平板':
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 如果是外库，且是西区品种，则品名前加新产品-
-        elif row['deliware_house'].find('运输处临港') != -1 and row['big_commodity_name'] in ['白卷', '窄带', '冷板']:
+        elif (row['deliware_house'].find('F10') != -1 or row['deliware_house'].find('F20') != -1) and row[
+            'big_commodity_name'] in ['白卷', '窄带', '冷板']:
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 其余全部是老区-
         else:
