@@ -10,9 +10,8 @@ import config
 
 active_config = config.get_active_config()
 
-db_pool_trans_plan = None
 db_pool_ods = None
-if hasattr(active_config, 'MYSQL_HOST'):
+if hasattr(active_config, 'ODS_MYSQL_HOST'):
     # 创建数据库连接池。
     # 后续数据库操作应从连接池获取连接，并在操作完成后关闭归还连接。
     db_pool_ods = PooledDB(
@@ -24,4 +23,3 @@ if hasattr(active_config, 'MYSQL_HOST'):
         passwd=active_config.ODS_MYSQL_PASSWD,
         db=active_config.ODS_MYSQL_DB,
         charset=active_config.ODS_MYSQL_CHARSET)
-
