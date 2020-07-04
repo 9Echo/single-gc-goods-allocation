@@ -7,7 +7,7 @@ class ModelConfig:
     RG_SECOND_MIN_WEIGHT = 24000
     RG_SINGLE_UP_WEIGHT = 500
     RG_SINGLE_LOWER_WEIGHT = 1000
-    RG_PRIORITY = {'客户急发': 1, '客户催货': 2, '超期清理': 3}
+    RG_PRIORITY = {'客户催货一级': 1, '客户催货二级': 2, '超期清理': 3}
     RG_PRIORITY_GRADE = {1: "A", 2: "B", 3: "C", 4: "D"}
     RG_LY_GROUP = {
         '赣榆区': ['U220-赣榆库', '赣榆区'],

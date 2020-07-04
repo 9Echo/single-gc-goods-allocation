@@ -127,13 +127,10 @@ def deal_stock(all_stock_list, truck):
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        if stock.priority == "客户催货":
-            stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-        elif datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
+        stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
+        if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
                 datetime.datetime.now() + datetime.timedelta(days=-2)):
             stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
-        else:
-            stock.priority = 3
         # 按33000将货物分成若干份
         num = (truck.load_weight + ModelConfig.RG_SINGLE_UP_WEIGHT) // stock.piece_weight
         # 首先去除 件重大于33000的货物
