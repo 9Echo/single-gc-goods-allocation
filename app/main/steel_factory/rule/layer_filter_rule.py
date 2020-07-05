@@ -44,9 +44,13 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 得到待匹配列表
@@ -113,9 +117,13 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 获取可拼货同区仓库
@@ -157,9 +165,13 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
@@ -197,9 +209,13 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
+            if temp_stock.big_commodity_name in ModelConfig.RG_XL:
+                surplus_weight += ModelConfig.RG_XL_UP_WEIGHT
             new_min_weight = min_weight - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if v.deliware_house == temp_stock.deliware_house
