@@ -19,7 +19,8 @@ class Stock(BaseEntity):
         self.big_commodity_name = None  # 品名
         self.mark = None  # 牌号
         self.specs = None  # 规格
-        self.deliware_house = None  # 出库仓库
+        self.deliware_house = None  # 出库仓库code
+        self.deliware_house_name = None  # 出库仓库name
         self.province = None  # 省份
         self.city = None  # 城市
         self.dlv_spot_name_end = None  # 终点

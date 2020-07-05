@@ -36,7 +36,7 @@ def create_load_task(stock_list: List[Stock], load_task_id, load_task_type) -> L
         load_task_item.oritem_num = i.oritem_num
         load_task_item.standard = i.specs
         load_task_item.sgsign = i.mark
-        load_task_item.outstock_code = i.deliware_house
+        load_task_item.outstock_code = i.deliware_house_name
         load_task_item.instock_code = i.deliware
         load_task_item.big_commodity = i.big_commodity_name
         load_task_item.receive_address = i.detail_address
