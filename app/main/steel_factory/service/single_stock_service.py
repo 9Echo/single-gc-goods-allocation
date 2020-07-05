@@ -157,29 +157,3 @@ def deal_stock(all_stock_list, truck):
     # 按照优先发运和最新挂单时间排序
     stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
     return stock_list
-
-    # def address_latitude_and_longitude():
-    #     """获取数据表中地址经纬度信息
-    #     """
-    #     sql1 = """
-    #             select address as detail_address,longitude, latitude
-    #             from ods_db_sys_t_point
-    #         """
-    #     sql2 = """
-    #             select address as standard_address,longitude, latitude
-    #             from ods_db_sys_t_point
-    #             where longitude is not null
-    #             And latitude is not null
-    #             GROUP BY longitude, latitude
-    #         """
-    #     result_1 = pd.read_sql(sql1, db_pool_ods.connection())
-    #     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
-    #     return result_1, result_2
-    #
-    #
-    # def merge_stock(df_stock):
-    #     # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
-    #     data1, data2 = address_latitude_and_longitude()
-    #     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
-    #     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    #     return df_stock
