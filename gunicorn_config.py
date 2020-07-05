@@ -64,8 +64,8 @@ logconfig_dict = {
     'disable_existing_loggers': False,
     'root': {
         "level": "DEBUG",  # 打日志的等级可以换的，下面的同理
-        "handlers": ["error_file"],  # 对应下面的键
-        "propagate": 1
+        # "handlers": ["error_file"],  # 对应下面的键
+        # "propagate": 1
     },
     'loggers': {
         "gunicorn.error": {
