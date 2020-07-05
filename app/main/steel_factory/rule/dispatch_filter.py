@@ -2,8 +2,6 @@
 # @Time    : 2019/11/15 14:03
 # @Author  : Zihao.Liu
 import copy
-from datetime import datetime
-
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.layer_filter_rule import layer_filter
 from app.util.enum_util import DispatchType, LoadTaskType
@@ -38,5 +36,4 @@ def dispatch_filter(load_task_list, stock_list):
         # 目标货物拆散分
         surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.THIRD,
                                           ModelConfig.RG_MIN_WEIGHT)
-    # surplus_stock_dict = {**surplus_stock_dict, **surplus_stock_xg_dict}
     return surplus_stock_dict

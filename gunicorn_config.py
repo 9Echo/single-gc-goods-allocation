@@ -15,6 +15,7 @@ from app.util.file_handlers import MultiProcessSafeTimedRotatingFileHandler
 
 # 应用参数
 from config import Config
+
 APP_NAME = Config.APP_NAME
 SERVER_PORT = Config.SERVER_PORT
 
@@ -61,6 +62,11 @@ errorlog = '/app/{}/logs/gunicorn_server.log'.format(APP_NAME)
 logconfig_dict = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        "level": "DEBUG",  # 打日志的等级可以换的，下面的同理
+        "handlers": ["error_file"],  # 对应下面的键
+        "propagate": 1
+    },
     'loggers': {
         "gunicorn.error": {
             "level": "DEBUG",  # 打日志的等级可以换的，下面的同理
