@@ -128,7 +128,7 @@ def deal_stock(data):
                 and ModelConfig.RG_MIN_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
             sift_stock_list.append(stock)
             continue
-        if stock.priority != 4 and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT:
+        if ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT:
             stock.sort = 1
         # 按33000将货物分成若干份
         num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
@@ -167,7 +167,6 @@ def deal_stock(data):
 
     if not stock_list:
         raise MyException('输入可发库存无效', ResponseCode.Error)
-    print("{},{}".format(len(stock_list), len(sift_stock_list)))
     return stock_list, sift_stock_list
 
 
