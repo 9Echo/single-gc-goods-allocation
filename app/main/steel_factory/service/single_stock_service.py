@@ -35,7 +35,7 @@ def get_stock(truck):
     if out_stock_list:
         all_stock_list = [i for i in all_stock_list if i.get('deliware_house') not in out_stock_list]
     # 获取已开装车清单信息、预装车清单信息、最大更新时间、开单推荐但未经过确认
-    loading_detail_list = loading_detail_dao.select_loading_detail()
+    loading_detail_list = loading_detail_dao.select_loading_detail(truck)
     # 扣除操作
     for stock_dict in all_stock_list:
         # 找出库存中被开单的子项
