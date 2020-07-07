@@ -4,6 +4,7 @@ from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.util.generate_id import TrainId
+from model_config import ModelConfig
 
 
 def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask],
@@ -30,9 +31,12 @@ def calculate(compose_list: List[Stock], general_stock_dict: Dict[int, Stock], l
         stock = v[0]
         stock.actual_number = len(v)
         stock.actual_weight = len(v) * stock.piece_weight
-        new_compose_list.append(stock)
+        temp_weight = (general_stock.actual_number - len(v)) * general_stock.piece_weight
+        # if general_stock.actual_weight>ModelConfig.RG_MIN_WEIGHT and temp_weight<ModelConfig.RG_MIN_WEIGHT:
+
         general_stock.actual_number -= len(v)
         general_stock.actual_weight = general_stock.actual_number * general_stock.piece_weight
+        new_compose_list.append(stock)
         if general_stock.actual_number == 0:
             general_stock_dict.pop(k)
     # 生成车次数据
