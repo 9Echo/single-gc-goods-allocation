@@ -12,7 +12,7 @@ class OutStockQueueDao(BaseDao):
         """
         sql = """
         select
-        stock_name
+        stock_name,truck_count
         from
         (
         SELECT
@@ -21,15 +21,15 @@ class OutStockQueueDao(BaseDao):
         FROM
         db_dev.`dws_dis_warehouse_trucks`
         ) t
-        where truck_count > 35
         """
         data = self.select_all(sql)
-        out_stock_list = list()
+
+        out_stock_dict=dict()
         if data:
             for i in data:
-                code, = i.values()
-                out_stock_list.append(code)
-        return out_stock_list
+                code,count = i.values()
+                out_stock_dict[code] = count
+        return out_stock_dict
 
 
 out_stock_queue_dao = OutStockQueueDao()
