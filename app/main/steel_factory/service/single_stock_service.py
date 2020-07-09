@@ -124,6 +124,11 @@ def deal_stock(all_stock_list, truck):
     stock_list = []
     for record in dic:
         stock = Stock(record)
+        # 如果可发小于待发，并且待发在标载范围内，就不参与配载
+        if stock.actual_number < stock.waint_fordel_number \
+                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <= \
+                stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT:
+            continue
         stock.parent_stock_id = get_stock_id(stock)
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
@@ -155,5 +160,5 @@ def deal_stock(all_stock_list, truck):
                 copy_2.actual_number = int(num)
                 stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
+    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time, x.actual_weight), reverse=False)
     return stock_list

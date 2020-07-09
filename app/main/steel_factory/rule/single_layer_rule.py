@@ -1,5 +1,6 @@
 from typing import List
 from app.main.steel_factory.entity.stock import Stock
+from app.main.steel_factory.entity.truck import Truck
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.goods_filter_rule import goods_filter
 from app.main.steel_factory.rule.split_rule import split
@@ -7,7 +8,7 @@ from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def layer_filter(stock_list: list, truck):
+def layer_filter(stock_list: list, truck: Truck):
     """
     按层次分货
     第一层：一装一卸
@@ -54,6 +55,11 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     if dispatch_type is DispatchType.THIRD:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT
         new_min_weight = surplus_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT
+    # 如果拉卷，并且载重在29-35，就将下限设到29
+    elif temp_stock.big_commodity_name in ModelConfig.RG_COMMODITY_J and \
+            ModelConfig.RG_J_MIN_WEIGHT <= max_weight <= ModelConfig.RG_MAX_WEIGHT:
+        surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
+        new_min_weight = ModelConfig.RG_J_MIN_WEIGHT - temp_stock.actual_weight
     # 不拆散的情况，最大重量等于车辆最大载重扣除目标货物的重量，下浮1000
     else:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
@@ -64,6 +70,10 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
                    and stock.standard_address == temp_stock.standard_address
                    and stock.piece_weight <= surplus_weight
                    ]
+    # 如果卷重小于24或者大于29，则不拼线材
+    if temp_stock.actual_weight >= ModelConfig.RG_J_MIN_WEIGHT or \
+            temp_stock.actual_weight <= ModelConfig.RG_SECOND_MIN_WEIGHT:
+        filter_list = [stock_j for stock_j in filter_list if stock_j.big_commodity_name == '老区-卷板']
     if filter_list:
         if temp_stock.big_commodity_name == '老区-型钢':
             temp_max_weight: int = 0
@@ -95,6 +105,10 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
                 return create_load_task(compose_list, None, LoadTaskType.TYPE_1.value)
     # 一单在达标重量之上并且无货可拼的情况生成车次
     elif new_min_weight <= 0:
+        return create_load_task([temp_stock], None, LoadTaskType.TYPE_1.value)
+    # 如果是卷，并且temp_stock重量达到29，则直接生成车次
+    elif temp_stock.big_commodity_name in ModelConfig.RG_COMMODITY_J and \
+            temp_stock.actual_weight > ModelConfig.RG_J_MIN_WEIGHT:
         return create_load_task([temp_stock], None, LoadTaskType.TYPE_1.value)
     else:
         return None
@@ -180,6 +194,10 @@ def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, a
     :param new_min_weight:
     :return:
     """
+    # 如果卷重小于24或者大于29，则不拼线材
+    if temp_stock.actual_weight >= ModelConfig.RG_J_MIN_WEIGHT or \
+            temp_stock.actual_weight <= ModelConfig.RG_SECOND_MIN_WEIGHT:
+        filter_list = [stock_j for stock_j in filter_list if stock_j.big_commodity_name == '老区-卷板']
     if not filter_list:
         return 0, []
     temp_max_weight: int = 0

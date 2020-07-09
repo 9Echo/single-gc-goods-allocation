@@ -12,9 +12,6 @@ def consumer_filter(stock_list):
     """
     # 将库存分为催货库存和其他库存
     hurry_stock_list = [stock for stock in stock_list if stock.priority == 1]
-    # 如果没有客户催货一级，就对客户催货二级进行轮询
-    if not hurry_stock_list:
-        hurry_stock_list = [stock for stock in stock_list if stock.priority == 2]
     left_stock_list = stock_list[len(hurry_stock_list):]
     # 构建催货库存字典, 每个客户对应一个库存列表
     hurry_stock_dict = {}

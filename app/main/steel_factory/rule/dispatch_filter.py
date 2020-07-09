@@ -14,7 +14,6 @@ def dispatch_filter(load_task_list, stock_list):
     分货规则
     :param load_task_list:
     :param stock_list:
-    :param xg_dict:
     :return:
     """
     # 甩货列表
@@ -22,7 +21,7 @@ def dispatch_filter(load_task_list, stock_list):
     # 转换字典
     stock_dict = {i.stock_id: i for i in stock_list}
     # 优先考虑急发特殊货物
-    general_stock_dict = layer_filter(stock_dict, load_task_list, DispatchType.FIRST, ModelConfig.RG_MIN_WEIGHT)
+    general_stock_dict = layer_filter(stock_dict, load_task_list, DispatchType.FIRST)
     # 剩余优先考虑急发特殊货物生成车次，走29吨包车运输
     for k, v in copy.copy(general_stock_dict).items():
         if v.sort == 1:
@@ -31,9 +30,7 @@ def dispatch_filter(load_task_list, stock_list):
     # 剩余货物走正常流程
     if general_stock_dict:
         # 目标货物整体分
-        first_surplus_stock_dict = layer_filter(general_stock_dict, load_task_list, DispatchType.SECOND,
-                                                ModelConfig.RG_MIN_WEIGHT)
+        first_surplus_stock_dict = layer_filter(general_stock_dict, load_task_list, DispatchType.SECOND)
         # 目标货物拆散分
-        surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.THIRD,
-                                          ModelConfig.RG_MIN_WEIGHT)
+        surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.THIRD)
     return surplus_stock_dict

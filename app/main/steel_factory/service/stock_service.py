@@ -110,7 +110,8 @@ def deal_stock(data):
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
         if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
                 stock.actual_number < stock.waint_fordel_number
-                and ModelConfig.RG_MIN_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
+                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <=
+                stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
             sift_stock_list.append(stock)
             continue
         # 组数

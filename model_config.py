@@ -3,13 +3,22 @@ class ModelConfig:
     """
 
     # 日钢标载
-    RG_MAX_WEIGHT = 33000
-    RG_MIN_WEIGHT = 29000
+    RG_MAX_WEIGHT = 35000
+    RG_MIN_WEIGHT = 31000
+    RG_J_MIN_WEIGHT = 29000
     RG_SECOND_MIN_WEIGHT = 24000
     RG_SINGLE_UP_WEIGHT = 500
-    RG_SINGLE_LOWER_WEIGHT = 1000
-    RG_XL_UP_WEIGHT = 2000
-    RG_XL = ['老区-型钢', '老区-螺纹', '老区-线材']
+    RG_SINGLE_LOWER_WEIGHT = 2000
+    RG_COMMODITY_WEIGHT = {'老区-卷板': RG_J_MIN_WEIGHT,
+                           '新产品-卷板': RG_J_MIN_WEIGHT,
+                           '新产品-白卷': RG_J_MIN_WEIGHT,
+                           '老区-型钢': RG_MIN_WEIGHT,
+                           '老区-线材': RG_MIN_WEIGHT,
+                           '老区-螺纹': RG_MIN_WEIGHT,
+                           '老区-开平板': RG_MIN_WEIGHT,
+                           '新产品-窄带': RG_MIN_WEIGHT,
+                           '新产品-冷板': RG_MIN_WEIGHT
+                           }
     RG_PRIORITY = {'客户催货一级': 1, '客户催货二级': 2, '超期清理': 3}
     RG_PRIORITY_GRADE = {1: "A", 2: "B", 3: "C", 4: "D"}
     RG_LY_GROUP = {
@@ -51,6 +60,7 @@ class ModelConfig:
         "新产品-冷板": ["钢丝绳"],
         "老区-开平板": ["垫木"]
     }
+    RG_COMMODITY_J = ["老区-卷板", "新产品-卷板", "新产品-白卷"]
     RG_COMMODITY_LYG = ["老区-卷板", "新产品-卷板", "新产品-白卷"]
     RG_PORT_NAME_END_LYG = ["泰州钢冉码头", "泰州华纳码头",
                             "常州钢材现货交易市场码头", "常州万都码头",
