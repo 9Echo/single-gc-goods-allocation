@@ -8,27 +8,25 @@ from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def layer_filter(general_stock_dict, load_task_list, dispatch_type, min_weight):
+def layer_filter(general_stock_dict, load_task_list, dispatch_type):
     """
 
-    :param min_weight:
     :param general_stock_dict:
     :param load_task_list:
     :param dispatch_type:
     :return:
     """
-    first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, dispatch_type, min_weight)
-    second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type, min_weight)
-    # third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
-    surplus_stock_dict = fourth_deal_general_stock(second_result_dict, load_task_list, dispatch_type, min_weight)
+    first_result_dict = first_deal_general_stock(general_stock_dict, load_task_list, dispatch_type)
+    second_result_dict = second_deal_general_stock(first_result_dict, load_task_list, dispatch_type)
+    # 不同区两装一卸取消
+    # third_stock_dict = third_deal_general_stock(second_result_dict, load_task_list, dispatch_type)
+    surplus_stock_dict = fourth_deal_general_stock(second_result_dict, load_task_list, dispatch_type)
     return surplus_stock_dict
 
 
-def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                             min_weight) -> Dict[int, Stock]:
+def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type):
     """
     一装一卸筛选器
-    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -44,10 +42,12 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT)
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT) - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 得到待匹配列表
         filter_list = [v for v in general_stock_dict.values() if v.deliware_house == temp_stock.deliware_house
@@ -83,8 +83,8 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
                     temp_stock = temp_stock if dispatch_type is not DispatchType.THIRD else None
                     calculate(compose_list, general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
                     continue
-        # 一单在[31-33]并且无货可拼的情况生成车次
-        elif temp_stock.actual_weight >= ModelConfig.RG_MIN_WEIGHT:
+        elif temp_stock.actual_weight >= ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                             ModelConfig.RG_MIN_WEIGHT):
             calculate([], general_stock_dict, load_task_list, temp_stock, LoadTaskType.TYPE_1.value)
             continue
         general_stock_dict.pop(stock_id, 404)
@@ -92,11 +92,9 @@ def first_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     return result_dict
 
 
-def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                              min_weight) -> Dict[int, Stock]:
+def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type):
     """
     两装一卸（同区仓库）筛选器
-    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -113,10 +111,12 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT)
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT) - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         # 获取可拼货同区仓库
         warehouse_out_group = get_warehouse_out_group(temp_stock)
@@ -137,11 +137,9 @@ def second_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
     return result_dict
 
 
-def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                             min_weight) -> Dict[int, Stock]:
+def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type):
     """
     两装一卸（非同区仓库）筛选器
-    :param min_weight:
     :param dispatch_type:
     :param general_stock_dict:
     :param load_task_list:
@@ -157,10 +155,12 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT)
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
+            new_min_weight = ModelConfig.RG_COMMODITY_WEIGHT.get(temp_stock.big_commodity_name,
+                                                                 ModelConfig.RG_MIN_WEIGHT) - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if v.standard_address == temp_stock.standard_address
                        and v.piece_weight <= surplus_weight
@@ -268,6 +268,9 @@ def get_optimal_group(filter_list, temp_stock, surplus_weight, new_min_weight, a
 
 
 def get_warehouse_out_group(temp_stock: Stock) -> List[str]:
+    target_group = []
     for group in ModelConfig.RG_WAREHOUSE_GROUP:
         if temp_stock.deliware_house in group:
-            return group
+            target_group = group
+            break
+    return target_group

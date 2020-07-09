@@ -2,12 +2,12 @@
 # Description: 库存服务
 # Created: shaoluyu 2020/03/12
 import copy
-
+import pandas as pd
+import numpy as np
 from app.util.code import ResponseCode
 from app.util.my_exception import MyException
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
-import pandas as pd
 from app.util.db_pool import db_pool_ods
 from app.util.get_static_path import get_path
 
@@ -40,11 +40,11 @@ def address_latitude_and_longitude():
     """
     sql1 = """
             select address as 'detail_address',longitude, latitude
-            from ods_db_sys_t_point
+            from db_dw.ods_db_sys_t_point
         """
     sql2 = """
             select address as '卸货地址2',longitude, latitude 
-            from ods_db_sys_t_point
+            from db_dw.ods_db_sys_t_point
             where longitude is not null
             And latitude is not null
             GROUP BY longitude, latitude
@@ -59,16 +59,6 @@ def deal_stock(data):
 
     :return:
     """
-    """
-        步骤：
-        1 调用get_stock(),获取库存列表
-        2 可发重量+=需开单重量合并，可发件数+=需开单件数合并，
-        若需短溢重量>0,减去相应的件数和重量，若品名为窄带，将可发件数=窄带捆包数,若品名为开平板，品名=if出库仓库包含P 西区开平板 else 老区开平板
-        3 过滤掉可发重量或可发件数或窄带捆包数<=0的数据，过滤掉最新挂单时间为空的数据
-        4 卸货地址标准化，由于存在差别在几个字左右的不同地址，但其实是一个地址的情况
-        5 以33t为重量上限，将可发重量大于此值的库存明细进行拆分，拆分成重量<=33t的若干份
-        6 得到新的库存列表，返回
-        """
     if not data:
         raise MyException('输入列表为空', ResponseCode.Error)
     data1, data2 = address_latitude_and_longitude()
@@ -80,35 +70,15 @@ def deal_stock(data):
     result = pd.DataFrame()
     # 获取库存
     df_stock = pd.DataFrame(data)
-    # ——————————————注释开始
     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
     df_stock["实际终点"] = df_stock["dlv_spot_name_end"]
     # 根据公式，计算实际可发重量，实际可发件数
-    # df_stock["实际可发重量"] = (df_stock["can_send_weight"] + df_stock["need_lading_wt"]) * 1000
     df_stock["实际可发重量"] = df_stock["can_send_weight"] * 1000
-    # df_stock["实际可发件数"] = df_stock["can_send_number"] + df_stock["need_lading_num"]
     df_stock["实际可发件数"] = df_stock["can_send_number"]
-    # df_stock["over_flow_wt"] = df_stock["over_flow_wt"] * 1000
-    # 窄带按捆包数计算，实际可发件数 = 捆包数
-    # df_stock.loc[(df_stock["big_commodity_name"] == "窄带") & (df_stock["pack_number"] > 0), ["实际可发件数"]] = df_stock[
-    #     "pack_number"]
     # # 根据公式计算件重
     df_stock["件重"] = round(df_stock["实际可发重量"] / df_stock["实际可发件数"])
     df_stock["实际可发重量"] = df_stock["件重"] * df_stock["实际可发件数"]
-    # 根据短溢的重量，扣除相应的实际可发件数和实际可发重量,此处math.ceil向上取出会报错，所以用的是另一种向上取整方法
-    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发件数"]] = df_stock["实际可发件数"] + (
-    #             -df_stock["over_flow_wt"] // df_stock["件重"])
-    # df_stock.loc[df_stock["over_flow_wt"] > 0, ["实际可发重量"]] = df_stock["实际可发重量"] + df_stock["件重"] * (
-    #         -df_stock["over_flow_wt"] // df_stock["件重"])
-    # 区分西老区的开平板
-    # df_stock.loc[(df_stock["big_commodity_name"] == "开平板") & (df_stock["deliware_house"].str.startswith("P")), [
-    #     "big_commodity_name"]] = ["西区开平板"]
-    # df_stock.loc[(df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P")), [
-    #     "big_commodity_name"]] = ["西区黑卷"]
-    # df_stock.loc[
-    #     (df_stock["big_commodity_name"] == "黑卷") & (df_stock["deliware_house"].str.startswith("P") is False), [
-    #         "big_commodity_name"]] = ["老区黑卷"]
     df_stock.loc[df_stock["deliware"].str.startswith("U"), ["实际终点"]] = df_stock["deliware"]
     df_stock.loc[(df_stock["port_name_end"].isin(ModelConfig.RG_PORT_NAME_END_LYG)) & (
         df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["实际终点"]] = "U288-岚北港口库2LYG"
@@ -118,63 +88,77 @@ def deal_stock(data):
     df_stock.loc[
         (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (
                 df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
-    # ——————————————注释结束
+    df_stock.loc[
+        (df_stock["件重"] < ModelConfig.RG_MIN_WEIGHT) & (
+                df_stock["实际可发重量"] >= ModelConfig.RG_SECOND_MIN_WEIGHT), ["sort"]] = 1
     result = result.append(df_stock)
     result = rename_pd(result)
     # 如果标准地址没有匹配到，那么就是用详细地址代替
     result.loc[result["standard_address"].isnull(), ["standard_address"]] = result["detail_address"]
+    result['actual_weight'].fillna(0, inplace=True)
+    result['actual_number'].fillna(0, inplace=True)
+    result['piece_weight'][np.isinf(result['piece_weight'])] = -1
     dic = result.to_dict(orient="record")
     count_parent = 0
     for record in dic:
         count_parent += 1
         stock = Stock(record)
-        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
-                stock.actual_number < stock.waint_fordel_number and ModelConfig.RG_MAX_WEIGHT <= stock.waint_fordel_weight <= ModelConfig.RG_MIN_WEIGHT):
-            sift_stock_list.append(stock)
-            continue
         stock.parent_stock_id = count_parent
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        if not stock.standard_address:
-            stock.standard_address = stock.detail_address
-        if stock.priority == "客户催货":
-            stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-        else:
-            # if datetime.datetime.strptime(str(stock.latest_order_time).split(".")[0], "%Y-%m-%d %H:%M:%S") <= (
-            #         datetime.datetime.now() + datetime.timedelta(days=-2)):
-            #     stock.priority = "超期清理"
-            if stock.priority in ModelConfig.RG_PRIORITY:
-                stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-            else:
-                stock.priority = 3
-        if (stock.priority in ModelConfig.RG_PRIORITY.values()
-                and ModelConfig.RG_SECOND_MIN_WEIGHT <= stock.piece_weight < ModelConfig.RG_MIN_WEIGHT):
-            stock.sort = 1
-        # 按33000将货物分成若干份
-        num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
+        stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
+        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
+                stock.actual_number < stock.waint_fordel_number
+                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <=
+                stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
+            sift_stock_list.append(stock)
+            continue
+        # 组数
+        target_group_num = 0
+        # 最后一组件数
+        target_left_num = 0
+        # 一组几件
+        target_num = 0
+        for weight in range(ModelConfig.RG_MIN_WEIGHT, ModelConfig.RG_MAX_WEIGHT + 1000, 1000):
+            # 一组几件
+            num = weight // stock.piece_weight
+            if num < 1 or num > stock.actual_number:
+                target_num = num
+                continue
+            # 组数
+            group_num = stock.actual_number // num
+            # 最后一组件数
+            left_num = stock.actual_number % num
+            # 如果分的每组件数更多，并且组数不减少，就替换
+            if group_num >= target_group_num:
+                target_group_num = group_num
+                target_left_num = left_num
+                target_num = num
+        # 将货物分成若干份
+        # num = ModelConfig.RG_MAX_WEIGHT // stock.piece_weight
         # 首先去除 件重大于33000的货物
-        if num < 1:
+        if target_num < 1:
             sift_stock_list.append(stock)
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
-        elif num > stock.actual_number:
+        elif target_num > stock.actual_number:
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
-            group_num = stock.actual_number // num
-            left_num = stock.actual_number % num
+            # group_num = stock.actual_number // num
+            # left_num = stock.actual_number % num
             copy_1 = copy.deepcopy(stock)
-            copy_1.actual_number = int(left_num)
-            copy_1.actual_weight = left_num * stock.piece_weight
-            if left_num:
+            copy_1.actual_number = int(target_left_num)
+            copy_1.actual_weight = target_left_num * stock.piece_weight
+            if target_left_num:
                 if ModelConfig.RG_MIN_WEIGHT <= copy_1.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
                     copy_1.sort = 2
                 stock_list.append(copy_1)
-            for q in range(int(group_num)):
+            for q in range(int(target_group_num)):
                 copy_2 = copy.deepcopy(stock)
-                copy_2.actual_weight = num * stock.piece_weight
-                copy_2.actual_number = int(num)
+                copy_2.actual_weight = target_num * stock.piece_weight
+                copy_2.actual_number = int(target_num)
                 if ModelConfig.RG_MIN_WEIGHT <= copy_2.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
                     copy_2.sort = 2
                 stock_list.append(copy_2)
@@ -188,7 +172,6 @@ def deal_stock(data):
 
     if not stock_list:
         raise MyException('输入可发库存无效', ResponseCode.Error)
-    print("{},{}".format(len(stock_list), len(sift_stock_list)))
     return stock_list, sift_stock_list
 
 

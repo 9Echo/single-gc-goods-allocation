@@ -33,21 +33,6 @@ class Config:
     # 任务调度器lock文件名称
     SCHEDULER_LOCK_FILE_NAME = 'scheduler-{}.lock'.format(APP_NAME)
 
-    # 数仓连接
-    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
-    ODS_MYSQL_PORT = 3306
-    ODS_MYSQL_USER = 'bigdata_user4'
-    ODS_MYSQL_PASSWD = 'user4!0525'
-    ODS_MYSQL_DB = 'db_dw'
-    ODS_MYSQL_CHARSET = 'utf8'
-
-    # 开单参数配置
-    # 车载最大重量
-    MAX_WEIGHT = 33000
-    # 分车次限制重量
-    TRUCK_SPLIT_RANGE = 1000
-    RD_LX_GROUP = ['热镀', '热度', '热镀1', '螺旋焊管', '热镀方矩管', 'QF热镀管']
-
     @staticmethod
     def init_app(app):
         pass
@@ -56,24 +41,15 @@ class Config:
 class DevelopmentConfig(Config):
     """开发环境配置
     """
-    # Mysql配置，可选（不使用时可删除）
-    MYSQL_HOST = '172.16.110.156'
-    MYSQL_PORT = 3306
-    MYSQL_USER = 'v3dev_user'
-    MYSQL_PASSWD = 'JTcztee829#bv'
-    MYSQL_DB = 'db_trans_plan'
-    MYSQL_CHARSET = 'utf8'
 
-    # ODS_MYSQL_HOST = 'localhost'
-    # ODS_MYSQL_PORT = 3306
-    # ODS_MYSQL_USER = 'root'
-    # ODS_MYSQL_PASSWD = '123456'
-    # ODS_MYSQL_DB = 'db_trans_plan'
-    # ODS_MYSQL_CHARSET = 'utf8'
+    # 数仓连接
+    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
+    ODS_MYSQL_PORT = 3306
+    ODS_MYSQL_USER = 'bigdata_user4'
+    ODS_MYSQL_PASSWD = 'user4!0525'
+    ODS_MYSQL_DB = 'db_model'
+    ODS_MYSQL_CHARSET = 'utf8'
 
-    # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
-        MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
 
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '172.16.110.156'
@@ -138,17 +114,13 @@ class DevelopmentConfig(Config):
 class TestConfig(Config):
     """测试环境配置
     """
-    # Mysql配置，可选（不使用时可删除）
-    MYSQL_HOST = '192.168.1.12'
-    MYSQL_PORT = 3307
-    MYSQL_USER = 'v3test_user'
-    MYSQL_PASSWD = 'V3Test@56'
-    MYSQL_DB = 'db_trans_plan'
-    MYSQL_CHARSET = 'utf8'
-
-    # sqlalchemy ORM底层所访问数据库URI，可选（不使用时可删除）
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset={}'.format(
-        MYSQL_USER, MYSQL_PASSWD, MYSQL_HOST, MYSQL_PORT, MYSQL_DB, MYSQL_CHARSET)
+    # 数仓连接
+    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
+    ODS_MYSQL_PORT = 3306
+    ODS_MYSQL_USER = 'bigdata_user4'
+    ODS_MYSQL_PASSWD = 'user4!0525'
+    ODS_MYSQL_DB = 'db_model'
+    ODS_MYSQL_CHARSET = 'utf8'
 
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '172.16.110.156'
@@ -216,7 +188,7 @@ class UatConfig(Config):
     ODS_MYSQL_PORT = 3306
     ODS_MYSQL_USER = 'bigdata_user4'
     ODS_MYSQL_PASSWD = 'user4!0525'
-    ODS_MYSQL_DB = 'db_dw'
+    ODS_MYSQL_DB = 'db_model'
     ODS_MYSQL_CHARSET = 'utf8'
 
     # Redis配置，可选（不使用时可删除）
@@ -226,7 +198,7 @@ class UatConfig(Config):
     REDIS_MAX_CONNECTIONS = 2
 
     # 微服务url
-    DISPATCH_SERVICE_URL = 'http://192.168.1.70:9078'
+    DISPATCH_SERVICE_URL = 'https://uat.jczh56.com/api/dispatch-center'
     # Celery配置，可选（不使用时可删除）
     # CELERY_BROKER_URL = 'redis://:wobugaoxing@47.99.118.183:6379/0'
     # CELERY_RESULT_BACKEND = 'redis://:wobugaoxing@47.99.118.183:6379/0'

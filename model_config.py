@@ -1,13 +1,25 @@
 class ModelConfig:
     """模型参数配置
     """
+
     # 日钢标载
-    RG_MAX_WEIGHT = 33000
+    RG_MAX_WEIGHT = 35000
     RG_MIN_WEIGHT = 31000
+    RG_J_MIN_WEIGHT = 29000
     RG_SECOND_MIN_WEIGHT = 24000
     RG_SINGLE_UP_WEIGHT = 500
-    RG_SINGLE_LOWER_WEIGHT = 1000
-    RG_PRIORITY = {'客户催货': 1, '超期清理': 2}
+    RG_SINGLE_LOWER_WEIGHT = 2000
+    RG_COMMODITY_WEIGHT = {'老区-卷板': RG_J_MIN_WEIGHT,
+                           '新产品-卷板': RG_J_MIN_WEIGHT,
+                           '新产品-白卷': RG_J_MIN_WEIGHT,
+                           '老区-型钢': RG_MIN_WEIGHT,
+                           '老区-线材': RG_MIN_WEIGHT,
+                           '老区-螺纹': RG_MIN_WEIGHT,
+                           '老区-开平板': RG_MIN_WEIGHT,
+                           '新产品-窄带': RG_MIN_WEIGHT,
+                           '新产品-冷板': RG_MIN_WEIGHT
+                           }
+    RG_PRIORITY = {'客户催货一级': 1, '客户催货二级': 2, '超期清理': 3}
     RG_PRIORITY_GRADE = {1: "A", 2: "B", 3: "C", 4: "D"}
     RG_LY_GROUP = {
         '赣榆区': ['U220-赣榆库', '赣榆区'],
@@ -48,6 +60,7 @@ class ModelConfig:
         "新产品-冷板": ["钢丝绳"],
         "老区-开平板": ["垫木"]
     }
+    RG_COMMODITY_J = ["老区-卷板", "新产品-卷板", "新产品-白卷"]
     RG_COMMODITY_LYG = ["老区-卷板", "新产品-卷板", "新产品-白卷"]
     RG_PORT_NAME_END_LYG = ["泰州钢冉码头", "泰州华纳码头",
                             "常州钢材现货交易市场码头", "常州万都码头",
@@ -55,11 +68,9 @@ class ModelConfig:
                             "无锡国联皋桥码头", "无锡国信码头"]
 
     RG_WAREHOUSE_GROUP = [
-        ['P5-P5冷轧成品库', 'P6-P6冷轧成品库', 'P7-P7剪切成品1库', 'P8-P8精整黑卷成品库'],
-        ["B2-小棒库(二棒)", "E1-#1热轧卷成品库", "E2-#2热轧卷成品库", "E3-#3热轧卷成品库", "E4-#4热轧卷成品库", "F1-成品中间库",
-         "F2-山东联储中间库", "H1-大H型钢成品库", "T1-小H型钢成品库", "X1-高线库", "X2-多头盘螺库", "Z1-热轧#1580成品库",
-         "Z2-热轧#2150成品", "Z4-精整1#成品库", "Z5-开平1、2#成品库", "Z8-开平3#成品库", "ZA-开平5#成品库", "ZC-精整2#成品库"],
-        ["F10-运输处临港东库", "F20-运输处临港西库"]
+        ['P5', 'P6', 'P7', 'P8'],
+        ["B2", "E1", "E2", "E3", "E4", "F1", "F2", "H1", "T1", "X1", "X2", "Z1", "Z2", "Z4", "Z5", "Z8", "ZA", "ZC"],
+        ["F10", "F20"]
     ]
     # 标准车载最大重量
     STANDARD_MAX_WEIGHT = 33000
@@ -112,4 +123,32 @@ class ModelConfig:
         '0C6': 12,
         '0C7': 8,
         '0C8': 6,
+    }
+
+    #各仓库最大车辆容纳数
+    WAREHOUSE_WAIT_DICT = {
+        'B2': 15,
+        'E1': 10,
+        'E2': 10,
+        'E3': 10,
+        'E4': 10,
+        'F1': 10,
+        'F10': 25,
+        'F2': 30,
+        'F20': 25,
+        'H1': 15,
+        'P5': 25,
+        'P6': 25,
+        'P7': 10,
+        'P8': 15,
+        'T1': 15,
+        'X1': 15,
+        'X2': 15,
+        'Z1': 15,
+        'Z2': 20,
+        'Z4': 15,
+        'Z5': 15,
+        'Z8': 15,
+        'ZA': 15,
+        'ZC': 15
     }

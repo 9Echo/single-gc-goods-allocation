@@ -4,7 +4,6 @@
 import copy
 import datetime
 import pandas as pd
-
 from app.main.steel_factory.dao.loading_detail_dao import loading_detail_dao
 from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
@@ -38,8 +37,22 @@ def get_stock(truck):
     # if out_stock_list:
     #     all_stock_list = [i for i in all_stock_list if
     #                       (i.get('deliware_house').split('-')[0]) not in out_stock_list]
+    # 查询各仓库排队信息：结果为字典{‘仓库号’：排队车数量}
+    out_stock_dict = out_stock_queue_dao.select_out_stock_queue()
+    # 按仓库号升序排序：结果为元组列表
+    out_stock_dict = [(k, out_stock_dict[k]) for k in sorted(out_stock_dict.keys())]
+    out_stock_list = list()
+    if out_stock_dict:
+        j = 0  # 元组列表out_stock_dict的索引
+        for i in ModelConfig.WAREHOUSE_WAIT_DICT.keys():
+            if out_stock_dict[j][1] > ModelConfig.WAREHOUSE_WAIT_DICT[i]:
+                out_stock_list.append(i)
+            j += 1
+    # 去除等待数较高的出库仓库，暂不往该仓库开单
+    if out_stock_list:
+        all_stock_list = [i for i in all_stock_list if i.get('deliware_house') not in out_stock_list]
     # 获取已开装车清单信息、预装车清单信息、最大更新时间、开单推荐但未经过确认
-    loading_detail_list = loading_detail_dao.select_loading_detail()
+    loading_detail_list = loading_detail_dao.select_loading_detail(truck)
     # 扣除操作
     for stock_dict in all_stock_list:
         # 找出库存中被开单的子项
@@ -50,7 +63,8 @@ def get_stock(truck):
             for i in temp_list:
                 stock_dict['CANSENDWEIGHT'] = float(stock_dict.get('CANSENDWEIGHT', 0)) - float(i.get('weight', 0))
                 stock_dict['CANSENDNUMBER'] = int(stock_dict.get('CANSENDNUMBER', 0)) - int(i.get('count', 0))
-
+    if not all_stock_list:
+        return []
     # 库存预处理
     target_stock_list = deal_stock(all_stock_list, truck)
     return target_stock_list
@@ -80,6 +94,8 @@ def deal_stock(all_stock_list, truck):
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
             df_stock["latest_order_time"].notnull())]
+    if df_stock.empty:
+        return []
     global flag
     flag = False
 
@@ -98,7 +114,8 @@ def deal_stock(all_stock_list, truck):
         elif row['deliware_house'].startswith("P") and row['big_commodity_name'] != '开平板':
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 如果是外库，且是西区品种，则品名前加新产品-
-        elif row['deliware_house'].find('运输处临港') and row['big_commodity_name'] in ['白卷', '窄带', '冷板']:
+        elif (row['deliware_house'].find('F10') != -1 or row['deliware_house'].find('F20') != -1) and row[
+            'big_commodity_name'] in ['白卷', '窄带', '冷板']:
             row['big_commodity_name'] = '新产品-' + row['big_commodity_name']
         # 其余全部是老区-
         else:
@@ -124,17 +141,19 @@ def deal_stock(all_stock_list, truck):
     stock_list = []
     for record in dic:
         stock = Stock(record)
+        # 如果可发小于待发，并且待发在标载范围内，就不参与配载
+        if stock.actual_number < stock.waint_fordel_number \
+                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <= \
+                stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT:
+            continue
         stock.parent_stock_id = get_stock_id(stock)
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        if stock.priority == "客户催货":
-            stock.priority = ModelConfig.RG_PRIORITY[stock.priority]
-        elif datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
+        stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
+        if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
                 datetime.datetime.now() + datetime.timedelta(days=-2)):
             stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
-        else:
-            stock.priority = 3
         # 按33000将货物分成若干份
         num = (truck.load_weight + ModelConfig.RG_SINGLE_UP_WEIGHT) // stock.piece_weight
         # 首先去除 件重大于33000的货物
@@ -158,31 +177,5 @@ def deal_stock(all_stock_list, truck):
                 copy_2.actual_number = int(num)
                 stock_list.append(copy_2)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time), reverse=False)
+    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time, x.actual_weight), reverse=False)
     return stock_list
-
-    # def address_latitude_and_longitude():
-    #     """获取数据表中地址经纬度信息
-    #     """
-    #     sql1 = """
-    #             select address as detail_address,longitude, latitude
-    #             from ods_db_sys_t_point
-    #         """
-    #     sql2 = """
-    #             select address as standard_address,longitude, latitude
-    #             from ods_db_sys_t_point
-    #             where longitude is not null
-    #             And latitude is not null
-    #             GROUP BY longitude, latitude
-    #         """
-    #     result_1 = pd.read_sql(sql1, db_pool_ods.connection())
-    #     result_2 = pd.read_sql(sql2, db_pool_ods.connection())
-    #     return result_1, result_2
-    #
-    #
-    # def merge_stock(df_stock):
-    #     # data1,data2分别是需卸货的订单地址，数据库中保存的地址及经纬度
-    #     data1, data2 = address_latitude_and_longitude()
-    #     df_stock = pd.merge(df_stock, data1, on="detail_address", how="left")
-    #     df_stock = pd.merge(df_stock, data2, on=["latitude", "longitude"], how="left")
-    #     return df_stock
