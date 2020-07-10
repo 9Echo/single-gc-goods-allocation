@@ -80,6 +80,7 @@ def deal_stock(all_stock_list, truck):
     df_stock["NEED_LADING_WT"] = df_stock["NEED_LADING_WT"].astype('float64')
     df_stock["NEED_LADING_NUM"] = df_stock["NEED_LADING_NUM"].astype('int64')
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"].astype('float64')
+    df_stock["waint_fordel_number"] = df_stock["waint_fordel_number"].astype('float64')
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["actual_weight"] = (df_stock["CANSENDWEIGHT"] + df_stock["NEED_LADING_WT"]) * 1000
     df_stock["actual_number"] = df_stock["CANSENDNUMBER"] + df_stock["NEED_LADING_NUM"]
@@ -90,6 +91,20 @@ def deal_stock(all_stock_list, truck):
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
+    # 窄带捆包数
+    """
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    """
+    df_stock['wait_production_number'] = df_stock['waint_fordel_number'] - df_stock['actual_number']
+    df_stock.loc[df_stock['wait_production_number'] < 0, ['wait_production_number']] = 0
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
