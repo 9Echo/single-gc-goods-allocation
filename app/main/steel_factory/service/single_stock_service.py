@@ -100,8 +100,6 @@ def deal_stock(all_stock_list, truck):
     
     
     """
-    df_stock['wait_production_number'] = df_stock['waint_fordel_number'] - df_stock['actual_number']
-    df_stock.loc[df_stock['wait_production_number'] < 0, ['wait_production_number']] = 0
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
@@ -162,7 +160,6 @@ def deal_stock(all_stock_list, truck):
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
-        stock.wait_production_number = int(stock.wait_production_number)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
         if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
                 datetime.datetime.now() + datetime.timedelta(days=-2)):

@@ -26,20 +26,6 @@ def tail_grouping_filter(stock_list: List[Stock]):
             stock_dic["huge"].append(s)
         else:
             stock_dic["tail"].append(s)
-
-
-        # if s.actual_weight >= min_weight:
-        #     stock_dic["huge"].append(s)
-        # else:
-        #     # (可发件数+待产件数)*件重<重量下限
-        #     future_sum_weight = (s.actual_number + s.wait_production_number) * s.piece_weight
-        #     if future_sum_weight <= min_weight:
-        #         stock_dic["tail"].append(s)
-        #     else:
-        #         if user_dic[s.consumer + "," + s.big_commodity_name] > 150000:
-        #             stock_dic["huge"].append(s)
-        #         else:
-        #             stock_dic["lock"].append(s)
     return stock_dic
 
 
