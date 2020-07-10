@@ -211,7 +211,7 @@ def deal_stock(all_stock_list, truck):
                     limit_mark = 0
                 else:
                     limit_mark = 1
-                stock.limit_mark = limit_mark
+                copy_2.limit_mark = limit_mark
                 stock_list.append(copy_2)
             if target_left_num:
                 copy_1 = copy.deepcopy(stock)
