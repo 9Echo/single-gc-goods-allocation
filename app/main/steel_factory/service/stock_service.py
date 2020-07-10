@@ -5,6 +5,7 @@ import copy
 import pandas as pd
 import numpy as np
 from app.util.code import ResponseCode
+from app.util.get_weight_limit import get_lower_limit
 from app.util.my_exception import MyException
 from model_config import ModelConfig
 from app.main.steel_factory.entity.stock import Stock
@@ -120,7 +121,7 @@ def deal_stock(data):
         target_left_num = 0
         # 一组几件
         target_num = 0
-        for weight in range(ModelConfig.RG_MIN_WEIGHT, ModelConfig.RG_MAX_WEIGHT + 1000, 1000):
+        for weight in range(get_lower_limit(stock.big_commodity_name), ModelConfig.RG_MAX_WEIGHT + 1000, 1000):
             # 一组几件
             num = weight // stock.piece_weight
             if num < 1 or num > stock.actual_number:
