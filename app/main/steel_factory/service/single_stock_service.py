@@ -80,7 +80,8 @@ def deal_stock(all_stock_list, truck):
     df_stock["NEED_LADING_WT"] = df_stock["NEED_LADING_WT"].astype('float64')
     df_stock["NEED_LADING_NUM"] = df_stock["NEED_LADING_NUM"].astype('int64')
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"].astype('float64')
-    df_stock["waint_fordel_number"] = df_stock["waint_fordel_number"].astype('float64')
+    df_stock["waint_fordel_number"] = df_stock["waint_fordel_number"].astype('int64')
+    df_stock["waint_fordel_weight"] = df_stock["waint_fordel_weight"].astype('float64')
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["actual_weight"] = (df_stock["CANSENDWEIGHT"] + df_stock["NEED_LADING_WT"]) * 1000
     df_stock["actual_number"] = df_stock["CANSENDNUMBER"] + df_stock["NEED_LADING_NUM"]
@@ -165,6 +166,7 @@ def deal_stock(all_stock_list, truck):
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
+        stock.wait_production_number = int(stock.wait_production_number)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
         if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
                 datetime.datetime.now() + datetime.timedelta(days=-2)):
