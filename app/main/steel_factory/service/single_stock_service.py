@@ -88,18 +88,6 @@ def deal_stock(all_stock_list, truck):
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
-    # 窄带捆包数
-    """
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    """
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
@@ -152,8 +140,7 @@ def deal_stock(all_stock_list, truck):
     for record in dic:
         stock = Stock(record)
         # 如果可发小于待发，并且待发在标载范围内，就不参与配载
-        if stock.actual_number < stock.waint_fordel_number \
-                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <= \
+        if stock.actual_number < stock.waint_fordel_number and get_lower_limit(stock.big_commodity_name) <= \
                 stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT:
             continue
         stock.parent_stock_id = get_stock_id(stock)
