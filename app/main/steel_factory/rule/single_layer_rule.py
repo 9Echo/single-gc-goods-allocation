@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.entity.truck import Truck
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
@@ -8,7 +8,7 @@ from app.util.enum_util import DispatchType, LoadTaskType
 from model_config import ModelConfig
 
 
-def layer_filter(stock_list: list, truck: Truck):
+def layer_filter(stock_list: List, stock_dict: Dict, truck: Truck):
     """
     按层次分货
     第一层：一装一卸
@@ -19,26 +19,50 @@ def layer_filter(stock_list: list, truck: Truck):
     max_weight = truck.load_weight
     # 车次对象
     load_task = None
-    for i in stock_list:
-        # 如果目标品种不是车辆信息指定的品种或者超过车载重量，跳过
-        if i.big_commodity_name != truck.big_commodity_name or i.actual_weight > (
-                max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
-            continue
-        # 一装一卸
-        load_task = first_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
-        if load_task:
-            break
-        # 同区两装一卸
-        load_task = second_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
-        if load_task:
-            break
-        # 一装两卸
-        load_task = fourth_deal_general_stock(stock_list, i, DispatchType.SECOND, max_weight)
-        if load_task:
-            break
-    # 合并
-    merge_result(load_task)
-    return load_task
+    tail_list = stock_dict['tail']
+    huge_list = stock_dict['huge']
+    if tail_list:
+        for i in stock_list:
+            # 如果目标品种不是车辆信息指定的品种或者超过车载重量，跳过
+            if i.big_commodity_name != truck.big_commodity_name or i.actual_weight > (
+                    max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
+                continue
+            # 一装一卸
+            load_task = first_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+            # 同区两装一卸
+            load_task = second_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+            # 一装两卸
+            load_task = fourth_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+        # 合并
+        merge_result(load_task)
+        return load_task
+    if huge_list:
+        for i in stock_list:
+            # 如果目标品种不是车辆信息指定的品种或者超过车载重量，跳过
+            if i.big_commodity_name != truck.big_commodity_name or i.actual_weight > (
+                    max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
+                continue
+            # 一装一卸
+            load_task = first_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+            # 同区两装一卸
+            load_task = second_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+            # 一装两卸
+            load_task = fourth_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                break
+        # 合并
+        merge_result(load_task)
+        return load_task
 
 
 def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):

@@ -13,6 +13,6 @@ def dispatch(truck):
     # 货物按尾货-tail、锁货-lock、大批量货-huge分组
     stock_dic = single_tail_stock_grouping_rule.tail_grouping_filter(stock_list)
     # 生成车次
-    load_task = single_layer_rule.layer_filter(stock_list, truck)
-    # load_task = single_layer_rule.layer_filter(stock_dic, truck)
+    # load_task = single_layer_rule.layer_filter(stock_list, truck)
+    load_task = single_layer_rule.layer_filter(stock_list, stock_dic, truck)
     return load_task
