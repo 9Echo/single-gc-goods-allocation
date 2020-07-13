@@ -9,13 +9,18 @@ from app.util.generate_id import TrainId
 from model_config import ModelConfig
 
 
-def dispatch_filter(load_task_list, stock_list):
+def dispatch_filter(load_task_list, stock_dic):
     """
     分货规则
-    :param load_task_list:
     :param stock_list:
+    :param stock_dic:
+    :param load_task_list:
     :return:
     """
+    tail_list = stock_dic['tail']
+    huge_list = stock_dic['huge']
+    lock_list = stock_dic['lock']
+    stock_list = tail_list + huge_list
     # 甩货列表
     surplus_stock_dict = dict()
     # 转换字典
@@ -33,4 +38,7 @@ def dispatch_filter(load_task_list, stock_list):
         first_surplus_stock_dict = layer_filter(general_stock_dict, load_task_list, DispatchType.SECOND)
         # 目标货物拆散分
         surplus_stock_dict = layer_filter(first_surplus_stock_dict, load_task_list, DispatchType.THIRD)
+    # 锁住的货物依次生成车次
+    for i in lock_list:
+        load_task_list.append(create_load_task([i], TrainId.get_id(), LoadTaskType.TYPE_1.value))
     return surplus_stock_dict

@@ -26,7 +26,7 @@ class OutStockQueueDao(BaseDao):
         out_stock_dict = {'stock_name': [], 'truck_count_real': []}
         if data:
             for i in data:
-                code,count = i.values()
+                code, count = i.values()
                 out_stock_dict['stock_name'].append(code)
                 out_stock_dict['truck_count_real'].append(count)
         return out_stock_dict

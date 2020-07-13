@@ -9,6 +9,7 @@ from app.main.steel_factory.dao.out_stock_queue_dao import out_stock_queue_dao
 from app.main.steel_factory.dao.single_stock_dao import stock_dao
 from app.main.steel_factory.entity.load_task_item import LoadTaskItem
 from app.main.steel_factory.entity.stock import Stock
+from app.util.get_weight_limit import get_lower_limit
 from model_config import ModelConfig
 
 flag = False
@@ -77,6 +78,8 @@ def deal_stock(all_stock_list, truck):
     df_stock["NEED_LADING_WT"] = df_stock["NEED_LADING_WT"].astype('float64')
     df_stock["NEED_LADING_NUM"] = df_stock["NEED_LADING_NUM"].astype('int64')
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"].astype('float64')
+    df_stock["waint_fordel_number"] = df_stock["waint_fordel_number"].astype('int64')
+    df_stock["waint_fordel_weight"] = df_stock["waint_fordel_weight"].astype('float64')
     # 根据公式，计算实际可发重量，实际可发件数
     df_stock["actual_weight"] = (df_stock["CANSENDWEIGHT"] + df_stock["NEED_LADING_WT"]) * 1000
     df_stock["actual_number"] = df_stock["CANSENDNUMBER"] + df_stock["NEED_LADING_NUM"]
@@ -139,8 +142,7 @@ def deal_stock(all_stock_list, truck):
     for record in dic:
         stock = Stock(record)
         # 如果可发小于待发，并且待发在标载范围内，就不参与配载
-        if stock.actual_number < stock.waint_fordel_number \
-                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <= \
+        if stock.actual_number < stock.waint_fordel_number and get_lower_limit(stock.big_commodity_name) <= \
                 stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT:
             continue
         stock.parent_stock_id = get_stock_id(stock)
@@ -148,31 +150,70 @@ def deal_stock(all_stock_list, truck):
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
-        if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
-                datetime.datetime.now() + datetime.timedelta(days=-2)):
-            stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
+        if stock.priority > 2:
+            if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
+                    datetime.datetime.now() + datetime.timedelta(days=-2)):
+                stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
+        # 组数
+        target_group_num = 0
+        # 临时组数
+        temp_group_num = 0
+        # 最后一组件数
+        target_left_num = 0
+        # 一组几件
+        target_num = 0
+        for weight in range(get_lower_limit(stock.big_commodity_name), ModelConfig.RG_MAX_WEIGHT + 1000, 1000):
+            # 一组几件
+            num = weight // stock.piece_weight
+            if num < 1 or num > stock.actual_number:
+                target_num = num
+                continue
+            # 如果还没轮到最后，并且标准组重量未达到标载，就跳过
+            if weight < ModelConfig.RG_MAX_WEIGHT and (num * stock.piece_weight) < get_lower_limit(
+                    stock.big_commodity_name):
+                continue
+            # 组数
+            group_num = stock.actual_number // num
+            # 最后一组件数
+            left_num = stock.actual_number % num
+            # 如果最后一组符合标载条件，临时组数加1
+            temp_num = 0
+            if (left_num * stock.piece_weight) >= get_lower_limit(stock.big_commodity_name):
+                temp_num = 1
+            # 如果分的每组件数更多，并且组数不减少，就替换
+            if (group_num + temp_num) >= temp_group_num:
+                target_group_num = group_num
+                temp_group_num = group_num + temp_num
+                target_left_num = left_num
+                target_num = num
         # 按33000将货物分成若干份
-        num = (truck.load_weight + ModelConfig.RG_SINGLE_UP_WEIGHT) // stock.piece_weight
+        # num = (truck.load_weight + ModelConfig.RG_SINGLE_UP_WEIGHT) // stock.piece_weight
         # 首先去除 件重大于33000的货物
-        if num < 1:
+        if target_num < 1:
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
-        elif num > stock.actual_number:
+        elif target_num > stock.actual_number:
+            stock.limit_mark = 0
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
-            group_num = stock.actual_number // num
-            left_num = stock.actual_number % num
-            copy_1 = copy.deepcopy(stock)
-            copy_1.actual_number = int(left_num)
-            copy_1.actual_weight = left_num * stock.piece_weight
-            if left_num:
-                stock_list.append(copy_1)
-            for q in range(int(group_num)):
+            limit_mark = 1
+            for q in range(int(target_group_num)):
                 copy_2 = copy.deepcopy(stock)
-                copy_2.actual_weight = num * stock.piece_weight
-                copy_2.actual_number = int(num)
+                copy_2.actual_weight = target_num * stock.piece_weight
+                copy_2.actual_number = int(target_num)
+                if copy_2.actual_weight < get_lower_limit(stock.big_commodity_name):
+                    limit_mark = 0
+                else:
+                    limit_mark = 1
+                copy_2.limit_mark = limit_mark
                 stock_list.append(copy_2)
+            if target_left_num:
+                copy_1 = copy.deepcopy(stock)
+                copy_1.actual_number = int(target_left_num)
+                copy_1.actual_weight = target_left_num * stock.piece_weight
+                copy_1.limit_mark = limit_mark
+                stock_list.append(copy_1)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time, x.actual_weight), reverse=False)
+    stock_list.sort(key=lambda x: (x.priority, x.latest_order_time, x.actual_weight * -1), reverse=False)
     return stock_list
