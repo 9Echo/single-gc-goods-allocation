@@ -148,9 +148,10 @@ def deal_stock(all_stock_list, truck):
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
-        if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
-                datetime.datetime.now() + datetime.timedelta(days=-2)):
-            stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
+        if stock.priority > 2:
+            if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
+                    datetime.datetime.now() + datetime.timedelta(days=-2)):
+                stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
         # 组数
         target_group_num = 0
         # 临时组数
