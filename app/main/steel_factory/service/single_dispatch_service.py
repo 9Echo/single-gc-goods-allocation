@@ -8,35 +8,24 @@ from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.rule import single_dispatch_filter
 from app.util.result import Result
-from app.util.redis.redis_pool import redis_pool
-from app.util.redis.reids_lock import RedisLock
 
 
 def dispatch(truck):
     """
     进行单车配载
     """
-    redis_conn = redis.Redis(connection_pool=redis_pool)
-    lock_id = RedisLock.try_lock(redis_conn, 'rg_stock_lock', wait_time=20)
     load_task = None
-    # 拿到锁
-    if lock_id:
-        try:
-            load_task = single_dispatch_filter.dispatch(truck)
-            if load_task:
-                load_task.schedule_no = truck.schedule_no
-                load_task.car_mark = truck.car_mark
-                # 生成的车次信息保存入库
-                save_load_task(load_task)
-            else:
-                return Result.error('无推荐结果！')
-        finally:
-            RedisLock.unlock(redis_conn, 'rg_stock_lock', lock_id)
-        # 平台微服务所需格式转换
-        load_task_dict = data_format(load_task)
-        return Result.success(data=load_task_dict)
+    load_task = single_dispatch_filter.dispatch(truck)
+    if load_task:
+        load_task.schedule_no = truck.schedule_no
+        load_task.car_mark = truck.car_mark
+        # 生成的车次信息保存入库
+        save_load_task(load_task)
     else:
-        return Result.error('当前系统繁忙，请稍后再试！')
+        return Result.error('无推荐结果！')
+    # 平台微服务所需格式转换
+    load_task_dict = data_format(load_task)
+    return Result.success(data=load_task_dict)
 
 
 def data_format(load_task: LoadTask):
