@@ -37,17 +37,14 @@ def get_stock(truck):
     # if out_stock_list:
     #     all_stock_list = [i for i in all_stock_list if
     #                       (i.get('deliware_house').split('-')[0]) not in out_stock_list]
-    # 查询各仓库排队信息：结果为字典{‘仓库号’：排队车数量}
+    df1 = pd.DataFrame(ModelConfig.WAREHOUSE_WAIT_DICT)
+    # 查询各仓库排队信息：结果为字典{'仓库号': [仓库号列表], '排队车数量': [排队车数量列表]}
     out_stock_dict = out_stock_queue_dao.select_out_stock_queue()
-    # 按仓库号升序排序：结果为元组列表
-    out_stock_dict = [(k, out_stock_dict[k]) for k in sorted(out_stock_dict.keys())]
-    out_stock_list = list()
-    if out_stock_dict:
-        j = 0  # 元组列表out_stock_dict的索引
-        for i in ModelConfig.WAREHOUSE_WAIT_DICT.keys():
-            if out_stock_dict[j][1] > ModelConfig.WAREHOUSE_WAIT_DICT[i]:
-                out_stock_list.append(i)
-            j += 1
+    df2 = pd.DataFrame(out_stock_dict)
+    df = pd.merge(df1, df2, how='left', on='stock_name')
+    df = df.dropna()
+    df = df.drop(df[df['truck_count_real'] <= df['truck_count_std']].index)
+    out_stock_list = [i for i in df['stock_name']]
     # 去除等待数较高的出库仓库，暂不往该仓库开单
     if out_stock_list:
         all_stock_list = [i for i in all_stock_list if i.get('deliware_house') not in out_stock_list]
