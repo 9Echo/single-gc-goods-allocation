@@ -12,7 +12,7 @@ def consumer_filter(stock_list):
     4.按照先催货后超期的顺序将排序结果合并
     """
     # 将库存分为催货库存和其他库存
-    if not len(stock_list):
+    if not stock_list:
         return stock_list
     # 更新客户列表，添加新客户
     hurry_consumer_list = update_consumer_list(stock_list)
@@ -26,10 +26,13 @@ def consumer_filter(stock_list):
     hurry_stock_list = [stock for stock in left_stock_list if stock.priority == 2]
     left_stock_list = left_stock_list[len(hurry_stock_list):]
     new_hurry_stock_list += sort_stock_list(hurry_stock_list, hurry_consumer_list)
+    # 如果没有一级二级货物，结束轮询操作
+    if not new_hurry_stock_list:
+        return stock_list
     # 队列第一次被抽到的客户移到队列末尾
     first_consumer = new_hurry_stock_list[0].consumer
     first_index = 0
-    while (first_index < len(hurry_consumer_list)):
+    while first_index < len(hurry_consumer_list):
         if hurry_consumer_list[first_index] == first_consumer:
             break
         else:
@@ -46,8 +49,8 @@ def sort_stock_list(stock_list, hurry_consumer_list):
     根据催货客户列表给当前库存排序
     """
     # 列表为空时直接返回
-    if not len(stock_list):
-        return stock_list, False
+    if not stock_list:
+        return []
     # 构建催货库存字典, 每个客户对应一个库存列表
     stock_dict = {}
     for stock in stock_list:

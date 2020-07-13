@@ -118,6 +118,8 @@ def deal_stock(data):
             continue
         # 组数
         target_group_num = 0
+        # 临时组数
+        temp_group_num = 0
         # 最后一组件数
         target_left_num = 0
         # 一组几件
@@ -128,17 +130,22 @@ def deal_stock(data):
             if num < 1 or num > stock.actual_number:
                 target_num = num
                 continue
+            # 如果还没轮到最后，并且标准组重量未达到标载，就跳过
+            if weight < ModelConfig.RG_MAX_WEIGHT and (num * stock.piece_weight) < get_lower_limit(
+                    stock.big_commodity_name):
+                continue
             # 组数
             group_num = stock.actual_number // num
             # 最后一组件数
             left_num = stock.actual_number % num
             # 如果最后一组符合标载条件，临时组数加1
             temp_num = 0
-            if (left_num * stock.piece_weight) > get_lower_limit(stock.big_commodity_name):
+            if (left_num * stock.piece_weight) >= get_lower_limit(stock.big_commodity_name):
                 temp_num = 1
             # 如果分的每组件数更多，并且组数不减少，就替换
-            if (group_num + temp_num) >= target_group_num:
+            if (group_num + temp_num) >= temp_group_num:
                 target_group_num = group_num
+                temp_group_num = group_num + temp_num
                 target_left_num = left_num
                 target_num = num
         # 将货物分成若干份
