@@ -7,9 +7,11 @@ from app.main.steel_factory.dao.load_task_dao import load_task_dao
 from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
 from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.rule import single_dispatch_filter
+from app.util.aspect.distribute_lock import distribute_lock
 from app.util.result import Result
 
 
+@distribute_lock
 def dispatch(truck):
     """
     进行单车配载
