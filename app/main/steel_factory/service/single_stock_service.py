@@ -153,6 +153,8 @@ def deal_stock(all_stock_list, truck):
             stock.priority = ModelConfig.RG_PRIORITY["超期清理"]
         # 组数
         target_group_num = 0
+        # 临时组数
+        temp_group_num = 0
         # 最后一组件数
         target_left_num = 0
         # 一组几件
@@ -169,11 +171,12 @@ def deal_stock(all_stock_list, truck):
             left_num = stock.actual_number % num
             # 如果最后一组符合标载条件，临时组数加1
             temp_num = 0
-            if (left_num * stock.piece_weight) > get_lower_limit(stock.big_commodity_name):
+            if (left_num * stock.piece_weight) >= get_lower_limit(stock.big_commodity_name):
                 temp_num = 1
             # 如果分的每组件数更多，并且组数不减少，就替换
-            if (group_num + temp_num) >= target_group_num:
+            if (group_num + temp_num) >= temp_group_num:
                 target_group_num = group_num
+                temp_group_num = group_num + temp_num
                 target_left_num = left_num
                 target_num = num
         # 按33000将货物分成若干份
