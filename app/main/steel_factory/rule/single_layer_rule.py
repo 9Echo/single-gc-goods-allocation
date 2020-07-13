@@ -40,16 +40,7 @@ def layer_filter(stock_list: List, stock_dict: Dict, truck: Truck):
         load_task = fourth_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
         if load_task:
             break
-    if load_task:
-        # 合并
-        merge_result(load_task)
-        return load_task
-    # 在跟huge_list执行拼货
-    for i in stock_list:
-        # 如果目标品种不是车辆信息指定的品种或者超过车载重量，跳过
-        if i.big_commodity_name != truck.big_commodity_name or i.actual_weight > (
-                max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
-            continue
+        # 在跟huge_list执行拼货
         # 一装一卸
         load_task = first_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
         if load_task:
