@@ -23,7 +23,7 @@ def dispatch(stock_list, sift_stock_list) -> List[LoadTask]:
     TrainId.set_id()
     # 货物按尾货-tail、锁货-lock、大批量货-huge分组
     stock_dic = tail_stock_grouping_rule.tail_grouping_filter(stock_list)
-    surplus_stock_dict = dispatch_filter(load_task_list, stock_list, stock_dic)
+    surplus_stock_dict = dispatch_filter(load_task_list, stock_dic)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict or sift_stock_list:
         sift_stock_list.extend(list(surplus_stock_dict.values()))

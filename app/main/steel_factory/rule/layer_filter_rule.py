@@ -171,8 +171,7 @@ def third_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_lis
     return result_dict
 
 
-def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type,
-                              min_weight) -> Dict[int, Stock]:
+def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_list: List[LoadTask], dispatch_type):
     """
     一装两卸筛选器
     :param min_weight:
@@ -191,10 +190,10 @@ def fourth_deal_general_stock(general_stock_dict: Dict[int, Stock], load_task_li
             break
         if dispatch_type is DispatchType.THIRD:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT
-            new_min_weight = min_weight
+            new_min_weight = get_lower_limit(temp_stock.big_commodity_name)
         else:
             surplus_weight = ModelConfig.RG_MAX_WEIGHT - temp_stock.actual_weight
-            new_min_weight = min_weight - temp_stock.actual_weight
+            new_min_weight = get_lower_limit(temp_stock.big_commodity_name) - temp_stock.actual_weight
             general_stock_dict.pop(stock_id)
         filter_list = [v for v in general_stock_dict.values() if v.deliware_house == temp_stock.deliware_house
                        and v.actual_end_point == temp_stock.actual_end_point
