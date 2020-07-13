@@ -3,6 +3,7 @@
 # Created: shaoluyu 2020/03/12
 from typing import List
 from app.main.steel_factory.entity.load_task import LoadTask
+from app.main.steel_factory.rule import tail_stock_grouping_rule
 from app.main.steel_factory.rule.dispatch_filter import dispatch_filter, create_load_task
 from app.util.enum_util import LoadTaskType
 from datetime import datetime
@@ -20,7 +21,9 @@ def dispatch(stock_list, sift_stock_list) -> List[LoadTask]:
     load_task_list = list()
     # 重置车次id
     TrainId.set_id()
-    surplus_stock_dict = dispatch_filter(load_task_list, stock_list)
+    # 货物按尾货-tail、锁货-lock、大批量货-huge分组
+    stock_dic = tail_stock_grouping_rule.tail_grouping_filter(stock_list)
+    surplus_stock_dict = dispatch_filter(load_task_list, stock_list, stock_dic)
     # 分不到标载车次的部分，甩掉，生成一个伪车次加明细
     if surplus_stock_dict or sift_stock_list:
         sift_stock_list.extend(list(surplus_stock_dict.values()))

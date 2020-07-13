@@ -29,7 +29,7 @@ def consumer_filter(stock_list):
     # 队列第一次被抽到的客户移到队列末尾
     first_consumer = new_hurry_stock_list[0].consumer
     first_index = 0
-    while(first_index < len(hurry_consumer_list)):
+    while (first_index < len(hurry_consumer_list)):
         if hurry_consumer_list[first_index] == first_consumer:
             break
         else:

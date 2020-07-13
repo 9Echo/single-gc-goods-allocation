@@ -101,6 +101,7 @@ def deal_stock(data):
     result['piece_weight'][np.isinf(result['piece_weight'])] = -1
     dic = result.to_dict(orient="record")
     count_parent = 0
+    # 对每个stock处理
     for record in dic:
         count_parent += 1
         stock = Stock(record)
@@ -109,10 +110,10 @@ def deal_stock(data):
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
-        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time or (
-                stock.actual_number < stock.waint_fordel_number
-                and ModelConfig.RG_COMMODITY_WEIGHT.get(stock.big_commodity_name, ModelConfig.RG_MIN_WEIGHT) <=
-                stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
+        # 过滤掉不符合条件的stock
+        if stock.actual_number <= 0 or stock.actual_weight <= 0 or not stock.latest_order_time \
+                or (stock.actual_number < stock.waint_fordel_number and get_lower_limit(stock.big_commodity_name)
+                    <= stock.waint_fordel_weight <= ModelConfig.RG_MAX_WEIGHT):
             sift_stock_list.append(stock)
             continue
         # 组数
@@ -131,8 +132,12 @@ def deal_stock(data):
             group_num = stock.actual_number // num
             # 最后一组件数
             left_num = stock.actual_number % num
+            # 如果最后一组符合标载条件，临时组数加1
+            temp_num = 0
+            if (left_num * stock.piece_weight) > get_lower_limit(stock.big_commodity_name):
+                temp_num = 1
             # 如果分的每组件数更多，并且组数不减少，就替换
-            if group_num >= target_group_num:
+            if (group_num + temp_num) >= target_group_num:
                 target_group_num = group_num
                 target_left_num = left_num
                 target_num = num
@@ -144,27 +149,32 @@ def deal_stock(data):
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
         elif target_num > stock.actual_number:
+            stock.limit_mark = 0
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
-            # group_num = stock.actual_number // num
-            # left_num = stock.actual_number % num
-            copy_1 = copy.deepcopy(stock)
-            copy_1.actual_number = int(target_left_num)
-            copy_1.actual_weight = target_left_num * stock.piece_weight
-            if target_left_num:
-                if ModelConfig.RG_MIN_WEIGHT <= copy_1.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
-                    copy_1.sort = 2
-                stock_list.append(copy_1)
+            limit_mark = 1
             for q in range(int(target_group_num)):
                 copy_2 = copy.deepcopy(stock)
                 copy_2.actual_weight = target_num * stock.piece_weight
                 copy_2.actual_number = int(target_num)
-                if ModelConfig.RG_MIN_WEIGHT <= copy_2.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
+                if copy_2.actual_weight < get_lower_limit(stock.big_commodity_name):
+                    limit_mark = 0
+                else:
+                    limit_mark = 1
+                if get_lower_limit(stock.big_commodity_name) <= copy_2.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
                     copy_2.sort = 2
                 stock_list.append(copy_2)
+            if target_left_num:
+                copy_1 = copy.deepcopy(stock)
+                copy_1.actual_number = int(target_left_num)
+                copy_1.actual_weight = target_left_num * stock.piece_weight
+                copy_1.limit_mark = limit_mark
+                if get_lower_limit(stock.big_commodity_name) <= copy_1.actual_weight <= ModelConfig.RG_MAX_WEIGHT:
+                    copy_1.sort = 2
+                stock_list.append(copy_1)
     # 按照优先发运和最新挂单时间排序
-    stock_list.sort(key=lambda x: (x.sort, x.priority, x.latest_order_time), reverse=False)
+    stock_list.sort(key=lambda x: (x.sort, x.priority, x.latest_order_time, x.actual_weight * -1), reverse=False)
     count = 1
     # 为排序的stock对象赋Id
     for num in copy.copy(stock_list):

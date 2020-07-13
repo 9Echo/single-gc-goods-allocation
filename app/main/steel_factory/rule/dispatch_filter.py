@@ -9,13 +9,17 @@ from app.util.generate_id import TrainId
 from model_config import ModelConfig
 
 
-def dispatch_filter(load_task_list, stock_list):
+def dispatch_filter(load_task_list, stock_list, stock_dic):
     """
     分货规则
-    :param load_task_list:
     :param stock_list:
+    :param stock_dic:
+    :param load_task_list:
     :return:
     """
+    tail_list = stock_dic['tail']
+    huge_list = stock_dic['huge']
+    lock_list = stock_dic['lock']
     # 甩货列表
     surplus_stock_dict = dict()
     # 转换字典
