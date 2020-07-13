@@ -162,7 +162,8 @@ def deal_stock(all_stock_list, truck):
         for weight in range(get_lower_limit(stock.big_commodity_name), ModelConfig.RG_MAX_WEIGHT + 1000, 1000):
             # 一组几件
             num = weight // stock.piece_weight
-            if num < 1 or num > stock.actual_number:
+            if num < 1 or num > stock.actual_number or (num * stock.piece_weight) < get_lower_limit(
+                    stock.big_commodity_name):
                 target_num = num
                 continue
             # 组数
