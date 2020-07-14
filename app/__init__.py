@@ -8,7 +8,7 @@ from flask import Flask
 from flask_apscheduler import APScheduler
 import platform
 from app.util.aspect import *
-from app.util.eureka_client_util import EurekaClient
+from app.util.eureka_client_util import EurekaClientUtil
 from config import config, Config
 from app.util.core import JSONEncoder
 from app.util.actuator import Actuator
@@ -70,7 +70,7 @@ def create_app(config_name):
     Actuator.init_app(app)
 
     # 服务注册与发现
-    EurekaClient.set_eureka()
+    EurekaClientUtil.set_eureka()
 
     return app
 

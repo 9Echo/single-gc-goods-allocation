@@ -3,12 +3,13 @@
 # Created: shaoluyu 2020/7/14 10:48
 import logging
 import py_eureka_client.eureka_client as eureka_client
+
 from config import Config, get_active_config
 
 active_config = get_active_config()
 
 
-class EurekaClient:
+class EurekaClientUtil:
     """
 
     """
