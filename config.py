@@ -50,13 +50,13 @@ class DevelopmentConfig(Config):
     ODS_MYSQL_DB = 'db_model'
     ODS_MYSQL_CHARSET = 'utf8'
 
-
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
     REDIS_PASSWD = 'JCdev@56zh'
     REDIS_MAX_CONNECTIONS = 2
-
+    # EUREKA
+    EUREKA_SERVER = 'http://127.0.0.1:8761/eureka/'
     # 微服务url
     DISPATCH_SERVICE_URL = 'http://192.168.1.70:9078'
 
