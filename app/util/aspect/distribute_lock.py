@@ -2,9 +2,7 @@
 # Description: 
 # Created: shaoluyu 2020/7/13 17:36
 import functools
-
 import redis
-
 from app.util.redis.redis_pool import redis_pool
 from app.util.redis.reids_lock import RedisLock
 from app.util.result import Result
@@ -12,7 +10,7 @@ from app.util.result import Result
 
 def distribute_lock(func):
     """
-    加载重量计算基础数据
+    分布式锁，目标方法返回值默认是Result
     :param func:
     :return:
     """
