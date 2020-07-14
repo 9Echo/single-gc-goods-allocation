@@ -6,13 +6,11 @@ from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.layer_filter_rule import layer_filter
 from app.util.enum_util import DispatchType, LoadTaskType
 from app.util.generate_id import TrainId
-from model_config import ModelConfig
 
 
 def dispatch_filter(load_task_list, stock_dic):
     """
     分货规则
-    :param stock_list:
     :param stock_dic:
     :param load_task_list:
     :return:
