@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Description: 单车配载服务
 # Created: shaoluyu 2020/06/16
-import redis
 from datetime import datetime
 from app.main.steel_factory.dao.load_task_dao import load_task_dao
 from app.main.steel_factory.dao.load_task_item_dao import load_task_item_dao
