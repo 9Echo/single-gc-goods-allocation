@@ -70,7 +70,7 @@ def create_app(config_name):
     Actuator.init_app(app)
 
     # 服务注册与发现
-    EurekaClientUtil.set_eureka()
+    # EurekaClientUtil.set_eureka()
 
     return app
 
