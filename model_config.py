@@ -75,13 +75,13 @@ class ModelConfig:
     # 标准车载最大重量
     STANDARD_MAX_WEIGHT = 33000
     # 标准热镀、螺旋最大载重
-    STANDARD_RD_LX_MAX_WEIGHT = 33500
+    # STANDARD_RD_LX_MAX_WEIGHT = 33500
     # 标准热镀、螺旋上浮重量
-    STANDARD_RD_LX_UP_WEIGHT = 500
+    # STANDARD_RD_LX_UP_WEIGHT = 500
     # 标准背包上限
-    STANDARD_PACKAGE_MAX_WEIGHT = 33500
+    # STANDARD_PACKAGE_MAX_WEIGHT = 33500
     # 背包重量下浮
-    PACKAGE_LOWER_WEIGHT = 2500
+    PACKAGE_LOWER_WEIGHT = 2000
     # 体积上限系数
     MAX_VOLUME = 1.18
     # 分车次限制重量

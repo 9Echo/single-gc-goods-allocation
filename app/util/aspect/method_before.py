@@ -47,23 +47,21 @@ def set_weight(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
-        if getattr(args[0], 'truck_weight', None) and args[0].truck_weight:
-            weight = float(args[0].truck_weight) * 1000
+        if args[0].truck_weight != 32:
+            weight = args[0].truck_weight * 1000
             if weight < 20000:
                 raise MyException('输入的重量过小，请重新输入！', ResponseCode.Error)
             if weight >= 100000:
                 raise MyException('输入的重量过大，请重新输入！', ResponseCode.Error)
-            # 将最大载重、热镀、螺旋最大载重、背包最大载重统一赋值为用户自定义
-            g.MAX_WEIGHT, g.RD_LX_MAX_WEIGHT, g.PACKAGE_MAX_WEIGHT \
-                = weight, weight, weight
+            g.MAX_WEIGHT = weight
             # 热镀螺旋上浮设置为0
-            g.RD_LX_UP_WEIGHT = 0
+            # g.RD_LX_UP_WEIGHT = 0
         else:
             # 设置默认值
             g.MAX_WEIGHT = ModelConfig.STANDARD_MAX_WEIGHT
-            g.RD_LX_MAX_WEIGHT = ModelConfig.STANDARD_RD_LX_MAX_WEIGHT
-            g.RD_LX_UP_WEIGHT = ModelConfig.STANDARD_RD_LX_UP_WEIGHT
-            g.PACKAGE_MAX_WEIGHT = ModelConfig.STANDARD_PACKAGE_MAX_WEIGHT
+            # g.RD_LX_MAX_WEIGHT = ModelConfig.STANDARD_RD_LX_MAX_WEIGHT
+            # g.RD_LX_UP_WEIGHT = ModelConfig.STANDARD_RD_LX_UP_WEIGHT
+            # g.PACKAGE_MAX_WEIGHT = ModelConfig.STANDARD_PACKAGE_MAX_WEIGHT
 
         return func(*args, **kw)
 

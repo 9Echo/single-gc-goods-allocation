@@ -1,10 +1,10 @@
-
 from app.util.uuid_util import UUIDUtil
 
 
-def replenish_property(sheets, order,batch_no):
+def replenish_property(sheets, order, batch_no):
     """
 
+    :param batch_no:
     :param order:
     :param sheets:
     :return:

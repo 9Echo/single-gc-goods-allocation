@@ -3,11 +3,11 @@ import copy
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.util import weight_calculator
+from app.util.bean_convert_utils import BeanConvertUtils
 from model_config import ModelConfig
-from flask import g
 
 
-class CreateDeliveryItem():
+class CreateDeliveryItem:
     def __init__(self, order):
         """
         将订单数据转为订单子项的list
@@ -16,17 +16,8 @@ class CreateDeliveryItem():
         """
         self.success = True
         self.delivery_item_list = []
-
         for item in order.items:
-            delivery_item = DeliveryItem()
-            delivery_item.product_type = item.product_type
-            delivery_item.spec = item.spec
-            delivery_item.quantity = item.quantity
-            delivery_item.free_pcs = item.free_pcs
-            delivery_item.item_id = item.item_id
-            delivery_item.material = item.material
-            delivery_item.f_whs = item.f_whs
-            delivery_item.f_loc = item.f_loc
+            delivery_item = BeanConvertUtils.copy_properties(item, DeliveryItem)
             delivery_item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
             delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0
             delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type, delivery_item.item_id,
@@ -41,10 +32,11 @@ class CreateDeliveryItem():
 
             self.delivery_item_list.append(delivery_item)
 
-    def failsheet(self):
-        '''
+    def fail_sheet(self):
+        """
+
         :return:返回一张带有计算出错子项的发货通知单
-        '''
+        """
         # 如果上面计算有异常，返回一个特殊的sheet,上面有计算出错的子项，封装到sheet里只是为了利用sheet上额外信息去定位这个定单
         if not self.success:
             sheet = DeliverySheet()
@@ -55,7 +47,6 @@ class CreateDeliveryItem():
     def spec(self):
         """
         根据规格优先再对订单子项的list再进行拆分
-        :param order:
         :return:
         """
 
@@ -98,18 +89,11 @@ class CreateDeliveryItem():
         创建提货单子项
         :return:
         """
-        product_type = None
+        # product_type = None
         item_list = []  # 用于装拆散后的订单子项，单个元素要么是单捆，要么是散件
-        new_max_weight = 0
+        # new_max_weight = 0
 
         for delivery_item in self.delivery_item_list:  # 遍历每个订单子项
-            if not product_type:
-                product_type = delivery_item.product_type
-                if product_type in ModelConfig.RD_LX_GROUP:
-                    new_max_weight = g.RD_LX_MAX_WEIGHT
-
-            # 对订单子项按捆拆散,就是原来订单子项有n捆，现在变成多个单捆，先计算下单捆和单个散根的重量和总根数
-
             # 单捆重量
             weight1 = weight_calculator.calculate_weight(delivery_item.product_type, delivery_item.item_id, pack_num=1,
                                                          free_num=0)
@@ -121,39 +105,28 @@ class CreateDeliveryItem():
             total_pcs2 = 1
 
             # 单捆的子项
-            for i in range(delivery_item.quantity):
-                item = DeliveryItem()
-                item.product_type = delivery_item.product_type
-                item.spec = delivery_item.spec
+            for _ in range(delivery_item.quantity):
+                item = BeanConvertUtils.copy_properties(delivery_item, DeliveryItem)
                 item.quantity = 1
                 item.free_pcs = 0
                 item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
-                item.item_id = delivery_item.item_id
-                item.material = delivery_item.material
-                item.f_whs = delivery_item.f_whs
-                item.f_loc = delivery_item.f_loc
                 item.volume = 1 / item.max_quantity if item.max_quantity else 0.001
                 item.weight = weight1
                 item.total_pcs = total_pcs1
                 item_list.append(item)
 
             # 单散根的子项
-            for i in range(delivery_item.free_pcs):
-                item = DeliveryItem()
-                item.product_type = delivery_item.product_type
-                item.spec = delivery_item.spec
+            for _ in range(delivery_item.free_pcs):
+                item = BeanConvertUtils.copy_properties(delivery_item, DeliveryItem)
                 item.quantity = 0
                 item.free_pcs = 1
-                item.item_id = delivery_item.item_id
-                item.material = delivery_item.material
-                item.f_whs = delivery_item.f_whs
-                item.f_loc = delivery_item.f_loc
                 item.volume = 0
                 item.weight = weight2
                 item.total_pcs = total_pcs2
                 item_list.append(item)
 
-        return item_list, new_max_weight
+        # return item_list, new_max_weight
+        return item_list
 
     def optimize(self):
         max_delivery_items = []
@@ -165,7 +138,6 @@ class CreateDeliveryItem():
             if delivery_item.volume == 0:
                 min_delivery_items.append(delivery_item)
                 continue
-
             # 搜集大管
             # 如果该明细有件数上限并且单规格件数超出，进行切单
             if delivery_item.max_quantity and delivery_item.quantity > delivery_item.max_quantity:
@@ -179,7 +151,7 @@ class CreateDeliveryItem():
                 new_total_pcs = weight_calculator.calculate_pcs(delivery_item.product_type, delivery_item.item_id,
                                                                 delivery_item.max_quantity, 0)
                 # 创建出count个拷贝的新明细，散根数为0，件数为标准件数，总根数为标准总根数，体积占比近似为1
-                for i in range(0, count):
+                for _ in range(0, count):
                     copy_di = copy.deepcopy(delivery_item)
                     copy_di.free_pcs = 0
                     copy_di.quantity = delivery_item.max_quantity
@@ -190,7 +162,8 @@ class CreateDeliveryItem():
                     max_delivery_items.append(copy_di)
                 # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
                 delivery_item.quantity = surplus
-                delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0
+                delivery_item.volume = \
+                    delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0
                 delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type,
                                                                           delivery_item.item_id, delivery_item.quantity,
                                                                           delivery_item.free_pcs)

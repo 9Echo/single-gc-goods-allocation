@@ -3,15 +3,15 @@ from app.main.pipe_factory.rule import product_type_rule
 from app.util import weight_calculator
 
 
-def combine_sheets(sheets,type=None):
+def combine_sheets(sheets, types=None):
     '''
     合并因拼单被打散的发货单
     合并场景1：品类和物资代码相同的子发货单合并为1个子发货单
     合并场景2：品类相同物资代码不同的子发货单合并为1个发货单
     合并场景3：品类不同但是同属于一个similar group内的子发货单合并为1个发货单
     合并后如果被合并的发货单中没有剩余子单则删除该发货单
+    :param types: 比如types=='weight'，表明当以重量优先时要做额外的一些处理
     :param sheets:
-    :param type: 比如type=='weight'，表明当以重量优先时要做额外的一些处理
     :return:
     '''
 
@@ -62,7 +62,7 @@ def combine_sheets(sheets,type=None):
             sheet.delivery_no = doc_type + str(load_task_id) + '-' + str(no)
             for j in sheet.items:
                 j.delivery_no = sheet.delivery_no
-                if type=='weight':
+                if types == 'weight':
                     j.weight = weight_calculator.calculate_weight(j.product_type, j.item_id, j.quantity, j.free_pcs)
-            if type == 'weight':
+            if types == 'weight':
                 sheet.weight = sum(i.weight for i in sheet.items)

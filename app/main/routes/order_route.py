@@ -21,10 +21,13 @@ class OrderRoute(Resource):
             # 数据初始化
             order = order_service.generate_order(order_data['data'])
             # 规格优先
-            sheets_1 = dispatch_spec(order)
+            sheets_spec = dispatch_spec(order)
             # 重量优先
-            sheets_2 = dispatch_weight(order)
+            sheets_weight = dispatch_weight(order)
             # 综合
-            sheets_3 = dispatch_optimize(order)
-
-            return Result.success_response(sheets_1 + sheets_2 + sheets_3)
+            sheets_recommend = dispatch_optimize(order)
+            result_dict = dict()
+            result_dict['spec_first'] = sheets_spec
+            result_dict['weight_first'] = sheets_weight
+            result_dict['recommend_first'] = sheets_recommend
+            return Result.success_response(result_dict)

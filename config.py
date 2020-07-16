@@ -54,7 +54,7 @@ class DevelopmentConfig(Config):
     REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
     REDIS_PASSWD = 'JCdev@56zh'
-    REDIS_MAX_CONNECTIONS = 2
+    REDIS_MAX_CONNECTIONS = 5
     # EUREKA
     EUREKA_SERVER = 'http://127.0.0.1:8761/eureka/'
     # 微服务url

@@ -13,7 +13,6 @@ from app.main.routes.goods_allocation_route import GoodsAllocationRoute
 from app.main.routes.order_route import OrderRoute
 from app.main.routes.loading_route import LoadingRoute
 from app.main.routes.single_goods_allocation_route import SingleGoodsAllocationRoute
-from app.test.main.routes.order_route_test import OrderRouteTest
 
 blueprint = Blueprint('main', __name__)
 api = Api(blueprint)
@@ -22,13 +21,13 @@ api = Api(blueprint)
 # 订单请求
 api.add_resource(OrderRoute, '/order')
 # 订单请求测试
-api.add_resource(OrderRouteTest, '/orderTest')
+# api.add_resource(OrderRouteTest, '/orderTest')
 # 推荐发货通知单确认反馈
-api.add_resource(ConfirmRoute, '/confirm')
+# api.add_resource(ConfirmRoute, '/confirm')
 # 拼单推荐
-api.add_resource(ComposeRoute, '/compose')
+# api.add_resource(ComposeRoute, '/compose')
 # 配载图请求
-api.add_resource(LoadingRoute, '/loading')
+# api.add_resource(LoadingRoute, '/loading')
 # 钢厂智能分货请求
 api.add_resource(GoodsAllocationRoute, '/goodsAllocation')
 # 单车配货请求
