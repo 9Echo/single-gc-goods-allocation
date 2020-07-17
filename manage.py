@@ -23,7 +23,7 @@ if __name__ != '__main__':
     app.logger.info('active config name = {} '.format(active_config_name))
 
 if __name__ == '__main__':
-    handler = TimedRotatingFileHandler('/gc-goods-allocation/app/logs/flask.log', encoding='UTF-8')
+    handler = TimedRotatingFileHandler('E:/gc-goods-allocation/app/logs/flask.log', encoding='UTF-8')
     handler.setLevel(logging.DEBUG)
     logging_format = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')

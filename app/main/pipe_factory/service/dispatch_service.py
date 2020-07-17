@@ -20,11 +20,7 @@ def dispatch_spec(order):
     """
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
-    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
-    if not delivery_item_list.success:
-        return delivery_item_list.fail_sheet()
-    else:
-        delivery_item_spec_list = delivery_item_list.spec()  # 调用spec()，即规格优先来处理
+    delivery_item_spec_list = delivery_item_list.spec()  # 调用spec()，即规格优先来处理
     # 2、使用模型过滤器生成发货通知单
     sheets, task_id = spec_filter(delivery_item_spec_list)
     # 3、补充发货单的属性
@@ -44,12 +40,8 @@ def dispatch_weight(order):
     """
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
-    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
-    if not delivery_item_list.success:
-        return delivery_item_list.fail_sheet()
-    else:
-        # delivery_item_weight_list, new_max_weight = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
-        delivery_item_weight_list = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
+    # delivery_item_weight_list, new_max_weight = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
+    delivery_item_weight_list = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
     # 排序，按重量倒序
     delivery_item_weight_list.sort(key=lambda x: x.weight, reverse=True)
     # 放入重量优先模型
@@ -75,13 +67,8 @@ def dispatch_optimize(order):
     batch_no = UUIDUtil.create_id("ba")
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
-    # delivery_item_list.is_success=False证明有计算异常,返回一张含有计算出错子项的sheet
-    if not delivery_item_list.success:
-        return delivery_item_list.fail_sheet()
-    else:
-        # 调用optimize()，即将大小管分开
-        max_delivery_items, min_delivery_items = delivery_item_list.optimize()
-
+    # 调用optimize()，即将大小管分开
+    max_delivery_items, min_delivery_items = delivery_item_list.optimize()
     if max_delivery_items:
         # 2、使用模型过滤器生成发货通知单
         sheets, task_id = optimize_filter_max(max_delivery_items)
@@ -91,8 +78,6 @@ def dispatch_optimize(order):
 
         # 4、为发货单分配车次
         task_id = dispatch_load_task(sheets, task_id)
-
-    #
     if min_delivery_items:
         # 小管装填大管车次,这个操作没整合到optimize_filter（只处理了大管）,中间还差了一步发配车次，
         optimize_filter_min(sheets, min_delivery_items, task_id, order, batch_no)

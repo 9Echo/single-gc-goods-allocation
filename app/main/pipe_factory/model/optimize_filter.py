@@ -26,9 +26,6 @@ def optimize_filter_max(delivery_items: list, task_id=0):
     # new_max_weight = 0
     # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
     for i in copy.copy(delivery_items):
-        # if i.product_type in ModelConfig.RD_LX_GROUP:
-        #     new_max_weight = g.RD_LX_MAX_WEIGHT
-        # if i.weight <= (new_max_weight or g.MAX_WEIGHT):
         if i.weight <= g.MAX_WEIGHT:
             item_list.append(i)
             left_items.remove(i)
@@ -105,19 +102,12 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
         df = pd.DataFrame(sheets_dict)
         series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
         for k, v in series.items():
-            max_weight = 0
             current_weight = v
             # # 判断该车次是否下差过大
-            # current_sheets = list(filter(lambda i: i.load_task_id == k, sheets))
-            # if current_sheets and current_sheets[0].items:
-            #     if current_sheets[0].items[0].product_type in ModelConfig.RD_LX_GROUP:
-            #         max_weight = g.RD_LX_MAX_WEIGHT
-            # if v >= (max_weight or g.MAX_WEIGHT):
             if v >= g.MAX_WEIGHT:
                 continue
             for i in copy.copy(min_delivery_item):
                 # 如果该子项可完整放入
-                # if i.weight <= (max_weight or g.MAX_WEIGHT) - current_weight:
                 if i.weight <= g.MAX_WEIGHT - current_weight:
                     # 当前重量累加
                     current_weight += i.weight
@@ -175,5 +165,3 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
             dispatch_load_task(min_sheets, task_id)
             sheets.extend(min_sheets)
 
-# if __name__ == '__main__':
-#     pass

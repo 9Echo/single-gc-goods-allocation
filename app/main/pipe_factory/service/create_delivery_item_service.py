@@ -4,6 +4,8 @@ from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.util import weight_calculator
 from app.util.bean_convert_utils import BeanConvertUtils
+from app.util.code import ResponseCode
+from app.util.my_exception import MyException
 from model_config import ModelConfig
 
 
@@ -25,10 +27,8 @@ class CreateDeliveryItem:
             delivery_item.total_pcs = weight_calculator.calculate_pcs(delivery_item.product_type, delivery_item.item_id,
                                                                       delivery_item.quantity, delivery_item.free_pcs)
             # 如果遇到计算不出来的明细，计算异常
-            if delivery_item.weight == 0:
-                self.delivery_item_list[0] = delivery_item  # 一旦计算出错利用list的0号位记录这个项
-                self.success = False
-                break  # 一时出现计算异常就返回false了
+            if delivery_item.weight <= 0:
+                raise MyException('物资代码' + delivery_item.item_id + '未维护理论重量或维护错误！', ResponseCode.Error)
 
             self.delivery_item_list.append(delivery_item)
 

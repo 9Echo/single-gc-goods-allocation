@@ -1,4 +1,3 @@
-@echo off
-python manage.py
-taskkill /f /im cmd.exe
+cd C:\ProgramData\Anaconda3
+python E:\gc-goods-allocation\manage.py
 exit

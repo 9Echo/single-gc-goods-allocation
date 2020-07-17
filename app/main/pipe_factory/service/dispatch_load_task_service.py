@@ -35,15 +35,6 @@ def dispatch_load_task(sheets: list, task_id):
             total_volume += sheet.volume
             # 初始重量
             new_max_weight = g.MAX_WEIGHT
-            # 如果是下差过大的品种，重量累加
-            # if sheet.items and sheet.items[0].product_type in ModelConfig.RD_LX_GROUP:
-            #     rd_lx_total_weight += sheet.weight
-            # 如果该车次有下差过大的品种，动态计算重量上限
-            # if rd_lx_total_weight:
-            #     # 新最大载重上调 下差组别总重量/热镀螺旋最大载重 * 1000
-            #     new_max_weight = round(
-            #         g.MAX_WEIGHT + (rd_lx_total_weight / g.RD_LX_MAX_WEIGHT) * g.RD_LX_UP_WEIGHT)
-            #     new_max_weight = min(g.RD_LX_MAX_WEIGHT, new_max_weight)
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 # 按照体积比例计算，在最新的最大重量限制下还可以放多少重量
@@ -163,50 +154,3 @@ def split_sheet(sheet, limit_weight):
         return sheet, new_sheet
     else:
         return sheet, None
-
-# def split_sheet_optimize(sheet, limit_weight):
-#     """
-#     对超重的发货单进行分单
-#     limit_weight：当前车次重量剩余载重
-#     total_volume：当前车次目前体积占比
-#     """
-#     total_weight = 0
-#     # 切分出的新单子
-#     new_sheet = copy.copy(sheet)
-#     # 原单子最终的明细
-#     sheet_items = []
-#     # 新单子的明细
-#     new_sheet_items = copy.copy(sheet.items)
-#     for item in sheet.items:
-#         # 计算发货单中的哪一子项超重
-#         total_weight += item.weight
-#         if total_weight <= limit_weight:
-#             # 原单子追加明细
-#             sheet_items.append(item)
-#             # 新单子减少明细
-#             new_sheet_items.remove(item)
-#         #  如果当前车次超重
-#         else:
-#             item, new_item = weight_rule.split_item_optimize(item, total_weight - limit_weight)
-#             if new_item:
-#                 # 原单子追加明细
-#                 sheet_items.append(item)
-#                 # 新单子减少明细
-#                 new_sheet_items.remove(item)
-#                 # 新单子加入新切分出来的明细
-#                 new_sheet_items.insert(0, new_item)
-#             break
-#     if sheet_items:
-#         # 原单子明细重新赋值
-#         sheet.items = sheet_items
-#         sheet.weight = sum([i.weight for i in sheet.items])
-#         sheet.total_pcs = sum([i.total_pcs for i in sheet.items])
-#         sheet.volume = sum([i.volume for i in sheet.items])
-#         # 新单子明细赋值
-#         new_sheet.items = new_sheet_items
-#         new_sheet.weight = sum([i.weight for i in new_sheet.items])
-#         new_sheet.total_pcs = sum([i.total_pcs for i in new_sheet.items])
-#         new_sheet.volume = sum([i.volume for i in new_sheet.items])
-#         return sheet, new_sheet
-#     else:
-#         return sheet, None
