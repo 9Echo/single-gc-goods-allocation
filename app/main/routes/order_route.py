@@ -20,6 +20,8 @@ class OrderRoute(Resource):
             order_data = json.loads(request.get_data().decode("utf-8"))
             # 数据初始化
             order = order_service.generate_order(order_data['data'])
+
+            request_id = order_data['data'].get('request_id', None)
             # 规格优先
             sheets_spec = dispatch_spec(order)
             # 重量优先
@@ -30,4 +32,5 @@ class OrderRoute(Resource):
             result_dict['spec_first'] = sheets_spec
             result_dict['weight_first'] = sheets_weight
             result_dict['recommend_first'] = sheets_recommend
+            result_dict['request_id'] = request_id
             return Result.success_response(result_dict)

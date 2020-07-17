@@ -15,6 +15,7 @@ class Order(BaseEntity):
         self.items = []  # 订单子项
         self.company_id = None  # 公司id
         self.customer_id = None  # 客户id
+        self.salesorg_id = None  # 部门id
         self.salesman_id = None  # 销售员id
         self.truck_weight = None  # 载重自定义
         self.create_time = None  # 创建时间

@@ -32,6 +32,8 @@ if __name__ == '__main__':
     # 日志记录当前环境配置名称
     app.logger.info('flask app name = {} '.format(app.name))
     app.logger.info('active config name = {} '.format(active_config_name))
+    # from waitress import serve
+    # serve(app, listen='*:9238')
     # 启动flask应用app
     server_port = app.config.get('SERVER_PORT')
     app.run(host='0.0.0.0', port=server_port, debug=True)

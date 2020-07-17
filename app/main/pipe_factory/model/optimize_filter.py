@@ -64,7 +64,7 @@ def optimize_filter_max(delivery_items: list, task_id=0):
                 sheet.items = [item_list[i]]
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
-                sheet.type = 'spec_first'
+                # sheet.type = 'spec_first'
                 temp_item_list.append(item_list[i])
                 if is_full:
                     sheet.load_task_id = task_id
@@ -120,7 +120,7 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
                     new_sheet.salesman_id = order.salesman_id
                     new_sheet.weight = i.weight
                     new_sheet.total_pcs = i.total_pcs
-                    new_sheet.type = 'recommend_first'
+                    new_# sheet.type = 'recommend_first'
                     new_sheet.items.append(i)
                     sheets.append(new_sheet)
                     # 移除掉被分配的子项
@@ -137,7 +137,7 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
                         new_sheet.customer_id = order.customer_id
                         new_sheet.salesman_id = order.salesman_id
                         new_sheet.weight = i.weight
-                        new_sheet.type = 'recommend_first'
+                        # new_sheet.type = 'recommend_first'
                         new_sheet.total_pcs = i.total_pcs
                         new_sheet.items.append(i)
                         # 移除掉被分配的子项

@@ -15,8 +15,9 @@ def generate_order(order_data):
     order = Order()
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
-    order.company_id = order_data["company_id"]
+    # order.company_id = order_data["company_id"]
     order.customer_id = order_data['customer_id']
+    order.salesorg_id = order_data['salesorg_id']
     order.salesman_id = order_data['salesman_id']
     # 车辆载重转换成整形
     order.truck_weight = int(order_data.get('truck_weight'))

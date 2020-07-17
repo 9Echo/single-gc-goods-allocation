@@ -8,13 +8,13 @@ class DeliveryItem(BaseEntity):
     """提货单子项类"""
 
     def __init__(self, delivery_item=None):
-        self.rowid = None  # 主键id
+        # self.rowid = None  # 主键id
         self.delivery_no = None  # 发货通知单主单号
         self.delivery_item_no = None  # 子单号
         self.order_num = None  # 订单号
-        self.end_point = None  # 区县
-        self.address = None  # 收货地址
-        self.can_send_time = None  # 可发时间
+        # self.end_point = None  # 区县
+        # self.address = None  # 收货地址
+        # self.can_send_time = None  # 可发时间
         self.product_type = None  # 产品类型
         self.company_id = None  # 公司id
         self.spec = None  # 产品规格
@@ -37,7 +37,7 @@ class DeliveryItem(BaseEntity):
 
     def as_dict(self):
         ignore_attr = ['one_quantity_weight', 'one_free_pcs_weight', 'order_num', 'end_point', 'address',
-                       'can_send_time']
+                       'can_send_time', 'volume', 'create_time', 'update_time']
         result_dict = super(DeliveryItem, self).as_dict()
         for i in ignore_attr:
             result_dict.pop(i, 404)

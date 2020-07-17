@@ -49,7 +49,7 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
             sheet.items.append(item)
             # 设置提货单总体积占比
             sheet.volume = item.volume
-            sheet.type = 'weight_first'
+            # sheet.type = 'weight_first'
             # 重量优先每次都能分车，所以模型跑完就不用后续分车了
             sheet.load_task_id = load_task_id
             sheets.append(sheet)

@@ -64,7 +64,7 @@ def spec_filter(delivery_items: list):
                 sheet.items = [item_list[i]]
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
-                sheet.type = 'spec_first'
+                # sheet.type = 'spec_first'
                 temp_item_list.append(item_list[i])
                 if is_full:
                     sheet.load_task_id = task_id

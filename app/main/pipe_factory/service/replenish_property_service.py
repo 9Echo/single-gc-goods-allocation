@@ -12,6 +12,7 @@ def replenish_property(sheets, order, batch_no):
     for sheet in sheets:
         sheet.batch_no = batch_no
         sheet.customer_id = order.customer_id
+        sheet.salesorg_id = order.salesorg_id
         sheet.salesman_id = order.salesman_id
         sheet.weight = 0
         sheet.total_pcs = 0
