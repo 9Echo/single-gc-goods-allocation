@@ -20,5 +20,6 @@ class OrderItem(BaseEntity):
         self.material = None    # 材质
         self.create_time = None  # 创建时间
         self.update_time = None  # 更新时间
+        self.ext_info_map = None  # 携带参数
         if item:
             self.set_attr(item)
