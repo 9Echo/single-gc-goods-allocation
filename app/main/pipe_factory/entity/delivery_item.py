@@ -37,7 +37,7 @@ class DeliveryItem(BaseEntity):
 
     def as_dict(self):
         ignore_attr = ['one_quantity_weight', 'one_free_pcs_weight', 'order_num', 'end_point', 'address',
-                       'can_send_time', 'volume', 'create_time', 'update_time']
+                       'can_send_time', 'volume', 'create_time', 'update_time', 'max_quantity']
         result_dict = super(DeliveryItem, self).as_dict()
         for i in ignore_attr:
             result_dict.pop(i, 404)
