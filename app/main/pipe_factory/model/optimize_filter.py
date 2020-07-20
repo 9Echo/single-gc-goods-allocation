@@ -24,7 +24,6 @@ def optimize_filter_max(delivery_items: list):
     g.LOAD_TASK_ID = 0
     # 剩余的发货子单
     left_items = delivery_items
-    # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
     for i in copy.copy(delivery_items):
         if i.weight <= g.MAX_WEIGHT:
             item_list.append(i)
@@ -45,13 +44,11 @@ def optimize_filter_max(delivery_items: list):
         weight_cost = []
         for item in item_list:
             weight_cost.append((int(item.weight), float(item.volume), int(item.weight)))
-        # 将所有子单进行背包选举
         final_weight, result_list = \
             package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT, ModelConfig.MAX_VOLUME, weight_cost)
         if final_weight == 0:
             break
         # temp_item_list = copy.copy(item_list)
-        # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
             is_full = True
             g.LOAD_TASK_ID += 1
@@ -64,7 +61,6 @@ def optimize_filter_max(delivery_items: list):
                 sheet.items = [item_list[i]]
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
-                # sheet.type = 'spec_first'
                 temp_item_list.append(item_list[i])
                 if is_full:
                     sheet.load_task_id = g.LOAD_TASK_ID
@@ -142,7 +138,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
                         min_delivery_item.insert(0, new_item)
                         sheets.append(new_sheet)
                     break
-        # 装填完如果小管还有剩余，进行单独分货
+        # 装填完如果小管还有剩余
         if min_delivery_item:
             # 2、使用模型过滤器生成发货通知单
             min_sheets = optimize_filter_max(min_delivery_item)

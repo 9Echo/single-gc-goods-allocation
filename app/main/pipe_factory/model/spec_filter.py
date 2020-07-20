@@ -18,7 +18,6 @@ def spec_filter(delivery_items: list):
     # 剩余的发货子单
     left_items = delivery_items
     for i in copy.copy(delivery_items):
-        # 如果发货子单重量比上限小，直接添加，
         if i.weight <= g.MAX_WEIGHT:
             item_list.append(i)
             left_items.remove(i)
@@ -29,10 +28,7 @@ def spec_filter(delivery_items: list):
         if filtered_item.weight == 0:
             raise MyException('切分异常！', ResponseCode.Error)
         item_list.append(filtered_item)
-    # 上一步filtered_item中可能含有weight为0的子项，为无效子项
     item_list = list(filter(lambda x: x.weight > 0, item_list))
-    # 组装子单数据
-    # 就是将item_list中的所有货物都使用背包分成发货通知单明细
     while item_list:
         # 是否满载标记
         is_full = False
@@ -43,10 +39,8 @@ def spec_filter(delivery_items: list):
         final_weight, result_list = \
             package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT, ModelConfig.MAX_VOLUME,
                                                  weight_cost)
-        # 如果满足，说明有重量超出背包重量上限的子单，则返回
         if final_weight <= 0:
             raise MyException('package exception', ResponseCode.Error)
-        # 如果本次选中的组合价值在合理值范围内，直接赋车次号，不参于后续的操作
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
             is_full = True
             g.LOAD_TASK_ID += 1

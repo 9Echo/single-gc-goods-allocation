@@ -40,7 +40,6 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
         g.LOAD_TASK_ID += 1
         # plup求解，得到选中的下标序列
         result_index_list, value = pulp_solve(weight_list, volume_list, value_list, g.MAX_WEIGHT)
-        # 这里分出来的result_index_list的物资应该合起来是一车上的物品，但是由于可能有不同品类的货，所以不能合并在一张发货单上
         for i in sorted(result_index_list, reverse=True):
             sheet = DeliverySheet()
             item = delivery_items[i]
@@ -48,7 +47,6 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
             # 设置提货单总体积占比
             sheet.volume = item.volume
             # sheet.type = 'weight_first'
-            # 重量优先每次都能分车，所以模型跑完就不用后续分车了
             sheet.load_task_id = g.LOAD_TASK_ID
             sheets.append(sheet)
             weight_list.pop(i)
