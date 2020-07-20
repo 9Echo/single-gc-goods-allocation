@@ -23,7 +23,6 @@ def create_variable_list(delivery_items):
     return weight_list, volume_list, value_list
 
 
-# def call_pulp_solve(weight_list, volume_list, value_list, delivery_items, new_max_weight):
 def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
     """
 
@@ -33,14 +32,13 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
     :param value_list:
     :return:
     """
-    load_task_id = 0
     batch_no = UUIDUtil.create_id("ba")
     # 结果集
     sheets = []
+    g.LOAD_TASK_ID = 0
     while delivery_items:
-        load_task_id += 1
+        g.LOAD_TASK_ID += 1
         # plup求解，得到选中的下标序列
-        # result_index_list, value = pulp_solve(weight_list, volume_list, value_list, new_max_weight)
         result_index_list, value = pulp_solve(weight_list, volume_list, value_list, g.MAX_WEIGHT)
         # 这里分出来的result_index_list的物资应该合起来是一车上的物品，但是由于可能有不同品类的货，所以不能合并在一张发货单上
         for i in sorted(result_index_list, reverse=True):
@@ -51,7 +49,7 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
             sheet.volume = item.volume
             # sheet.type = 'weight_first'
             # 重量优先每次都能分车，所以模型跑完就不用后续分车了
-            sheet.load_task_id = load_task_id
+            sheet.load_task_id = g.LOAD_TASK_ID
             sheets.append(sheet)
             weight_list.pop(i)
             volume_list.pop(i)

@@ -13,8 +13,6 @@ def spec_filter(delivery_items: list):
     """
     # 返回的提货单列表
     sheets = []
-    # 车次号计数器
-    task_id = 0
     # 提货单明细列表
     item_list = []
     # 剩余的发货子单
@@ -49,10 +47,9 @@ def spec_filter(delivery_items: list):
         if final_weight <= 0:
             raise MyException('package exception', ResponseCode.Error)
         # 如果本次选中的组合价值在合理值范围内，直接赋车次号，不参于后续的操作
-        # if (g.PACKAGE_MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.PACKAGE_MAX_WEIGHT:
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
             is_full = True
-            task_id += 1
+            g.LOAD_TASK_ID += 1
         # 临时明细存放
         temp_item_list = []
         for i in range(len(result_list)):
@@ -62,13 +59,12 @@ def spec_filter(delivery_items: list):
                 sheet.items = [item_list[i]]
                 # 设置提货单总体积占比
                 sheet.volume = item_list[i].volume
-                # sheet.type = 'spec_first'
                 temp_item_list.append(item_list[i])
                 if is_full:
-                    sheet.load_task_id = task_id
+                    sheet.load_task_id = g.LOAD_TASK_ID
                 sheets.append(sheet)
         # 整体移除被开走的明细
         for i in temp_item_list:
             item_list.remove(i)
 
-    return sheets, task_id
+    return sheets

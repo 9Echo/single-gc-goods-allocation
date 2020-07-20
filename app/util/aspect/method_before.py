@@ -38,7 +38,7 @@ def get_item_a(func):
     return wrapper
 
 
-def set_weight(func):
+def param_init(func):
     """
     设置载重范围
     :param func:
@@ -47,6 +47,7 @@ def set_weight(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kw):
+        # 重量初始化
         if args[0].truck_weight != 32:
             weight = args[0].truck_weight * 1000
             if weight < 20000:
@@ -59,10 +60,10 @@ def set_weight(func):
         else:
             # 设置默认值
             g.MAX_WEIGHT = ModelConfig.STANDARD_MAX_WEIGHT
-            # g.RD_LX_MAX_WEIGHT = ModelConfig.STANDARD_RD_LX_MAX_WEIGHT
-            # g.RD_LX_UP_WEIGHT = ModelConfig.STANDARD_RD_LX_UP_WEIGHT
-            # g.PACKAGE_MAX_WEIGHT = ModelConfig.STANDARD_PACKAGE_MAX_WEIGHT
-
+        # 初始化车次号
+        g.LOAD_TASK_ID = 0
+        # 初始化单子类型
+        g.DOC_TYPE = 't'
         return func(*args, **kw)
 
     return wrapper

@@ -13,7 +13,7 @@ from app.util.uuid_util import UUIDUtil
 from model_config import ModelConfig
 
 
-def optimize_filter_max(delivery_items: list, task_id=0):
+def optimize_filter_max(delivery_items: list):
     """
     根据过滤规则将传入的发货子单划分到合适的发货单中
     """
@@ -21,9 +21,9 @@ def optimize_filter_max(delivery_items: list, task_id=0):
     sheets = []
     # 提货单明细列表
     item_list = []
+    g.LOAD_TASK_ID = 0
     # 剩余的发货子单
     left_items = delivery_items
-    # new_max_weight = 0
     # 遍历明细列表，如果一个子单的重量不到重量上限，则不参与compose
     for i in copy.copy(delivery_items):
         if i.weight <= g.MAX_WEIGHT:
@@ -54,7 +54,7 @@ def optimize_filter_max(delivery_items: list, task_id=0):
         # 如果本次选举的组合重量在合理值范围内，直接赋车次号，不参于后续的操作
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
             is_full = True
-            task_id += 1
+            g.LOAD_TASK_ID += 1
         # 临时明细存放
         temp_item_list = []
         for i in range(len(result_list)):
@@ -67,16 +67,16 @@ def optimize_filter_max(delivery_items: list, task_id=0):
                 # sheet.type = 'spec_first'
                 temp_item_list.append(item_list[i])
                 if is_full:
-                    sheet.load_task_id = task_id
+                    sheet.load_task_id = g.LOAD_TASK_ID
                 sheets.append(sheet)
         # 整体移除被开走的明细
         for i in temp_item_list:
             item_list.remove(i)
 
-    return sheets, task_id
+    return sheets
 
 
-def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
+def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
     """
     小管装填大管车次，将小管按照件数从小到大排序
     若小管不够，分完结束
@@ -85,16 +85,15 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
     :param order: 订单
     :param sheets:大管的提货单列表
     :param min_delivery_item:小管的子项列表
-    :param task_id:当前分配车次号
     :return: None
     """
     if not sheets:
         # 2、使用模型过滤器生成发货通知单
-        min_sheets, task_id = optimize_filter_max(min_delivery_item)
+        min_sheets = optimize_filter_max(min_delivery_item)
         # 3、补充发货单的属性
         replenish_property(min_sheets, order, batch_no)
         # 为发货单分配车次
-        dispatch_load_task(min_sheets, task_id)
+        dispatch_load_task(min_sheets)
         sheets.extend(min_sheets)
     else:
         min_delivery_item.sort(key=lambda x: x.quantity)
@@ -103,7 +102,6 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
         series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
         for k, v in series.items():
             current_weight = v
-            # # 判断该车次是否下差过大
             if v >= g.MAX_WEIGHT:
                 continue
             for i in copy.copy(min_delivery_item):
@@ -120,7 +118,6 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
                     new_sheet.salesman_id = order.salesman_id
                     new_sheet.weight = i.weight
                     new_sheet.total_pcs = i.total_pcs
-                    new_# sheet.type = 'recommend_first'
                     new_sheet.items.append(i)
                     sheets.append(new_sheet)
                     # 移除掉被分配的子项
@@ -137,7 +134,6 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
                         new_sheet.customer_id = order.customer_id
                         new_sheet.salesman_id = order.salesman_id
                         new_sheet.weight = i.weight
-                        # new_sheet.type = 'recommend_first'
                         new_sheet.total_pcs = i.total_pcs
                         new_sheet.items.append(i)
                         # 移除掉被分配的子项
@@ -149,7 +145,7 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
         # 装填完如果小管还有剩余，进行单独分货
         if min_delivery_item:
             # 2、使用模型过滤器生成发货通知单
-            min_sheets, task_id = optimize_filter_max(min_delivery_item, task_id)
+            min_sheets = optimize_filter_max(min_delivery_item)
             # 3、补充发货单的属性
             for sheet in min_sheets:
                 sheet.batch_no = batch_no
@@ -162,6 +158,5 @@ def optimize_filter_min(sheets, min_delivery_item, task_id, order, batch_no):
                     sheet.weight += di.weight
                     sheet.total_pcs += di.total_pcs
             # 为发货单分配车次
-            dispatch_load_task(min_sheets, task_id)
+            dispatch_load_task(min_sheets)
             sheets.extend(min_sheets)
-

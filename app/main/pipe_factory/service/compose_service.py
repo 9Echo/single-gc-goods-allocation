@@ -3,10 +3,10 @@
 # Created: shaoluyu 2019/12/12
 from app.main.pipe_factory.rule import compose_filter
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
-from app.util.aspect.method_before import set_weight
+from app.util.aspect.method_before import param_init
 
 
-@set_weight
+@param_init
 def compose(delivery_list_data):
     """
     拼单推荐逻辑

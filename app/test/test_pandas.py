@@ -40,7 +40,7 @@ def test_df():
         for i in list(v):
             print(i)
 
-    # doc_type = '提货单'
+    # g.DOC_TYPE = '提货单'
     # delivery_no = 0
     # dict_list = [i.as_dict() for i in sheets]
     # df = pd.DataFrame(dict_list)
@@ -55,7 +55,7 @@ def test_df():
     #         temp_delivery_list = product_type_rule.filter(one_load_task_delivery_list)
     #         delivery_no += 1
     #         for j in temp_delivery_list:
-    #             j.delivery_no = doc_type + str(delivery_no)
+    #             j.delivery_no = g.DOC_TYPE + str(delivery_no)
     #             one_load_task_delivery_list.remove(j)
     # data = [{'a': 1, 'b': 2}, {'a': 5, 'b': 10, 'c': 20}, {'a': 10, 'b': 11}, {'a': 20, 'b': 21}]
     # df = pd.DataFrame(data, index=['first', 'second', 'third', 'fourth'])

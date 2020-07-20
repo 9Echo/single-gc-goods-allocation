@@ -6,15 +6,13 @@ from app.main.pipe_factory.rule import weight_rule
 from model_config import ModelConfig
 
 
-def dispatch_load_task(sheets: list, task_id):
+def dispatch_load_task(sheets: list):
     """
     将发货单根据重量组合到对应的车次上
     :param sheets:
-    :param task_id:
     :return:
     """
 
-    doc_type = '提货单'
     left_sheets = []
     for sheet in sheets:
         # 如果已经生成车次的sheet，则跳过不处理
@@ -26,7 +24,7 @@ def dispatch_load_task(sheets: list, task_id):
     while left_sheets:
         total_weight = 0
         total_volume = 0
-        task_id += 1
+        g.LOAD_TASK_ID += 1
         no = 0
         # 下差组别的总重量
         # rd_lx_total_weight = 0
@@ -47,10 +45,10 @@ def dispatch_load_task(sheets: list, task_id):
                 sheet, new_sheet = split_sheet(sheet, limit_weight)
                 if new_sheet:
                     # 分单成功时旧单放入当前车上，新单放入等待列表
-                    sheet.load_task_id = task_id
+                    sheet.load_task_id = g.LOAD_TASK_ID
                     # 给旧单赋单号
                     no += 1
-                    sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
+                    sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
                     # 给明细赋单号
                     for item in sheet.items:
                         item.delivery_no = sheet.delivery_no
@@ -66,10 +64,10 @@ def dispatch_load_task(sheets: list, task_id):
                 # 如果总重量小于最大载重
                 if total_weight <= new_max_weight:
                     # 不超重时将当前发货单装到车上
-                    sheet.load_task_id = task_id
+                    sheet.load_task_id = g.LOAD_TASK_ID
                     # 给当前提货单赋单号
                     no += 1
-                    sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
+                    sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
                     # 给明细赋单号
                     for item in sheet.items:
                         item.delivery_no = sheet.delivery_no
@@ -91,10 +89,10 @@ def dispatch_load_task(sheets: list, task_id):
                         sheet, new_sheet = split_sheet(sheet, limit_weight)
                         if new_sheet:
                             # 分单成功时旧单放入当前车上，新单放入等待列表
-                            sheet.load_task_id = task_id
+                            sheet.load_task_id = g.LOAD_TASK_ID
                             # 给旧单赋单号
                             no += 1
-                            sheet.delivery_no = doc_type + str(task_id) + '-' + str(no)
+                            sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
                             # 给明细赋单号
                             for item in sheet.items:
                                 item.delivery_no = sheet.delivery_no
@@ -105,7 +103,6 @@ def dispatch_load_task(sheets: list, task_id):
                             # 原始单子列表加入新拆分出来的单子
                             sheets.append(new_sheet)
                         break
-    return task_id
 
 
 def split_sheet(sheet, limit_weight):
