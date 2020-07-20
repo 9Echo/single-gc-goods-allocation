@@ -2,8 +2,6 @@
 # @Time    : 2019/11/11 17:20
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
-from flask import g
-
 from app.main.pipe_factory.model.optimize_filter import optimize_filter_max, optimize_filter_min
 from app.main.pipe_factory.model.spec_filter import spec_filter
 from app.main.pipe_factory.model.weight_filter import weight_filter
