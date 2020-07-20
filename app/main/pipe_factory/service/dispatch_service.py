@@ -32,8 +32,6 @@ def dispatch_spec(order):
     dispatch_load_task(sheets)
     # 5、车次提货单按类合并
     combine_sheets(sheets)
-    # 6、将推荐发货通知单暂存redis
-    # Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
 
 
@@ -47,15 +45,11 @@ def dispatch_weight(order):
     delivery_item_weight_list.sort(key=lambda x: x.weight, reverse=True)
     # 放入重量优先模型
     sheets = weight_filter(delivery_item_weight_list)
-
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
     replenish_property(sheets, order, batch_no)
-
     # 归类合并
     combine_sheets(sheets, types='weight')
-    # 将推荐发货通知单暂存redis
-    # Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
 
 
@@ -83,6 +77,4 @@ def dispatch_optimize(order):
     # 车次提货单合并
     combine_sheets(sheets)
     sheets.sort(key=lambda i: i.load_task_id)
-    # 6、将推荐发货通知单暂存redis
-    # Thread(target=redis_service.set_delivery_list, args=(sheets,)).start()
     return sheets
