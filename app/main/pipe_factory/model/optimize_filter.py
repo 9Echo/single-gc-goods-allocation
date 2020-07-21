@@ -87,7 +87,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
         # 2、使用模型过滤器生成发货通知单
         min_sheets = optimize_filter_max(min_delivery_item)
         # 3、补充发货单的属性
-        replenish_property(min_sheets, order, batch_no)
+        replenish_property(min_sheets, order, batch_no, '20')
         # 为发货单分配车次
         dispatch_load_task(min_sheets)
         sheets.extend(min_sheets)
@@ -108,6 +108,9 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
                     # 生成新提货单，归到该车次下
                     new_sheet = DeliverySheet()
                     new_sheet.load_task_id = k
+                    new_sheet.request_id = order.request_id
+                    new_sheet.salesorg_id = order.salesorg_id
+                    new_sheet.type = '20'
                     new_sheet.volume = i.volume
                     new_sheet.batch_no = batch_no
                     new_sheet.customer_id = order.customer_id
@@ -125,6 +128,9 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
                         # 生成新提货单，归到该车次下
                         new_sheet = DeliverySheet()
                         new_sheet.load_task_id = k
+                        new_sheet.request_id = order.request_id
+                        new_sheet.salesorg_id = order.salesorg_id
+                        new_sheet.type = '20'
                         new_sheet.volume = i.volume
                         new_sheet.batch_no = batch_no
                         new_sheet.customer_id = order.customer_id

@@ -3,7 +3,6 @@
 # @Author  : Zihao.Liu
 
 from app.util.base.base_dao import BaseDao
-from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 from app.util.date_util import get_now_str
 
 
@@ -15,43 +14,31 @@ class DeliveryItemDao(BaseDao):
             delivery_no,
             delivery_item_no,
             product_type,
+            item_id,
             spec,
+            f_whs,
+            f_loc,
+            material,
             weight,
             quantity,
             free_pcs,
-            create_time) value(%s,%s,%s,%s,%s,%s,%s,%s)"""
+            create_date) value(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
         if items:
             values = [(
                 item.delivery_no,
                 item.delivery_item_no,
                 item.product_type,
+                item.item_id,
                 item.spec,
+                item.f_whs,
+                item.f_loc,
+                item.material,
                 item.weight,
                 item.quantity,
                 item.free_pcs,
                 get_now_str()) for item in items]
             self.executemany(sql, values)
         return
-
-    def batch_update(self, items):
-        """批量更新子发货单"""
-        sql = """update t_ga_delivery_item set 
-                quantity= %s,
-                free_pcs= %s
-                where delivery_item_no = %s"""
-        if items:
-            values = [(
-                item.quantity,
-                item.free_pcs,
-                item.delivery_item_no) for item in items]
-            self.executemany(sql, values)
-
-    def batch_delete(self, items):
-        """批量删除子发货单"""
-        sql = "delete from t_ga_delivery_item where delivery_item_no = %s"
-        if items:
-            values = [(item.delivery_item_no,) for item in items]
-            self.executemany(sql, values)
 
 
 delivery_item_dao = DeliveryItemDao()

@@ -3,10 +3,13 @@
 # Created: shaoluyu 2019/11/13
 # Modified: shaoluyu 2019/11/13
 import json
+from threading import Thread
+
 from flask import request
 from flask_restful import Resource
 from app.main.pipe_factory.service import order_service
 from app.main.pipe_factory.service.dispatch_service import dispatch_spec, dispatch_weight, dispatch_optimize
+from app.main.pipe_factory.service.sheet_service import save_sheets
 from app.util.result import Result
 
 
@@ -36,4 +39,5 @@ class OrderRoute(Resource):
             result_dict['recommend_first'] = sheets_recommend
             result_dict['request_id'] = request_id
             result_dict['ext_info_map'] = ext_info_map
+            Thread(target=save_sheets, args=(sheets_spec + sheets_weight + sheets_recommend,)).start()
             return Result.success_response(result_dict)

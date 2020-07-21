@@ -46,7 +46,6 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
             sheet.items.append(item)
             # 设置提货单总体积占比
             sheet.volume = item.volume
-            # sheet.type = 'weight_first'
             sheet.load_task_id = g.LOAD_TASK_ID
             sheets.append(sheet)
             weight_list.pop(i)

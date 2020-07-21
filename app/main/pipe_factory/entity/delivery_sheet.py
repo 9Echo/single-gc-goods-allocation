@@ -18,11 +18,12 @@ class DeliverySheet(BaseEntity):
         self.batch_no = None  # 批次号
         # self.status = None  # 状态 00：预留 10：已生成，20：已打印
         self.customer_id = None  # 客户id
+        self.request_id = None  # 请求id
         self.salesorg_id = None  # 部门id
         self.salesman_id = None  # 业务员id
         self.total_pcs = None  # 总根数
         self.weight = None  # 重量
-        # self.type = None  # 类型
+        self.type = None  # 类型
         self.volume = None  # 所占体积
         self.items = []  # 发货通知单子单
         self.create_time = None  # 创建时间

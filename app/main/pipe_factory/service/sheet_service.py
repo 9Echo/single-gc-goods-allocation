@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020/03/26 16:14
 # @Author  : zhouwentao
+from app.main.pipe_factory.dao.delivery_item_dao import delivery_item_dao
+from app.main.pipe_factory.dao.delivery_sheet_dao import delivery_sheet_dao
 from app.main.pipe_factory.entity.delivery_sheet import DeliverySheet
 from app.main.pipe_factory.entity.delivery_item import DeliveryItem
 
@@ -15,3 +17,16 @@ def generate_sheets(sheets):
         sheets_list.append(delivery_sheet)
 
     return sheets_list
+
+
+def save_sheets(result_list):
+    """
+
+    :param result_list:
+    :return:
+    """
+    delivery_sheet_dao.batch_insert(result_list)
+    items = list()
+    for i in result_list:
+        items.extend(i.items)
+    delivery_item_dao.batch_insert(items)

@@ -25,7 +25,7 @@ def dispatch_spec(order):
     sheets = spec_filter(delivery_item_spec_list)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
-    replenish_property(sheets, order, batch_no)
+    replenish_property(sheets, order, batch_no, '00')
     # 4、为发货单分配车次
     dispatch_load_task(sheets)
     # 5、车次提货单按类合并
@@ -45,7 +45,7 @@ def dispatch_weight(order):
     sheets = weight_filter(delivery_item_weight_list)
     # 3、补充发货单的属性
     batch_no = UUIDUtil.create_id("ba")
-    replenish_property(sheets, order, batch_no)
+    replenish_property(sheets, order, batch_no, '10')
     # 归类合并
     combine_sheets(sheets, types='weight')
     return sheets
@@ -55,7 +55,6 @@ def dispatch_optimize(order):
     """根据订单执行分货
     """
     sheets = []
-    # task_id = 0
     batch_no = UUIDUtil.create_id("ba")
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
@@ -66,7 +65,7 @@ def dispatch_optimize(order):
         sheets = optimize_filter_max(max_delivery_items)
         # 3、补充发货单的属性
         batch_no = UUIDUtil.create_id("ba")
-        replenish_property(sheets, order, batch_no)
+        replenish_property(sheets, order, batch_no, '20')
         # 4、为发货单分配车次
         dispatch_load_task(sheets)
     if min_delivery_items:
