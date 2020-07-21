@@ -32,18 +32,6 @@ class CreateDeliveryItem:
 
             self.delivery_item_list.append(delivery_item)
 
-    def fail_sheet(self):
-        """
-
-        :return:返回一张带有计算出错子项的发货通知单
-        """
-        # 如果上面计算有异常，返回一个特殊的sheet,上面有计算出错的子项，封装到sheet里只是为了利用sheet上额外信息去定位这个定单
-        if not self.success:
-            sheet = DeliverySheet()
-            sheet.weight = '0'
-            sheet.items = [self.delivery_item_list[0]]
-            return sheet
-
     def spec(self):
         """
         根据规格优先再对订单子项的list再进行拆分
