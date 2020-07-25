@@ -10,7 +10,7 @@ class DeliverySheetDao(BaseDao):
 
     def batch_insert(self, sheets):
         """保存发货单"""
-        sql = """insert into db_trans_plan.t_ga_delivery_sheet(
+        sql = """insert into t_ga_delivery_sheet(
             request_id,
             load_task_id,
             delivery_no,
