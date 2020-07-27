@@ -1,7 +1,5 @@
 import copy
-
 from flask import g
-
 from app.main.pipe_factory.rule import product_type_rule
 from app.util import weight_calculator
 
