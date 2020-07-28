@@ -2,6 +2,8 @@
 # @Time    : 2019/11/11 17:20
 # @Author  : Zihao.Liu
 # Modified: shaoluyu 2019/11/13
+from flask import g
+
 from app.main.pipe_factory.model.optimize_filter import optimize_filter_max, optimize_filter_min
 from app.main.pipe_factory.model.spec_filter import spec_filter
 from app.main.pipe_factory.model.weight_filter import weight_filter
@@ -37,6 +39,7 @@ def dispatch_weight(order):
     """根据订单执行分货
     """
     # 1、将订单项转为发货通知单子单的list
+    g.LOAD_TASK_ID = 0
     delivery_item_list = CreateDeliveryItem(order)
     delivery_item_weight_list = delivery_item_list.weight()  # 调用weight()，即重量优先来处理
     # 排序，按重量倒序
@@ -54,6 +57,7 @@ def dispatch_weight(order):
 def dispatch_optimize(order):
     """根据订单执行分货
     """
+    g.LOAD_TASK_ID = 0
     sheets = []
     batch_no = UUIDUtil.create_id("ba")
     # 1、将订单项转为发货通知单子单的list

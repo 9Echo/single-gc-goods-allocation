@@ -35,7 +35,6 @@ def call_pulp_solve(weight_list, volume_list, value_list, delivery_items):
     batch_no = UUIDUtil.create_id("ba")
     # 结果集
     sheets = []
-    g.LOAD_TASK_ID = 0
     while delivery_items:
         g.LOAD_TASK_ID += 1
         # plup求解，得到选中的下标序列

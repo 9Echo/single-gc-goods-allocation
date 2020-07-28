@@ -21,7 +21,6 @@ def optimize_filter_max(delivery_items: list):
     sheets = []
     # 提货单明细列表
     item_list = []
-    g.LOAD_TASK_ID = 0
     # 剩余的发货子单
     left_items = delivery_items
     for i in copy.copy(delivery_items):
@@ -137,6 +136,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
                         new_sheet.weight = i.weight
                         new_sheet.total_pcs = i.total_pcs
                         new_sheet.items.append(i)
+                        i.delivery_item_no = UUIDUtil.create_id('di')
                         # 移除掉被分配的子项
                         min_delivery_item.remove(i)
                         # 将剩余的子项放入子项列表
@@ -148,16 +148,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
             # 2、使用模型过滤器生成发货通知单
             min_sheets = optimize_filter_max(min_delivery_item)
             # 3、补充发货单的属性
-            for sheet in min_sheets:
-                sheet.batch_no = batch_no
-                sheet.customer_id = order.customer_id
-                sheet.salesman_id = order.salesman_id
-                sheet.weight = 0
-                sheet.total_pcs = 0
-                for di in sheet.items:
-                    di.delivery_item_no = UUIDUtil.create_id("di")
-                    sheet.weight += di.weight
-                    sheet.total_pcs += di.total_pcs
+            replenish_property(min_sheets, order, batch_no, '20')
             # 为发货单分配车次
             dispatch_load_task(min_sheets)
             sheets.extend(min_sheets)
