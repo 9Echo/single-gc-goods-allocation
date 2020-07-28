@@ -72,5 +72,4 @@ def dispatch_optimize(order):
         optimize_filter_min(sheets, min_delivery_items, order, batch_no)
     # 车次提货单合并
     combine_sheets(sheets)
-    sheets.sort(key=lambda i: i.load_task_id)
     return sheets

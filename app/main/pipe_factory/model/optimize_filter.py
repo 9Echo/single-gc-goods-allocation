@@ -35,7 +35,7 @@ def optimize_filter_max(delivery_items: list):
         # 每次取第一个元素进行compose,  filtered_items是得到的一个饱和(饱和即已达到重量上限)的子单
         filtered_item, left_items = weight_rule.compose_split(left_items[0], left_items)
         if filtered_item.weight == 0:
-            raise MyException('切分异常！', ResponseCode.Error)
+            raise MyException('分单异常！', ResponseCode.Error)
         item_list.append(filtered_item)
 
     while item_list:
@@ -48,8 +48,7 @@ def optimize_filter_max(delivery_items: list):
             package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT, ModelConfig.MAX_VOLUME, weight_cost)
         if final_weight == 0:
             break
-        # temp_item_list = copy.copy(item_list)
-        if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
+        if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) <= final_weight <= g.MAX_WEIGHT:
             is_full = True
             g.LOAD_TASK_ID += 1
         # 临时明细存放

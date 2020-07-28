@@ -19,8 +19,8 @@ class CreateDeliveryItem:
         for item in order.items:
             delivery_item = BeanConvertUtils.copy_properties(item, DeliveryItem)
             delivery_item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
-            delivery_item.volume = \
-                delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0.001
+            delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
+                if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
             delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type, delivery_item.item_id,
                                                                       delivery_item.quantity, delivery_item.free_pcs)
             delivery_item.total_pcs = weight_calculator.calculate_pcs(delivery_item.product_type, delivery_item.item_id,
@@ -50,7 +50,7 @@ class CreateDeliveryItem:
                 new_total_pcs = weight_calculator.calculate_pcs(delivery_item.product_type, delivery_item.item_id,
                                                                 delivery_item.max_quantity, 0)
                 # 创建出count个拷贝的新明细，散根数为0，件数为标准件数，总根数为标准总根数，体积占比近似为1
-                for i in range(0, count):
+                for _ in range(0, count):
                     copy_dilivery_item = copy.deepcopy(delivery_item)
                     copy_dilivery_item.free_pcs = 0
                     copy_dilivery_item.quantity = delivery_item.max_quantity
@@ -61,8 +61,8 @@ class CreateDeliveryItem:
                     self.delivery_item_list.append(copy_dilivery_item)
                 # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
                 delivery_item.quantity = surplus
-                delivery_item.volume = \
-                    delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0.001
+                delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
+                    if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
                 delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type,
                                                                           delivery_item.item_id, delivery_item.quantity,
                                                                           delivery_item.free_pcs)
@@ -98,7 +98,7 @@ class CreateDeliveryItem:
                 item.quantity = 1
                 item.free_pcs = 0
                 item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
-                item.volume = 1 / item.max_quantity if item.max_quantity else 0.001
+                item.volume = 1 / item.max_quantity if item.max_quantity else ModelConfig.DEFAULT_VOLUME
                 item.weight = weight1
                 item.total_pcs = total_pcs1
                 item_list.append(item)
@@ -121,7 +121,7 @@ class CreateDeliveryItem:
         for delivery_item in self.delivery_item_list:
 
             # 搜集小管
-            if delivery_item.volume == 0:
+            if delivery_item.volume == ModelConfig.DEFAULT_VOLUME:
                 min_delivery_items.append(delivery_item)
                 continue
             # 搜集大管
@@ -148,8 +148,8 @@ class CreateDeliveryItem:
                     max_delivery_items.append(copy_di)
                 # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
                 delivery_item.quantity = surplus
-                delivery_item.volume = \
-                    delivery_item.quantity / delivery_item.max_quantity if delivery_item.max_quantity else 0.001
+                delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
+                    if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
                 delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type,
                                                                           delivery_item.item_id, delivery_item.quantity,
                                                                           delivery_item.free_pcs)

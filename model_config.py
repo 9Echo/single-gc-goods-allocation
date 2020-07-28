@@ -86,6 +86,8 @@ class ModelConfig:
     PACKAGE_LOWER_WEIGHT = 1000
     # 体积上限系数
     MAX_VOLUME = 1.18
+    # 缺省值
+    DEFAULT_VOLUME = 0.001
     # 分车次限制重量
     TRUCK_SPLIT_RANGE = 1000
     # 考虑体积的物资代码前缀
