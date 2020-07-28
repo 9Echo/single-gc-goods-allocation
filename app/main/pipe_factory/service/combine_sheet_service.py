@@ -60,10 +60,13 @@ def combine_sheets(sheets, types=None):
         current_sheets = [i for i in sheets if i.load_task_id == load_task_id]
         no = 0
         for sheet in current_sheets:
+            item_no = 0
             no += 1
             sheet.delivery_no = g.DOC_TYPE + str(load_task_id) + '-' + str(no)
             for j in sheet.items:
+                item_no += 1
                 j.delivery_no = sheet.delivery_no
+                j.delivery_item_no = sheet.delivery_no + '-' + str(item_no)
                 if types == 'weight':
                     j.weight = weight_calculator.calculate_weight(j.product_type, j.item_id, j.quantity, j.free_pcs)
             if types == 'weight':

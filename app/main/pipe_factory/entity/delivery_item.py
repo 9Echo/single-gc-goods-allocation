@@ -12,9 +12,6 @@ class DeliveryItem(BaseEntity):
         self.delivery_no = None  # 发货通知单主单号
         self.delivery_item_no = None  # 子单号
         self.order_num = None  # 订单号
-        # self.end_point = None  # 区县
-        # self.address = None  # 收货地址
-        # self.can_send_time = None  # 可发时间
         self.product_type = None  # 产品类型
         self.company_id = None  # 公司id
         self.spec = None  # 产品规格

@@ -25,9 +25,6 @@ def dispatch_load_task(sheets: list):
         total_weight = 0
         total_volume = 0
         g.LOAD_TASK_ID += 1
-        no = 0
-        # 下差组别的总重量
-        # rd_lx_total_weight = 0
         for sheet in copy.copy(left_sheets):
             total_weight += sheet.weight
             total_volume += sheet.volume
@@ -46,12 +43,6 @@ def dispatch_load_task(sheets: list):
                 if new_sheet:
                     # 分单成功时旧单放入当前车上，新单放入等待列表
                     sheet.load_task_id = g.LOAD_TASK_ID
-                    # 给旧单赋单号
-                    no += 1
-                    sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
-                    # 给明细赋单号
-                    for item in sheet.items:
-                        item.delivery_no = sheet.delivery_no
                     # 删除原单子
                     left_sheets.remove(sheet)
                     # 加入切分后剩余的新单子
@@ -65,12 +56,6 @@ def dispatch_load_task(sheets: list):
                 if total_weight <= new_max_weight:
                     # 不超重时将当前发货单装到车上
                     sheet.load_task_id = g.LOAD_TASK_ID
-                    # 给当前提货单赋单号
-                    no += 1
-                    sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
-                    # 给明细赋单号
-                    for item in sheet.items:
-                        item.delivery_no = sheet.delivery_no
                     # 将拼车成功的单子移除
                     left_sheets.remove(sheet)
                     if new_max_weight - total_weight < ModelConfig.TRUCK_SPLIT_RANGE:
@@ -90,12 +75,6 @@ def dispatch_load_task(sheets: list):
                         if new_sheet:
                             # 分单成功时旧单放入当前车上，新单放入等待列表
                             sheet.load_task_id = g.LOAD_TASK_ID
-                            # 给旧单赋单号
-                            no += 1
-                            sheet.delivery_no = g.DOC_TYPE + str(g.LOAD_TASK_ID) + '-' + str(no)
-                            # 给明细赋单号
-                            for item in sheet.items:
-                                item.delivery_no = sheet.delivery_no
                             # 删除原单子
                             left_sheets.remove(sheet)
                             # 加入切分后剩余的新单子

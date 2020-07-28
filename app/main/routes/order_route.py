@@ -39,5 +39,7 @@ class OrderRoute(Resource):
             result_dict['recommend_first'] = sheets_recommend
             result_dict['request_id'] = request_id
             result_dict['ext_info_map'] = ext_info_map
-            Thread(target=save_sheets, args=(sheets_spec + sheets_weight + sheets_recommend,)).start()
-            return Result.success_response(result_dict)
+            try:
+                return Result.success_response(result_dict)
+            finally:
+                Thread(target=save_sheets, args=(sheets_spec + sheets_weight + sheets_recommend,)).start()
