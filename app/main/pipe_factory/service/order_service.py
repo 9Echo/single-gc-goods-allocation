@@ -13,8 +13,7 @@ def generate_order(order_data):
     order = Order(order_data)
     order.items = []
     order.order_no = UUIDUtil.create_id("order")
-    # 车辆载重转换成整形
-    order.truck_weight = int(order_data.get('truck_weight'))
+    order.truck_weight = order_data.get('truck_weight')
     for item in order_data['items']:
         oi = OrderItem(item)
         oi.order_no = order.order_no

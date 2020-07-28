@@ -26,9 +26,9 @@ def spec_filter(delivery_items: list):
         # 每次取第一个元素进行compose,  filtered_item是得到的一个饱和(饱和即已达到重量上限)的子单
         filtered_item, left_items = weight_rule.compose_split(left_items[0], left_items)
         if filtered_item.weight == 0:
-            raise MyException('切分异常！', ResponseCode.Error)
+            raise MyException('分单异常！', ResponseCode.Error)
         item_list.append(filtered_item)
-    item_list = list(filter(lambda x: x.weight > 0, item_list))
+    item_list = [i for i in item_list if i.weight > 0]
     while item_list:
         # 是否满载标记
         is_full = False
@@ -41,7 +41,7 @@ def spec_filter(delivery_items: list):
                                                  weight_cost)
         if final_weight <= 0:
             raise MyException('package exception', ResponseCode.Error)
-        if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) < final_weight < g.MAX_WEIGHT:
+        if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) <= final_weight <= g.MAX_WEIGHT:
             is_full = True
             g.LOAD_TASK_ID += 1
         # 临时明细存放

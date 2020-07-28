@@ -5,8 +5,10 @@
 # Modified: shaoluyu 2019/10/29; shaoluyu 2019/06/20
 
 import logging
+import os
+
 import config
-# from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 from app import create_app
 
 # 获取当前生效的环境配置类
@@ -23,15 +25,16 @@ if __name__ != '__main__':
     app.logger.info('active config name = {} '.format(active_config_name))
 
 if __name__ == '__main__':
-    # handler = TimedRotatingFileHandler('E:/gc-goods-allocation/app/logs/flask.log', encoding='UTF-8')
-    # handler.setLevel(logging.DEBUG)
-    # logging_format = logging.Formatter(
-    #     '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
-    # handler.setFormatter(logging_format)
-    # app.logger.addHandler(handler)
-    # # 日志记录当前环境配置名称
-    # app.logger.info('flask app name = {} '.format(app.name))
-    # app.logger.info('active config name = {} '.format(active_config_name))
+    cur_path = os.path.abspath(os.path.dirname(__file__))
+    handler = TimedRotatingFileHandler(cur_path + '\\app\\logs\\flask.log', encoding='UTF-8')
+    handler.setLevel(logging.DEBUG)
+    logging_format = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
+    handler.setFormatter(logging_format)
+    app.logger.addHandler(handler)
+    # 日志记录当前环境配置名称
+    app.logger.info('flask app name = {} '.format(app.name))
+    app.logger.info('active config name = {} '.format(active_config_name))
     # from waitress import serve
     # serve(app, listen='*:9238')
     # 启动flask应用app

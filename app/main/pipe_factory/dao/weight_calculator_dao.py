@@ -10,11 +10,19 @@ class WeightCalculatorDao(BaseDao):
         '''
         :return:
         '''
-        sql = """select ITEMID,GBGZL,GS_PER 
+        sql = """select 
+                 ITEMID,
+                 case 
+                 when
+                 ifnull(GBGZL_R,'') <> ''
+                 then GBGZL_R
+                 else 
+                 GBGZL end as GBGZL,
+                 GS_PER 
                  from t_itema
-                where ITEMID in ({}) 
-                and ifnull(GBGZL,'') <> '' 
-                and ifnull(GS_PER,'') <> ''
+                 where ITEMID in ({}) 
+                 and ifnull(GBGZL,'') <> '' 
+                 and ifnull(GS_PER,'') <> ''
                 """
         values = "'"
         values += "','".join([item.item_id for item in data_list])

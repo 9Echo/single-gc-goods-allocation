@@ -31,6 +31,7 @@ def get_item_a(func):
         item_a_dict = {}
         data = get_item_a_dict_list(items)
         for i in data:
+            # 上线时若GBGZL_R有值，则取。无值则取GBGZL
             item_a_dict.setdefault(i['ITEMID'], {'GBGZL': i['GBGZL'], 'GS_PER': i['GS_PER']})
         g.ITEM_A_DICT = item_a_dict
         return func(*args, **kw)
@@ -48,15 +49,13 @@ def param_init(func):
     @functools.wraps(func)
     def wrapper(*args, **kw):
         # 重量初始化
-        if args[0].truck_weight != 32:
-            weight = args[0].truck_weight * 1000
+        if args[0].truck_weight:
+            weight = int(float(args[0].truck_weight) * 1000)
             if weight < 20000:
                 raise MyException('输入的重量过小，请重新输入！', ResponseCode.Error)
             if weight >= 100000:
                 raise MyException('输入的重量过大，请重新输入！', ResponseCode.Error)
             g.MAX_WEIGHT = weight
-            # 热镀螺旋上浮设置为0
-            # g.RD_LX_UP_WEIGHT = 0
         else:
             # 设置默认值
             g.MAX_WEIGHT = ModelConfig.STANDARD_MAX_WEIGHT
