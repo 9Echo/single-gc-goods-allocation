@@ -50,6 +50,14 @@ class DevelopmentConfig(Config):
     ODS_MYSQL_DB = 'db_model'
     ODS_MYSQL_CHARSET = 'utf8'
 
+    # sales数据库连接
+    # ODS_MYSQL_HOST = '192.168.1.50'
+    # ODS_MYSQL_PORT = 8484
+    # ODS_MYSQL_USER = 'data_group'
+    # ODS_MYSQL_PASSWD = 'safdsfewf'
+    # ODS_MYSQL_DB = 'db_model'
+    # ODS_MYSQL_CHARSET = 'utf8'
+
     # Redis配置，可选（不使用时可删除）
     REDIS_HOST = '172.16.110.156'
     REDIS_PORT = '6379'
