@@ -31,6 +31,7 @@ def save_sheets(result_list):
         i.delivery_no = UUIDUtil.create_id("de")
         for j in i.items:
             j.delivery_no = i.delivery_no
+            j.delivery_item_no = UUIDUtil.create_id("di")
         items.extend(i.items)
     delivery_sheet_dao.batch_insert(result_list)
     delivery_item_dao.batch_insert(items)

@@ -20,6 +20,6 @@ def replenish_property(sheets, order, batch_no, types):
         sheet.weight = 0
         sheet.total_pcs = 0
         for di in sheet.items:
-            di.delivery_item_no = UUIDUtil.create_id("di")
+            # di.delivery_item_no = UUIDUtil.create_id("di")
             sheet.weight += di.weight
             sheet.total_pcs += di.total_pcs
