@@ -6,12 +6,8 @@
 from flask import Blueprint
 from flask import jsonify
 from flask_restful import Api
-from app.main.routes import compose_route
-from app.main.routes.compose_route import ComposeRoute
-from app.main.routes.confirm_route import ConfirmRoute
 from app.main.routes.goods_allocation_route import GoodsAllocationRoute
 from app.main.routes.order_route import OrderRoute
-from app.main.routes.loading_route import LoadingRoute
 from app.main.routes.single_goods_allocation_route import SingleGoodsAllocationRoute
 
 blueprint = Blueprint('main', __name__)
