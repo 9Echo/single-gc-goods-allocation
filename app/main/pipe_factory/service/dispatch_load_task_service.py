@@ -6,9 +6,10 @@ from app.main.pipe_factory.rule import weight_rule
 from model_config import ModelConfig
 
 
-def dispatch_load_task(sheets: list):
+def dispatch_load_task(sheets: list, min_delivery_items=None):
     """
     将发货单根据重量组合到对应的车次上
+    :param min_delivery_items:
     :param sheets:
     :return:
     """
@@ -26,6 +27,13 @@ def dispatch_load_task(sheets: list):
         total_volume = 0
         g.LOAD_TASK_ID += 1
         for sheet in copy.copy(left_sheets):
+            # 如果提货单体积系数为1，并且小管列表不为空，则生成车次
+            if sheet.volume == 1 and min_delivery_items:
+                # 不超重时将当前发货单装到车上
+                sheet.load_task_id = g.LOAD_TASK_ID
+                # 将拼车成功的单子移除
+                left_sheets.remove(sheet)
+                break
             total_weight += sheet.weight
             total_volume += sheet.volume
             # 初始重量

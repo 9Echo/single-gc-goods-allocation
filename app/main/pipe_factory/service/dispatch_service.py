@@ -69,8 +69,9 @@ def dispatch_optimize(order):
         # 3、补充发货单的属性
         batch_no = UUIDUtil.create_id("ba")
         replenish_property(sheets, order, batch_no, '20')
+        sheets.sort(key=lambda x: x.volume, reverse=True)
         # 4、为发货单分配车次
-        dispatch_load_task(sheets)
+        dispatch_load_task(sheets, min_delivery_items)
     if min_delivery_items:
         optimize_filter_min(sheets, min_delivery_items, order, batch_no)
     # 车次提货单合并
