@@ -58,38 +58,39 @@ def match_solve(order, delivery_item_list: List[DeliveryItem]):
                     min_delivery_count = int(min_item.quantity / min_item_quantity)
                     # 组合数
                     delivery_count = min(max_delivery_count, min_delivery_count)
-                    # 大小管扣减件数
-                    max_item.quantity -= int(delivery_count * max_item_quantity)
-                    min_item.quantity -= int(delivery_count * min_item_quantity)
-                    # 如果大管扣除后件数为0并且散根也为0，则删除明细
-                    if max_item.quantity == 0 and max_item.free_pcs == 0:
-                        delivery_item_list.remove(max_item)
-                        max_delivery_items.remove(max_item)
-                    else:
-                        # 大管重新计算参数
-                        calculate(max_item)
-                    # 如果小管扣除后件数为0并且散根也为0，则删除明细
-                    if min_item.quantity == 0 and max_item.free_pcs == 0:
-                        delivery_item_list.remove(min_item)
-                        min_delivery_items.remove(min_item)
-                    else:
-                        # 小管重新计算参数
-                        calculate(min_item)
-                    # 批量生成提货单
-                    for _ in range(delivery_count):
-                        g.LOAD_TASK_ID += 1
-                        main_sheet = DeliverySheet()
-                        main_sheet.load_task_id = g.LOAD_TASK_ID
-                        copy_max_item = copy.deepcopy(max_item)
-                        calculate_for_copy_item(copy_max_item, max_item_quantity)
-                        main_sheet.items = [copy_max_item]
-                        sheets.append(main_sheet)
-                        sub_sheet = DeliverySheet()
-                        sub_sheet.load_task_id = g.LOAD_TASK_ID
-                        copy_min_item = copy.deepcopy(min_item)
-                        calculate_for_copy_item(copy_min_item, min_item_quantity)
-                        sub_sheet.items = [copy_min_item]
-                        sheets.append(sub_sheet)
+                    if delivery_count > 0:
+                        # 大小管扣减件数
+                        max_item.quantity -= int(delivery_count * max_item_quantity)
+                        min_item.quantity -= int(delivery_count * min_item_quantity)
+                        # 如果大管扣除后件数为0并且散根也为0，则删除明细
+                        if max_item.quantity == 0 and max_item.free_pcs == 0:
+                            delivery_item_list.remove(max_item)
+                            max_delivery_items.remove(max_item)
+                        else:
+                            # 大管重新计算参数
+                            calculate(max_item)
+                        # 如果小管扣除后件数为0并且散根也为0，则删除明细
+                        if min_item.quantity == 0 and max_item.free_pcs == 0:
+                            delivery_item_list.remove(min_item)
+                            min_delivery_items.remove(min_item)
+                        else:
+                            # 小管重新计算参数
+                            calculate(min_item)
+                        # 批量生成提货单
+                        for _ in range(delivery_count):
+                            g.LOAD_TASK_ID += 1
+                            main_sheet = DeliverySheet()
+                            main_sheet.load_task_id = g.LOAD_TASK_ID
+                            copy_max_item = copy.deepcopy(max_item)
+                            calculate_for_copy_item(copy_max_item, max_item_quantity)
+                            main_sheet.items = [copy_max_item]
+                            sheets.append(main_sheet)
+                            sub_sheet = DeliverySheet()
+                            sub_sheet.load_task_id = g.LOAD_TASK_ID
+                            copy_min_item = copy.deepcopy(min_item)
+                            calculate_for_copy_item(copy_min_item, min_item_quantity)
+                            sub_sheet.items = [copy_min_item]
+                            sheets.append(sub_sheet)
                 else:
                     continue
         # 大管单独生成提货单
@@ -98,21 +99,22 @@ def match_solve(order, delivery_item_list: List[DeliveryItem]):
             main_quantity = temp_min_item_list[0].get('main_quantity')
             if max_item.quantity >= main_quantity:
                 max_delivery_count = int(max_item.quantity / main_quantity)
-                # 生成提货单，扣减件数
-                max_item.quantity -= int(max_delivery_count * main_quantity)
-                if max_item.quantity == 0 and max_item.free_pcs == 0:
-                    delivery_item_list.remove(max_item)
-                    max_delivery_items.remove(max_item)
-                else:
-                    calculate(max_item)
-                for _ in range(max_delivery_count):
-                    g.LOAD_TASK_ID += 1
-                    main_sheet = DeliverySheet()
-                    main_sheet.load_task_id = g.LOAD_TASK_ID
-                    copy_max_item = copy.deepcopy(max_item)
-                    calculate_for_copy_item(copy_max_item, main_quantity)
-                    main_sheet.items = [copy_max_item]
-                    sheets.append(main_sheet)
+                if max_delivery_count > 0:
+                    # 生成提货单，扣减件数
+                    max_item.quantity -= int(max_delivery_count * main_quantity)
+                    if max_item.quantity == 0 and max_item.free_pcs == 0:
+                        delivery_item_list.remove(max_item)
+                        max_delivery_items.remove(max_item)
+                    else:
+                        calculate(max_item)
+                    for _ in range(max_delivery_count):
+                        g.LOAD_TASK_ID += 1
+                        main_sheet = DeliverySheet()
+                        main_sheet.load_task_id = g.LOAD_TASK_ID
+                        copy_max_item = copy.deepcopy(max_item)
+                        calculate_for_copy_item(copy_max_item, main_quantity)
+                        main_sheet.items = [copy_max_item]
+                        sheets.append(main_sheet)
 
     return sheets
 
