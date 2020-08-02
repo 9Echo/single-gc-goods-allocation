@@ -6,6 +6,7 @@ from flask import g
 from app.main.pipe_factory.model.optimize_filter import optimize_filter_max, optimize_filter_min
 from app.main.pipe_factory.model.spec_filter import spec_filter
 from app.main.pipe_factory.model.weight_filter import weight_filter
+from app.main.pipe_factory.rule.match_solution import match_solve
 from app.main.pipe_factory.service.dispatch_load_task_service import dispatch_load_task
 from app.util.aspect.method_before import get_item_a, param_init
 from app.main.pipe_factory.service.combine_sheet_service import combine_sheets
@@ -61,6 +62,9 @@ def dispatch_optimize(order):
     batch_no = UUIDUtil.create_id("ba")
     # 1、将订单项转为发货通知单子单的list
     delivery_item_list = CreateDeliveryItem(order)
+    # 根据历史数据匹配开单
+    match_sheets = match_solve(order, delivery_item_list.delivery_item_list)
+    replenish_property(match_sheets, order, batch_no, '20')
     # 调用optimize()，即将大小管分开
     max_delivery_items, min_delivery_items = delivery_item_list.optimize()
     if max_delivery_items:
@@ -75,5 +79,6 @@ def dispatch_optimize(order):
     if min_delivery_items:
         optimize_filter_min(sheets, min_delivery_items, order, batch_no)
     # 车次提货单合并
+    sheets = match_sheets + sheets
     combine_sheets(sheets)
     return sheets
