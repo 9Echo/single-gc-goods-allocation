@@ -46,6 +46,7 @@ venv
 # idea
 .idea
 
+.vbs
 #
 *.lock
 *.log

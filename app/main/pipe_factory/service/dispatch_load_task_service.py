@@ -21,14 +21,20 @@ def dispatch_load_task(sheets: list, min_delivery_items=None):
             continue
         else:
             left_sheets.append(sheet)
+    # 如果有小管，统计小管总重量
+    min_total_weight = 0
+    if min_delivery_items:
+        min_total_weight = sum(i.weight for i in min_delivery_items)
     # 记录是否有未分车的单子
     while left_sheets:
         total_weight = 0
         total_volume = 0
         g.LOAD_TASK_ID += 1
         for sheet in copy.copy(left_sheets):
-            # 如果提货单体积系数为1，并且小管列表不为空，则生成车次
-            if sheet.volume == 1 and min_delivery_items:
+            # 如果提货单体积系数为1，小管剩余搭配重量大于0
+            if sheet.volume == 1 and min_total_weight > 0:
+                # 计算剩余小管重量
+                min_total_weight -= (g.MAX_WEIGHT - sheet.weight)
                 # 不超重时将当前发货单装到车上
                 sheet.load_task_id = g.LOAD_TASK_ID
                 # 将拼车成功的单子移除

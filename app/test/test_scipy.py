@@ -12,10 +12,10 @@ from app.util import collection_util
 计算  (2+x1)/(1+x2) - 3*x1+4*x3 的最小值  x1,x2,x3的范围都在0.1到0.9 之间
 
 """
-volume = [10000, 34, 22, 22, 34]
-one_weight = [1.067, 0.751, 1.488, 0.641, 0.815]
+volume = [1000, 34, 22, 22, 34]
+one_weight = [1.067, .751, 1.488, .641, .815]
 order_j = [50, 40, 40, 40, 30]
-max_weight = 32.5
+max_weight = 33
 max_volume = 1.18
 
 
@@ -108,8 +108,7 @@ def con(args):
         # 约束矩阵所有点为整数
         # {'type': 'eq', 'fun': lambda x: x % 1}
     )
-    # for i in range(0, 30):
-    #     cons += ({'type': 'eq', 'fun': lambda x: x[i] % 1},)
+    cons += ({'type': 'ineq', 'fun': lambda x: sum([item % 1 for item in x])},)
     return cons
 
 
@@ -124,11 +123,13 @@ if __name__ == "__main__":
     # x0 = np.asarray((0, 0, 0))
     bnds = ()
     for i in range(0, 30):
-        bnds += ((0, None),)
+        bnds += ((0, 50),)
 
-    res = minimize(fun(args), x0, method='SLSQP', bounds=bnds, constraints=cons)
+    res = minimize(fun(args), x0, method='SLSQP', bounds=bnds, constraints=cons, options={'maxiter': 100000})
     print(res.fun)
     print(res.success)
+    print(res.message)
+    print(res.nit)
     # print(res.x)
     result = res.x.reshape(6, 5)
     print(result)

@@ -93,7 +93,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
         min_delivery_item.sort(key=lambda x: x.quantity)
         sheets_dict = [sheet.as_dict() for sheet in sheets]
         df = pd.DataFrame(sheets_dict)
-        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_values(ascending=False)
+        series = df.groupby(by=['load_task_id'])['weight'].sum().sort_index()
         for k, v in series.items():
             current_weight = v
             if v >= g.MAX_WEIGHT:
