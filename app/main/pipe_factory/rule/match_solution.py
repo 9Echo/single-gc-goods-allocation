@@ -32,12 +32,16 @@ def match_solve(order, delivery_item_list: List[DeliveryItem]):
             min_delivery_items.append(delivery_item)
         else:
             max_delivery_items.append(delivery_item)
+    # 如果没有大管，return
+    if not max_delivery_items:
+        return sheets
     # 查询大小管搭配数据
     match_data = match_dao.select_match_data(order, max_delivery_items, min_delivery_items)
     match_dict = dict()
     # 搭配结果按大管item_id分组
     for i in match_data:
         match_dict.setdefault(i.get('main_item_id'), []).append(i)
+
     # 遍历大管列表，寻找组合
     for max_item in copy.copy(max_delivery_items):
         # 历史此大管所搭配的组合数据
@@ -94,7 +98,7 @@ def match_solve(order, delivery_item_list: List[DeliveryItem]):
                 else:
                     continue
         # 大管单独生成提货单
-        temp_min_item_list = [i for i in temp_match_data if i.get('sub_item_id') == '']
+        temp_min_item_list = [i for i in temp_match_data if not i.get('sub_item_id')]
         if temp_min_item_list:
             main_quantity = temp_min_item_list[0].get('main_quantity')
             if max_item.quantity >= main_quantity:
