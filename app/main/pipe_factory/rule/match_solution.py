@@ -45,7 +45,7 @@ def match_solve(order, delivery_item_list: List[DeliveryItem]):
     # 遍历大管列表，寻找组合
     for max_item in copy.copy(max_delivery_items):
         # 历史此大管所搭配的组合数据
-        temp_match_data = match_dict.get(max_item.item_id, None)
+        temp_match_data = match_dict.get(max_item.item_id, [])
         # 按照次数多到少的顺序依次匹配
         for match_item in temp_match_data:
             # 找出被匹配的小管

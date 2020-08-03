@@ -17,10 +17,9 @@ class MatchDao(BaseDao):
             a.city_name,
             max(a.combine_count) as combine_count
             from
-            t_gc_history_match a,(SELECT city_name FROM db_sys.`t_company_address` where company_id = '{}') b
+            t_gc_history_match a
             where
-            a.city_name = b.city_name 
-            and a.main_item_id in ({}) 
+             a.main_item_id in ({}) 
             and (a.sub_item_id in ({}) or ifnull(a.sub_item_id,'') = '')
             GROUP BY a.main_item_id,a.sub_item_id,a.city_name) t2 
             where t1.main_item_id = t2.main_item_id 
@@ -29,13 +28,15 @@ class MatchDao(BaseDao):
             and t1.combine_count = t2.combine_count	
             order by t1.main_item_id,t1.combine_count desc
         """
+        # ,(SELECT city_name FROM db_sys.`t_company_address` where company_id = '{}') b
+        # a.city_name = b.city_name
         max_item_id_values = "'"
         max_item_id_values += "','".join([i.item_id for i in max_delivery_items])
         max_item_id_values += "'"
         min_item_id_values = "'"
         min_item_id_values += "','".join([i.item_id for i in min_delivery_items])
         min_item_id_values += "'"
-        return self.select_all(sql.format(order.customer_id, max_item_id_values, min_item_id_values))
+        return self.select_all(sql.format(max_item_id_values, min_item_id_values))
 
 
 match_dao = MatchDao()
