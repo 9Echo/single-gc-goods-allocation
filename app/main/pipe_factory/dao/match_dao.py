@@ -17,7 +17,7 @@ class MatchDao(BaseDao):
             a.city_name,
             max(a.combine_count) as combine_count
             from
-            t_gc_history_match a,(SELECT city_name FROM `t_company_address` where company_id = '{}') b
+            t_gc_history_match a,(SELECT city_name FROM db_sys.`t_company_address` where company_id = '{}') b
             where
             a.city_name = b.city_name 
             and a.main_item_id in ({}) 
