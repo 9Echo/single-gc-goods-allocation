@@ -90,8 +90,8 @@ def deal_stock(data):
         (df_stock["实际可发重量"] <= ModelConfig.RG_MAX_WEIGHT) & (
                 df_stock["实际可发重量"] >= ModelConfig.RG_MIN_WEIGHT), ["sort"]] = 2
     df_stock.loc[
-        (df_stock["件重"] < ModelConfig.RG_MIN_WEIGHT) & (
-                df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["sort"]] = 1
+        (df_stock["件重"] >= ModelConfig.RG_SECOND_MIN_WEIGHT) & (df_stock["件重"] < ModelConfig.RG_J_MIN_WEIGHT) &
+        (df_stock["big_commodity_name"].isin(ModelConfig.RG_COMMODITY_LYG)), ["sort"]] = 1
     result = result.append(df_stock)
     result = rename_pd(result)
     # 如果标准地址没有匹配到，那么就是用详细地址代替

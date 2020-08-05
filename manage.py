@@ -26,7 +26,8 @@ if __name__ != '__main__':
 
 if __name__ == '__main__':
     cur_path = os.path.abspath(os.path.dirname(__file__))
-    handler = TimedRotatingFileHandler(cur_path + '\\app\\logs\\flask.log', encoding='UTF-8')
+    handler = logging.FileHandler(cur_path + '\\app\\logs\\flask.log', encoding='UTF-8')
+    # handler = TimedRotatingFileHandler(cur_path + '\\app\\logs\\flask.log',when='midnight', encoding='UTF-8')
     handler.setLevel(logging.DEBUG)
     logging_format = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
