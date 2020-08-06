@@ -67,7 +67,5 @@ def combine_sheets(sheets, types=None):
                 item_no += 1
                 j.delivery_no = sheet.delivery_no
                 j.delivery_item_no = sheet.delivery_no + '-' + str(item_no)
-                if types == 'weight':
-                    j.weight = weight_calculator.calculate_weight(j.product_type, j.item_id, j.quantity, j.free_pcs)
-            if types == 'weight':
-                sheet.weight = sum(i.weight for i in sheet.items)
+                j.weight = weight_calculator.calculate_weight(j.product_type, j.item_id, j.quantity, j.free_pcs)
+            sheet.weight = sum(i.weight for i in sheet.items)

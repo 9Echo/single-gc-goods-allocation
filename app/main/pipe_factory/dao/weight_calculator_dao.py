@@ -19,7 +19,7 @@ class WeightCalculatorDao(BaseDao):
                  else 
                  GBGZL end as GBGZL,
                  GS_PER 
-                 from db_sys.t_itema
+                 from t_itema
                  where ITEMID in ({}) 
                  and ifnull(GBGZL,'') <> '' 
                  and ifnull(GS_PER,'') <> ''
