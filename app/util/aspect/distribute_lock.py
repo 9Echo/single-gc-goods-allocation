@@ -4,7 +4,7 @@
 import functools
 import redis
 from app.util.redis.redis_pool import redis_pool
-from app.util.redis.reids_lock import RedisLock
+from app.util.redis.redis_lock import RedisLock
 from app.util.result import Result
 
 
