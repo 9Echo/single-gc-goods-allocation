@@ -1,5 +1,6 @@
 import json
 
+
 from flask import jsonify, Response
 
 from app.util.base.base_entity import BaseEntity
