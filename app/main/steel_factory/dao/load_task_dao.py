@@ -40,27 +40,5 @@ class LoadTaskDao(BaseDao):
         """
         self.executemany(sql, values)
 
-    # def select_load_task(self):
-    #     """查
-    #
-    #     Args:
-    #
-    #     Returns:
-    #
-    #     Raise:
-    #
-    #     """
-    #     self.select_all()
-    #     sql = """
-    #         select *
-    #         from {}
-    #         where
-    #     """
-
 
 load_task_dao = LoadTaskDao()
-# if __name__ == "__main__":
-#     # ('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct', datetime.datetime(2020, 5, 28, 15, 35, 51, 453957)
-#     load_task_dao.insert_load_task(
-#         [('C000000882', -1, '甩货', 22802.212, None, None, 0, 0, '垫皮,鞍座,草垫子,垫木,钢丝绳', 'A', 'ct',
-#           datetime.datetime(2020, 5, 28, 15, 35, 51, 453957))])

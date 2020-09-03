@@ -113,30 +113,6 @@ class GetCommodity(BaseDao):
             print("commodity_dao.update_database_time is error")
             traceback.print_exc()
 
-    @staticmethod
-    def pd_read_table(tablename):
-        """读数据
-
-        Args:
-            tableName：读的数据库名
-
-        Returns:
-
-        Raise:
-
-        """
-        try:
-            sql = """
-                select *
-                from {}
-            """
-            conn = db_pool_trans_plan.connection()
-            results = pd.read_sql_query(sql.format(tablename), conn)
-            return results
-        except Exception as e:
-            print("commodity_dao.read_table is error")
-            traceback.print_exc()
-
     def write_db(self, data):
         """写库
 
@@ -158,6 +134,7 @@ class GetCommodity(BaseDao):
         except Exception as e:
             print("commodity_dao.write_database is error")
             traceback.print_exc()
+
 
 if __name__ == '__main__':
     g = GetCommodity()

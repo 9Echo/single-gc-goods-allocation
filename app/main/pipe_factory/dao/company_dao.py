@@ -104,24 +104,13 @@ class GetCompanyData(BaseDao):
         try:
             sql = "insert into t_compose_company(company_name1, company_name2, match_size, update_time) values('{}','{}','{}','{}')"
             # for re in result:
-                # print(re[0][0])
-                # print(re[1])
+            # print(re[0][0])
+            # print(re[1])
             self.execute(sql.format(re[0][0], re[0][1], re[1], now_time))
             print("finish!")
         except Exception as e:
             print("write_database error!")
             traceback.print_exc()
-
-    @staticmethod
-    def get_data_from_table():
-        '''
-        获取t_compose_company搭配数据
-        :return:
-        '''
-        conn = db_pool_trans_plan.connection()
-        sql = "select * from t_compose_company"
-        data = pd.read_sql(sql, conn)
-        return data
 
     @staticmethod
     def add_match_size(company_list, result_dic):
