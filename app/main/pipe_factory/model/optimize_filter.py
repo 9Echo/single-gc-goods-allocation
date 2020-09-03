@@ -43,8 +43,8 @@ def optimize_filter_max(delivery_items: list):
         weight_cost = []
         for item in item_list:
             weight_cost.append((int(item.weight), float(item.volume), int(item.weight)))
-        final_weight, result_list = \
-            package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT, ModelConfig.MAX_VOLUME, weight_cost)
+        final_weight, result_list = package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT,
+                                                                         ModelConfig.MAX_VOLUME, weight_cost)
         if final_weight == 0:
             break
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) <= final_weight <= g.MAX_WEIGHT:
@@ -120,8 +120,7 @@ def optimize_filter_min(sheets, min_delivery_item, order, batch_no):
                     # 移除掉被分配的子项
                     min_delivery_item.remove(i)
                 else:
-                    i, new_item = \
-                        weight_rule.split_item(i, i.weight - (g.MAX_WEIGHT - current_weight))
+                    i, new_item = weight_rule.split_item(i, i.weight - (g.MAX_WEIGHT - current_weight))
                     if new_item:
                         # 生成新提货单，归到该车次下
                         new_sheet = DeliverySheet()

@@ -56,8 +56,8 @@ def split_item(item, delta_weight):
         new_item.weight = item.weight - weight
         new_item.quantity = item.quantity - quantity
         new_item.free_pcs = item.free_pcs - free_pcs
-        new_item.volume = new_item.quantity / new_item.max_quantity \
-            if new_item.max_quantity else ModelConfig.DEFAULT_VOLUME
+        new_item.volume = (new_item.quantity / new_item.max_quantity
+                           if new_item.max_quantity else ModelConfig.DEFAULT_VOLUME)
         # 更新原子单的数量
         item.quantity = quantity
         item.free_pcs = free_pcs

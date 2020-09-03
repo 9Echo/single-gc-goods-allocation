@@ -19,8 +19,8 @@ class CreateDeliveryItem:
         for item in order.items:
             delivery_item = BeanConvertUtils.copy_properties(item, DeliveryItem)
             delivery_item.max_quantity = ModelConfig.ITEM_ID_DICT.get(delivery_item.item_id[:3])
-            delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
-                if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
+            delivery_item.volume = (delivery_item.quantity / delivery_item.max_quantity
+                                    if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME)
             delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type, delivery_item.item_id,
                                                                       delivery_item.quantity, delivery_item.free_pcs)
             delivery_item.total_pcs = weight_calculator.calculate_pcs(delivery_item.product_type, delivery_item.item_id,
@@ -61,8 +61,8 @@ class CreateDeliveryItem:
                     self.delivery_item_list.append(copy_dilivery_item)
                 # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
                 delivery_item.quantity = surplus
-                delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
-                    if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
+                delivery_item.volume = (delivery_item.quantity / delivery_item.max_quantity
+                                        if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME)
                 delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type,
                                                                           delivery_item.item_id, delivery_item.quantity,
                                                                           delivery_item.free_pcs)
@@ -148,8 +148,8 @@ class CreateDeliveryItem:
                     max_delivery_items.append(copy_di)
                 # 原明细更新件数为剩余件数，体积占比通过件数/标准件数计算
                 delivery_item.quantity = surplus
-                delivery_item.volume = delivery_item.quantity / delivery_item.max_quantity \
-                    if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME
+                delivery_item.volume = (delivery_item.quantity / delivery_item.max_quantity
+                                        if delivery_item.max_quantity else ModelConfig.DEFAULT_VOLUME)
                 delivery_item.weight = weight_calculator.calculate_weight(delivery_item.product_type,
                                                                           delivery_item.item_id, delivery_item.quantity,
                                                                           delivery_item.free_pcs)

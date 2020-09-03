@@ -49,8 +49,7 @@ L          request time in decimal seconds
 p          process ID
 """
 
-access_log_format = \
-    '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
+access_log_format = '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
 # 访问日志文件
 accesslog = '/app/{}/logs/gunicorn_access.log'.format(APP_NAME)
 

@@ -47,8 +47,8 @@ def dispatch_load_task(sheets: list, min_delivery_items=None):
             # 如果当前车次总体积占比超出，计算剩余体积比例进行重量切单
             if total_volume > ModelConfig.MAX_VOLUME:
                 # 按照体积比例计算，在最新的最大重量限制下还可以放多少重量
-                limit_volume_weight = \
-                    (ModelConfig.MAX_VOLUME - total_volume + sheet.volume) / sheet.volume * sheet.weight
+                limit_volume_weight = ((ModelConfig.MAX_VOLUME - total_volume + sheet.volume)
+                                       / sheet.volume * sheet.weight)
                 # 在最新的最大重量限制下还可以放多少重量
                 limit_weight_weight = new_max_weight - (total_weight - sheet.weight)
                 # 取较小的

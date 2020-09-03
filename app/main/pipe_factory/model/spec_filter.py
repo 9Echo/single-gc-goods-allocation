@@ -36,9 +36,9 @@ def spec_filter(delivery_items: list):
         for item in item_list:
             weight_cost.append((int(item.weight), float(item.volume), int(item.weight)))
         # 将所有待选集进行背包
-        final_weight, result_list = \
-            package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT, ModelConfig.MAX_VOLUME,
-                                                 weight_cost)
+        final_weight, result_list = package_solution.dynamic_programming(len(item_list), g.MAX_WEIGHT,
+                                                                         ModelConfig.MAX_VOLUME,
+                                                                         weight_cost)
         if final_weight <= 0:
             raise MyException('package exception', ResponseCode.Error)
         if (g.MAX_WEIGHT - ModelConfig.PACKAGE_LOWER_WEIGHT) <= final_weight <= g.MAX_WEIGHT:
