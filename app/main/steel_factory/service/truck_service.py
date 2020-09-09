@@ -26,7 +26,4 @@ def generate_truck(json_data):
     truck.load_weight = int(float(json_data['load_weight']) * 1000)
     truck.remark = json_data['remark']
     truck.actual_end_point = ModelConfig.RG_LY_GROUP.get(truck.dlv_spot_name_end, [truck.dlv_spot_name_end])
-    # 必填字段非空检查
-    if not truck.dlv_spot_name_end or not truck.big_commodity_name or not truck.load_weight:
-        raise MyException('必填参数值缺失', ResponseCode.Error)
     return truck
