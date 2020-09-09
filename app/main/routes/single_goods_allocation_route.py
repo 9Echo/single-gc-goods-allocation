@@ -23,15 +23,13 @@ class SingleGoodsAllocationRoute(Resource):
         输入车辆信息，返回开单结果
         """
         parser = reqparse.RequestParser(trim=True)
-        # parser.add_argument('truck_no', type=MyFlaskVerify.str_type, help='车牌号验证不通过！', required=True, nullable=False,
-        #                     location=['json'])
-        # parser.add_argument('plan_no', type=MyFlaskVerify.str_type, help='调度单号验证不通过！', required=True, nullable=False,
-        #                     location=['json'])
-        # parser.add_argument('plan_weight', type=MyFlaskVerify.number_type, help='载重验证不通过！', required=True,
-        #                     nullable=False, location=['json'])
-        # # 验证大于0
-        # parser.add_argument('plan_weight', type=MyFlaskVerify.number_value, help='载重验证不通过！', required=True,
-        #                     nullable=False, location=['json'])
+        parser.add_argument('schedule_no', type=MyFlaskVerify.str_type, help='报道号验证不通过！', required=True, nullable=False,
+                            location=['json'])
+        parser.add_argument('load_weight', type=MyFlaskVerify.number_type, help='载重验证不通过！', required=True,
+                            nullable=False, location=['json'])
+        # 验证大于0
+        parser.add_argument('load_weight', type=MyFlaskVerify.number_value, help='载重验证不通过！', required=True,
+                            nullable=False, location=['json'])
         parser.parse_args()
         json_data = json.loads(request.get_data().decode("utf-8"))
         truck = generate_truck(json_data["data"])
