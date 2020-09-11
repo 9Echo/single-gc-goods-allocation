@@ -1,5 +1,3 @@
-# 催单客户列表
-from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.service import redis_service
 
 
