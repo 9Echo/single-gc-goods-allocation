@@ -24,9 +24,9 @@ def layer_filter(stock_list: List, stock_dict: Dict, truck: Truck):
     huge_list = stock_dict['huge']
     # 先跟tail_list执行拼货
     for i in stock_list:
-        # 如果目标品种不是车辆信息指定的品种或者超过车载重量，跳过
-        if i.big_commodity_name != truck.big_commodity_name or i.actual_weight > (
-                max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
+        if truck.big_commodity_name and i.big_commodity_name != truck.big_commodity_name:
+            continue
+        if i.actual_weight > (max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
             continue
         # 一装一卸
         load_task = first_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
@@ -77,7 +77,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     elif get_lower_limit(temp_stock.big_commodity_name) <= max_weight <= ModelConfig.RG_MAX_WEIGHT:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
         new_min_weight = get_lower_limit(temp_stock.big_commodity_name) - temp_stock.actual_weight
-    # 不拉标载，最大重量等于车辆最大载重扣除目标货物的重量，下浮2000
+    # 不拉标载，最小重量等于车辆最大载重扣除目标货物的重量，下浮2000
     else:
         surplus_weight = max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT - temp_stock.actual_weight
         new_min_weight = max_weight - ModelConfig.RG_SINGLE_LOWER_WEIGHT - temp_stock.actual_weight
@@ -90,7 +90,7 @@ def first_deal_general_stock(stock_list, i, dispatch_type, max_weight):
     # 如果卷重小于24或者大于29，则不拼线材
     if temp_stock.big_commodity_name == '老区-卷板' and (
             temp_stock.actual_weight >= ModelConfig.RG_J_MIN_WEIGHT or
-            temp_stock.actual_weight <= ModelConfig.RG_SECOND_MIN_WEIGHT):
+            temp_stock.actual_weight < ModelConfig.RG_SECOND_MIN_WEIGHT):
         filter_list = [stock_j for stock_j in filter_list if stock_j.big_commodity_name == '老区-卷板']
     if filter_list:
         if temp_stock.big_commodity_name == '老区-型钢':

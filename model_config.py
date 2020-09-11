@@ -3,6 +3,7 @@ class ModelConfig:
     """
 
     # 日钢标载
+    RG_DEFAULT_CITY = '临沂市'
     RG_MAX_WEIGHT = 35000
     RG_MIN_WEIGHT = 31000
     RG_J_MIN_WEIGHT = 29000

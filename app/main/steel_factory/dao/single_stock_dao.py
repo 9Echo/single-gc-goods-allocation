@@ -45,25 +45,32 @@ class StockDao(BaseDao):
             priority,
             concat(longitude, latitude) as standard_address
 
-        from
+        FROM
         db_ads.kc_rg_product_can_be_send_amount
-        where
-        BIG_COMMODITYNAME in ({})
-        and (CANSENDNUMBER > 0 OR NEED_LADING_NUM > 0)
+        WHERE 
+        CITY = '{}'
+        AND 
+        (CANSENDNUMBER > 0 OR NEED_LADING_NUM > 0) 
         """
+        # 城市条件，不传默认为临沂市
+        city_condition = truck.city if truck.city else ModelConfig.RG_DEFAULT_CITY
+        sql = sql.format(city_condition)
         # 品种条件
-        commodity_group = ModelConfig.RG_COMMODITY_GROUP_FOR_SQL.get(truck.big_commodity_name, ['未知品种'])
-        commodity_values = "'"
-        commodity_values += "','".join([i for i in commodity_group])
-        commodity_values += "'"
-        sql = sql.format(commodity_values)
-        # 厂区条件
-        if truck.big_commodity_name.find('老区') != -1:
-            sql_condition = "and DELIWAREHOUSE not like 'P%'"
-            sql = sql + sql_condition
-        else:
-            sql_condition = "and (DELIWAREHOUSE like 'P%' or DELIWAREHOUSE like 'F10%' or DELIWAREHOUSE like 'F20%')"
-            sql = sql + sql_condition
+        if truck.big_commodity_name:
+            commodity_sql_condition = " and BIG_COMMODITYNAME in ({})"
+            commodity_group = ModelConfig.RG_COMMODITY_GROUP_FOR_SQL.get(truck.big_commodity_name, ['未知品种'])
+            commodity_values = "'"
+            commodity_values += "','".join([i for i in commodity_group])
+            commodity_values += "'"
+            commodity_sql_condition = commodity_sql_condition.format(commodity_values)
+            sql = sql + commodity_sql_condition
+            # 厂区条件
+            # if truck.big_commodity_name.find('老区') != -1:
+            #     sql_condition = " and DELIWAREHOUSE not like 'P%'"
+            #     sql = sql + sql_condition
+            # else:
+            #     sql_condition = " and (DELIWAREHOUSE like 'P%' or DELIWAREHOUSE like 'F10%' or DELIWAREHOUSE like 'F20%')"
+            #     sql = sql + sql_condition
         data = self.select_all(sql)
         return data
 

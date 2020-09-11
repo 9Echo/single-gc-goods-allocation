@@ -16,14 +16,15 @@ def generate_truck(json_data):
     """
     truck = Truck()
     truck.schedule_no = json_data['schedule_no']
-    truck.car_mark = json_data['car_mark']
-    truck.driver_id = json_data['driver_id']
-    truck.trans_group_name = json_data['trans_group_name']
-    truck.province = json_data['province']
-    truck.city = json_data['city']
-    truck.dlv_spot_name_end = json_data['dlv_spot_name_end']
-    truck.big_commodity_name = json_data['big_commodity_name']
+    truck.car_mark = json_data.get('car_mark', None)
+    truck.driver_id = json_data.get('driver_id', None)
+    truck.trans_group_name = json_data.get('trans_group_name', None)
+    truck.province = json_data.get('province', None)
+    truck.city = json_data.get('city', None)
+    truck.dlv_spot_name_end = json_data.get('dlv_spot_name_end', None)
+    truck.big_commodity_name = json_data.get('big_commodity_name', None)
     truck.load_weight = int(float(json_data['load_weight']) * 1000)
-    truck.remark = json_data['remark']
-    truck.actual_end_point = ModelConfig.RG_LY_GROUP.get(truck.dlv_spot_name_end, [truck.dlv_spot_name_end])
+    truck.remark = json_data.get('remark', None)
+    if truck.dlv_spot_name_end:
+        truck.actual_end_point = ModelConfig.RG_LY_GROUP.get(truck.dlv_spot_name_end, [truck.dlv_spot_name_end])
     return truck

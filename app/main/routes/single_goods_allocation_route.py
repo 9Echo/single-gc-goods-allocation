@@ -32,6 +32,6 @@ class SingleGoodsAllocationRoute(Resource):
                             nullable=False, location=['json'])
         parser.parse_args()
         json_data = json.loads(request.get_data().decode("utf-8"))
-        truck = generate_truck(json_data["data"])
+        truck = generate_truck(json_data)
         result = dispatch(truck)
         return Result.success_response(result)
