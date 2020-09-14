@@ -80,11 +80,13 @@ def deal_stock(all_stock_list, truck):
     df_stock["actual_number"] = df_stock["CANSENDNUMBER"] + df_stock["NEED_LADING_NUM"]
     # 根据公式计算件重
     df_stock["piece_weight"] = round(df_stock["actual_weight"] / df_stock["actual_number"])
-    df_stock["actual_weight"] = df_stock["piece_weight"] * df_stock["actual_number"]
     # 需短溢处理
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
+
+    df_stock["actual_weight"] = df_stock["piece_weight"] * df_stock["actual_number"]
+
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
