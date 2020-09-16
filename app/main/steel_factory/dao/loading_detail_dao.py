@@ -22,7 +22,7 @@ class LoadingDetailDao(BaseDao):
         FROM
             db_ads.`kc_rg_valid_loading_detail` 
         WHERE 
-            id like 'lms%' or id like 'pre%'
+            id like 'lms%'
         UNION ALL
         SELECT
             schedule_no,
@@ -34,7 +34,7 @@ class LoadingDetailDao(BaseDao):
         FROM
             t_load_task_item 
         WHERE
-            IFNULL( schedule_no, '' ) <> '' 
+            IFNULL( schedule_no, '' ) != '' 
             AND 
             schedule_no in (SELECT DISTINCT schedule_no FROM db_ads.kc_rg_valid_loading_detail WHERE id like 'plan%')
             and schedule_no != '{}'
