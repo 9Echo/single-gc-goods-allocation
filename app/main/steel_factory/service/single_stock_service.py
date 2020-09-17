@@ -192,10 +192,11 @@ def deal_stock(all_stock_list, truck):
             continue
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
         elif target_num > stock.actual_number:
-            stock.limit_mark = 0
             # 可装的件数大于实际可发件数，并且达到标载
             if stock.actual_weight > get_lower_limit(stock.big_commodity_name):
                 stock.limit_mark = 1
+            else:
+                stock.limit_mark = 0
             stock_list.append(stock)
         # 最后不满足则拆分
         else:

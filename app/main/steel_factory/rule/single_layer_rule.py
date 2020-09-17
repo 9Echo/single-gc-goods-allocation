@@ -1,8 +1,11 @@
 from typing import List, Dict
+
+from app.main.steel_factory.entity.load_task import LoadTask
 from app.main.steel_factory.entity.stock import Stock
 from app.main.steel_factory.entity.truck import Truck
 from app.main.steel_factory.rule.create_load_task_rule import create_load_task
 from app.main.steel_factory.rule.goods_filter_rule import goods_filter
+from app.main.steel_factory.rule.single_priority_rule import consumer_lunxun
 from app.main.steel_factory.rule.split_rule import split
 from app.util.enum_util import DispatchType, LoadTaskType
 from app.util.get_weight_limit import get_lower_limit
@@ -28,6 +31,14 @@ def layer_filter(stock_list: List, stock_dict: Dict, truck: Truck):
             continue
         if i.actual_weight > (max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
             continue
+        # # 计算该子订单相关订单的剩余重量（包括已生产和未生产重量）
+        # temp_weight = sum([k.actual_weight for k in stock_list
+        #                    if k.parent_stock_id == i.parent_stock_id
+        #                    and k is not i]) + i.wait_product_weight
+        # # 如果当前货物切分的不是标载、剩余重量<标载的下限、剩余重量+当前子订单重量<日钢标载最大重量(即选择该货物匹配后会产生尾货)，就跳过
+        # if i.limit_mark == 0 and temp_weight < get_lower_limit(
+        #         i.big_commodity_name) and temp_weight + i.piece_weight < ModelConfig.RG_MAX_WEIGHT:
+        #     continue
         # 一装一卸
         load_task = first_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
         if load_task:
@@ -53,6 +64,130 @@ def layer_filter(stock_list: List, stock_dict: Dict, truck: Truck):
         load_task = fourth_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
         if load_task:
             break
+    # 合并
+    merge_result(load_task)
+    return load_task
+
+
+def layer_filter1(stock_list: List, stock_dict: Dict, truck: Truck):
+    """
+    按层次分货
+    第一层：一装一卸
+    第二层：同库两装一卸
+    第三层：异库两装一卸
+    第四层：一装两卸
+    """
+    max_weight = truck.load_weight
+    # 车次对象
+    load_task = None
+    load_task_list: List[LoadTask] = []
+    tail_list = stock_dict['tail']
+    huge_list = stock_dict['huge']
+    # 先跟tail_list执行拼货
+    for i in stock_list:
+        if truck.big_commodity_name and i.big_commodity_name != truck.big_commodity_name:
+            continue
+        if i.actual_weight > (max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
+            continue
+        # 一装一卸
+        load_task = first_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+        # 同区两装一卸
+        load_task = second_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+        # 一装两卸
+        load_task = fourth_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+        # 在跟huge_list执行拼货
+        # 一装一卸
+        load_task = first_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+        # 同区两装一卸
+        load_task = second_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+        # 一装两卸
+        load_task = fourth_deal_general_stock(huge_list, i, DispatchType.SECOND, max_weight)
+        if load_task:
+            load_task_list.append(load_task)
+            continue
+    # 合并
+    merge_result(load_task)
+    return load_task
+
+
+def layer_filter_2(stock_list: List, stock_dict: Dict, truck: Truck):
+    """
+    按层次分货
+    第一层：一装一卸
+    第二层：同库两装一卸
+    第三层：异库两装一卸
+    第四层：一装两卸
+    """
+    max_weight = truck.load_weight
+    # 车次对象
+    load_task = None
+    # 车次对象列表
+    # load_task_list: List[LoadTask] = []
+    load_task_dict = {LoadTaskType.TYPE_1.value: [], LoadTaskType.TYPE_2.value: [], LoadTaskType.TYPE_4.value: []}
+    tail_list = stock_dict['tail'] + stock_dict['huge']
+    # 构建库存字典, 每个客户对应一个库存列表
+    stock_dict = {}
+    for stock in stock_list:
+        key = stock.priority + "," + stock.consumer
+        stock_dict.setdefault(key, []).append(stock)
+    for key in stock_dict.keys():
+        for i in stock_dict[key]:
+            if truck.big_commodity_name and i.big_commodity_name != truck.big_commodity_name:
+                continue
+            if i.actual_weight > (max_weight + ModelConfig.RG_SINGLE_UP_WEIGHT):
+                continue
+            # 一装一卸
+            load_task = first_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                load_task_dict[LoadTaskType.TYPE_1.value].append(load_task)
+                continue
+            # 同区两装一卸
+            load_task = second_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                load_task_dict[LoadTaskType.TYPE_2.value].append(load_task)
+                continue
+            # 一装两卸
+            load_task = fourth_deal_general_stock(tail_list, i, DispatchType.SECOND, max_weight)
+            if load_task:
+                load_task_dict[LoadTaskType.TYPE_4.value].append(load_task)
+                continue
+        if load_task_dict[LoadTaskType.TYPE_1.value]:
+            load_task = load_task_dict[LoadTaskType.TYPE_1.value][0]
+            for i in load_task_dict[LoadTaskType.TYPE_1.value]:
+                if i.total_weight > load_task.total_weight:
+                    load_task = i
+            break
+        if load_task_dict[LoadTaskType.TYPE_2.value]:
+            load_task = load_task_dict[LoadTaskType.TYPE_2.value][0]
+            for i in load_task_dict[LoadTaskType.TYPE_2.value]:
+                if i.total_weight > load_task.total_weight:
+                    load_task = i
+            break
+        if load_task_dict[LoadTaskType.TYPE_4.value]:
+            load_task = load_task_dict[LoadTaskType.TYPE_4.value][0]
+            for i in load_task_dict[LoadTaskType.TYPE_4.value]:
+                if i.total_weight > load_task.total_weight:
+                    load_task = i
+            break
+
+    i = stock_list[0]
+    # 客户轮询
+    consumer_lunxun(i.consumer)
     # 合并
     merge_result(load_task)
     return load_task

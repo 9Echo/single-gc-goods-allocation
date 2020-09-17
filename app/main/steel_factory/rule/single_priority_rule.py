@@ -24,6 +24,7 @@ def consumer_filter(stock_list):
     hurry_stock_list = [stock for stock in left_stock_list if stock.priority == 2]
     left_stock_list = left_stock_list[len(hurry_stock_list):]
     new_hurry_stock_list += sort_stock_list(hurry_stock_list, hurry_consumer_list)
+
     # 如果没有一级二级货物，结束轮询操作
     if not new_hurry_stock_list:
         return stock_list
@@ -37,9 +38,29 @@ def consumer_filter(stock_list):
             first_index += 1
     hurry_consumer_list.append(hurry_consumer_list[first_index])
     hurry_consumer_list.pop(first_index)
+
     redis_service.set_hurry_consumer_list(hurry_consumer_list)
     # 将重新排序后的催货列表和剩余库存合并
     return new_hurry_stock_list + left_stock_list
+
+
+def consumer_lunxun(consumer):
+    """
+    客户轮询操作
+    :param consumer:
+    :return:
+    """
+    # 队列第一次被抽到的客户移到队列末尾
+    hurry_consumer_list = redis_service.get_hurry_consumer_list()
+    first_index = 0
+    while first_index < len(hurry_consumer_list):
+        if hurry_consumer_list[first_index] == consumer:
+            break
+        else:
+            first_index += 1
+    hurry_consumer_list.append(hurry_consumer_list[first_index])
+    hurry_consumer_list.pop(first_index)
+    redis_service.set_hurry_consumer_list(hurry_consumer_list)
 
 
 def sort_stock_list(stock_list, hurry_consumer_list):
