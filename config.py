@@ -43,10 +43,10 @@ class DevelopmentConfig(Config):
     """
 
     # 数仓连接
-    ODS_MYSQL_HOST = 'localhost'
+    ODS_MYSQL_HOST = 'am-bp16yam2m9jqm2tyk90650.ads.aliyuncs.com'
     ODS_MYSQL_PORT = 3306
-    ODS_MYSQL_USER = 'root'
-    ODS_MYSQL_PASSWD = 'JJF'
+    ODS_MYSQL_USER = 'bigdata_user4'
+    ODS_MYSQL_PASSWD = 'user4!0525'
     ODS_MYSQL_DB = 'db_model'
     ODS_MYSQL_CHARSET = 'utf8'
 
