@@ -84,9 +84,10 @@ def deal_stock(all_stock_list, truck):
     df_stock["OVER_FLOW_WT"] = df_stock["OVER_FLOW_WT"] * 1000
     df_stock.loc[df_stock["OVER_FLOW_WT"] > 0, ["actual_number"]] = df_stock["actual_number"] + (
             -df_stock["OVER_FLOW_WT"] // df_stock["piece_weight"])
-
     df_stock["actual_weight"] = df_stock["piece_weight"] * df_stock["actual_number"]
-
+    # 计算待生产重量
+    df_stock["waint_fordel_weight"] = df_stock["waint_fordel_weight"] * 1000
+    df_stock["wait_product_weight"] = df_stock["waint_fordel_weight"] - df_stock["actual_weight"]
     # 筛选出大于0的数据
     df_stock = df_stock.loc[
         (df_stock["actual_weight"] > 0) & (df_stock["actual_number"] > 0) & (
@@ -146,6 +147,7 @@ def deal_stock(all_stock_list, truck):
         stock.actual_number = int(stock.actual_number)
         stock.actual_weight = int(stock.actual_weight)
         stock.piece_weight = int(stock.piece_weight)
+        stock.wait_product_weight = int(stock.wait_product_weight)
         stock.priority = ModelConfig.RG_PRIORITY.get(stock.priority, 4)
         # if stock.priority > 2:
         #     if datetime.datetime.strptime(str(stock.latest_order_time), "%Y%m%d%H%M%S") <= (
@@ -191,6 +193,9 @@ def deal_stock(all_stock_list, truck):
         # 其次如果可装的件数大于实际可发件数，不用拆分，直接添加到stock_list列表中
         elif target_num > stock.actual_number:
             stock.limit_mark = 0
+            # 可装的件数大于实际可发件数，并且达到标载
+            if stock.actual_weight > get_lower_limit(stock.big_commodity_name):
+                stock.limit_mark = 1
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
