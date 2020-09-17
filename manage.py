@@ -25,14 +25,6 @@ if __name__ != '__main__':
     app.logger.info('active config name = {} '.format(active_config_name))
 
 if __name__ == '__main__':
-    cur_path = os.path.abspath(os.path.dirname(__file__))
-    handler = logging.FileHandler(cur_path + '\\app\\logs\\flask.log', encoding='UTF-8')
-    # handler = TimedRotatingFileHandler(cur_path + '\\app\\logs\\flask.log',when='midnight', encoding='UTF-8')
-    handler.setLevel(logging.DEBUG)
-    logging_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
-    handler.setFormatter(logging_format)
-    app.logger.addHandler(handler)
     # 日志记录当前环境配置名称
     app.logger.info('flask app name = {} '.format(app.name))
     app.logger.info('active config name = {} '.format(active_config_name))
