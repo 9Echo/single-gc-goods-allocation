@@ -19,7 +19,7 @@ def tail_grouping_filter(stock_list: List[Stock]):
         if s.limit_mark == 0:
             stock_dic["tail"].append(s)
             continue
-        if user_dic[s.consumer + "," + s.big_commodity_name] < 150 and s.actual_weight >= min_weight:
+        if user_dic[s.consumer + "," + s.big_commodity_name] < 150000 and s.actual_weight >= min_weight:
             stock_dic["lock"].append(s)
             continue
         if s.actual_weight >= min_weight:
