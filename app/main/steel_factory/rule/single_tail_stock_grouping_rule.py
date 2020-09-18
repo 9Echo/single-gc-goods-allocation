@@ -24,8 +24,8 @@ def tail_grouping_filter(stock_list: List[Stock]):
             continue
         if s.actual_weight >= min_weight:
             stock_dic["huge"].append(s)
-        else:
-            stock_dic["tail"].append(s)
+        # else:
+        #     stock_dic["tail"].append(s)
     return stock_dic
 
 
