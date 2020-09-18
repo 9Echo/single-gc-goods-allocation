@@ -200,22 +200,26 @@ def deal_stock(all_stock_list, truck):
             stock_list.append(stock)
         # 最后不满足则拆分
         else:
-            limit_mark = 1
+            # limit_mark = 1
             for q in range(int(target_group_num)):
                 copy_2 = copy.deepcopy(stock)
                 copy_2.actual_weight = target_num * stock.piece_weight
                 copy_2.actual_number = int(target_num)
                 if copy_2.actual_weight < get_lower_limit(stock.big_commodity_name):
-                    limit_mark = 0
+                    copy_2.limit_mark = 0
                 else:
-                    limit_mark = 1
-                copy_2.limit_mark = limit_mark
+                    copy_2.limit_mark = 1
+
                 stock_list.append(copy_2)
             if target_left_num:
                 copy_1 = copy.deepcopy(stock)
                 copy_1.actual_number = int(target_left_num)
                 copy_1.actual_weight = target_left_num * stock.piece_weight
-                copy_1.limit_mark = limit_mark
+                if copy_1.actual_weight < get_lower_limit(stock.big_commodity_name):
+                    copy_1.limit_mark = 0
+                else:
+                    copy_1.limit_mark = 1
+                # copy_1.limit_mark = limit_mark
                 stock_list.append(copy_1)
     # 按照优先发运和最新挂单时间排序
     stock_list.sort(key=lambda x: (x.priority, x.latest_order_time, x.actual_weight * -1), reverse=False)
