@@ -4,7 +4,6 @@
 # Modified: shaoluyu 2019/11/13
 import json
 from threading import Thread
-
 from flask import request
 from flask_restful import Resource
 from app.main.pipe_factory.service import order_service

@@ -29,7 +29,7 @@ debug = True
 proc_name = 'gunicorn_app'
 pidfile = '/app/{}/logs/gunicorn.pid'.format(APP_NAME)
 capture_output = True
-logfile = '/app/{}/logs/gunicorn.log'.format(APP_NAME)
+# logfile = '/app/{}/logs/gunicorn.log'.format(APP_NAME)
 
 # 访问日志格式，错误日志无法设置
 """
@@ -49,14 +49,14 @@ L          request time in decimal seconds
 p          process ID
 """
 
-access_log_format = '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
-# 访问日志文件
-accesslog = '/app/{}/logs/gunicorn_access.log'.format(APP_NAME)
-
-# 错误日志级别，访问日志级别无法设置
-loglevel = 'debug'
-# 错误日志文件
-errorlog = '/app/{}/logs/gunicorn_server.log'.format(APP_NAME)
+# access_log_format = '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
+# # 访问日志文件
+# accesslog = '/app/{}/logs/gunicorn_access.log'.format(APP_NAME)
+#
+# # 错误日志级别，访问日志级别无法设置
+# loglevel = 'debug'
+# # 错误日志文件
+# errorlog = '/app/{}/logs/gunicorn_server.log'.format(APP_NAME)
 
 logconfig_dict = {
     'version': 1,
