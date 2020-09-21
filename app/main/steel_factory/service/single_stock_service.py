@@ -124,6 +124,10 @@ def deal_stock(all_stock_list, truck):
     # 窄带按捆包数计算，实际可发件数 = 捆包数
     df_stock.loc[(df_stock["big_commodity_name"] == "新产品-窄带") & (df_stock["PACK_NUMBER"] > 0), ["actual_number"]] = \
         df_stock["PACK_NUMBER"]
+    # 单独计算窄带的件重
+    df_stock.loc[
+        (df_stock["big_commodity_name"] == "新产品-窄带") & (df_stock["PACK_NUMBER"] > 0), ["piece_weight"]] = round(
+        df_stock["actual_weight"] / df_stock["actual_number"])
     # 将终点统一赋值到实际终点，方便后续处理联运
     df_stock["actual_end_point"] = df_stock["dlv_spot_name_end"]
     df_stock.loc[df_stock["deliware"].str.startswith("U"), ["actual_end_point"]] = df_stock["deliware"]
